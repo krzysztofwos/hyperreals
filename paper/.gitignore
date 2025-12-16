@@ -1,0 +1,22 @@
+# LaTeX temporary files
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.ps
+*.snm
+*.synctex.gz
+*.synctex.gz(busy)
+*.toc
+*.vrb
+
+# Evaluation outputs (keep `metrics.tex` checked in for LaTeX builds)
+metrics.csv
+metrics.md
