@@ -389,7 +389,7 @@ Finite computations must require only finite information about the non-construct
 Different completions of a partial ultrafilter can disagree on order/equality tests for oscillatory sequences, so comparisons are inherently choice-dependent in our API. However, many computations in analysis do not branch on such comparisons; they compute standard parts of near-standard values. For this fragment, evaluation is invariant under ultrafilter completion.
 
 \begin{definition}[The $\sthat$–ring fragment]\label{def:st-fragment}
-  Let $\mathcal{L}_{\sthat}$ be the set of closed terms generated from real constants using
+  Let $\mathcal{L}_{\sthat}$ be the set of closed terms generated from real constants and the distinguished infinitesimal $\delta=1/n$ using
   $+,-,\cdot,/$(where defined), the analytic constructors
   $\sin,\cos,\tan,\tanh,\exp,\log(1+\cdot),\sqrt{1+\cdot},\cosh,\sinh$, and the operator $\sthat$. An $\mathcal{L}_{\sthat}$ program evaluates these terms by interpreting the constructors
   pointwise on hyperreals and $\sthat(x)$ as $\st(x)$ when the extractor can certify that $x$ is near‑standard (otherwise it returns failure).
