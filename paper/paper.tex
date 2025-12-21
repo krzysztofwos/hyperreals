@@ -74,11 +74,11 @@ The challenge in implementing hyperreals stems from a foundational paradox. Thei
 
 Our key insight is that finite computations require only finite commitments. Rather than attempting to construct an ultrafilter (maximal filter), we maintain a \emph{partial ultrafilter} that we extend lazily as the program executes. When the program compares two hyperreal expressions, we determine whether existing constraints force a particular outcome. If not, we make a consistent choice and record it as a new constraint. This approach transforms the non-constructive choice of ultrafilter into a series of computational decisions made during program execution.
 
-The theoretical foundation for this approach is a completion argument. A terminating run makes only finitely many comparison queries and thus refers to only finitely many index sets. We maintain these commitments as a satisfiable constraint system; by the ultrafilter lemma (via Zorn's lemma) and the fact that non-principal ultrafilters extend the Fréchet filter of cofinite sets, any consistent finite family of commitments that avoids finite sets extends to a non-principal ultrafilter. Therefore each finite run is consistent with some classical hyperreal field, even though no ultrafilter is explicitly constructed. Different completions may disagree on underdetermined comparisons, but they are elementarily equivalent by Łoś's theorem~\cite{Los1955}.
+The theoretical foundation for this approach is a completion argument. A terminating run makes only finitely many comparison queries and thus refers to only finitely many index sets. We maintain these commitments as a satisfiable constraint system. By the ultrafilter lemma (via Zorn's lemma) and the fact that non-principal ultrafilters extend the Fréchet filter of cofinite sets, any consistent finite family of commitments that avoids finite sets extends to a non-principal ultrafilter. Therefore each finite run is consistent with some classical hyperreal field, even though no ultrafilter is explicitly constructed. Different completions may disagree on underdetermined comparisons, but they are elementarily equivalent by Łoś's theorem~\cite{Los1955}.
 
 Our implementation realizes this theoretical framework through careful engineering. We maintain a partial ultrafilter as a conjunction of constraints, employing SAT solving for consistency checking when extending it. However, we identify a substantial decidable fragment where comparisons can be resolved without SAT solving, including all comparisons involving standard reals, the infinitesimal $1/n$, and the infinite hyperreal $n$. For standard part extraction, we implement a series recognizer that handles compositions of common analytic functions by computing Laurent series expansions in powers of $1/n$.
 
-While the technical development is expressed in terms of operational semantics, constraint solving, and implementation, the motivating question is foundational: what entitles a finite computation to speak about continuum objects such as infinitesimals? Section~\ref{sec:foundations} articulates our answer in terms of finite observation and classical completion; it is the conceptual core that motivates the technical development.
+While the technical development is expressed in terms of operational semantics, constraint solving, and implementation, the motivating question is foundational: what entitles a finite computation to speak about continuum objects such as infinitesimals? Section~\ref{sec:foundations} articulates our answer in terms of finite observation and classical completion. It is the conceptual core that motivates the technical development.
 \paragraph{Contributions}
 This paper makes four primary contributions to the intersection of nonstandard analysis and programming languages:
 
@@ -242,7 +242,7 @@ The \code{PartialUltrafilter} class maintains the growing collection of constrai
 
 When a comparison is requested, the partial ultrafilter first checks whether the result is determined by finite-or-cofinite analysis. Sets like $\{n : n < 10\}$ (finite) are immediately excluded, while sets like $\{n : n > 10\}$ (cofinite) are immediately included. This fast path avoids SAT solving for many common comparisons.
 
-For comparisons that require SAT solving, the partial ultrafilter maintains incremental state. When a new set is included, we compute its intersections with all previously included sets. If any such intersection is provably finite, then the inclusion would violate non-principality; we therefore reject that branch (adding the appropriate blocking clause) and instead exclude the set. Otherwise, we add the intersections as committed-true sets, maintaining closure while keeping the representation finite.
+For comparisons that require SAT solving, the partial ultrafilter maintains incremental state. When a new set is included, we compute its intersections with all previously included sets. If any such intersection is provably finite, then the inclusion would violate non-principality. We therefore reject that branch (adding the appropriate blocking clause) and instead exclude the set. Otherwise, we add the intersections as committed-true sets, maintaining closure while keeping the representation finite.
 
 \subsection{SAT Solver Integration}
 
@@ -379,14 +379,14 @@ From a programming-language perspective, three ingredients make this viable:
 The non-constructive objects must extend a constructive base theory conservatively. For hyperreals, Łoś's theorem (transfer) ensures that all ultrafilter completions satisfy the same first-order theory of ordered fields, providing a stable semantic background.
 
 \paragraph{Interface Abstraction}
-Interaction with non-constructive objects must be mediated through a well-defined interface that does not reify the underlying completion. In our context, programs can only observe the answers to finitely many membership/comparison queries; the ultrafilter completion itself remains implicit.
+Interaction with non-constructive objects must be mediated through a well-defined interface that does not reify the underlying completion. In our context, programs can only observe the answers to finitely many membership/comparison queries. The ultrafilter completion itself remains implicit.
 
 \paragraph{Incremental Realization}
-Finite computations must require only finite information about the non-constructive object. Our incremental construction commits only to finite portions of the ultrafilter, so a finite run requires only finite commitments. The complete ultrafilter need never be realized; satisfiability (together with the finiteness and finite-intersection hypotheses of the completion theorem) guarantees that the commitments made so far admit at least one classical completion.
+Finite computations must require only finite information about the non-constructive object. Our incremental construction commits only to finite portions of the ultrafilter, so a finite run requires only finite commitments. The complete ultrafilter need never be realized. Satisfiability (together with the finiteness and finite-intersection hypotheses of the completion theorem) guarantees that the commitments made so far admit at least one classical completion.
 
 \subsection{Completion-Invariance of the Standard-Part Fragment}
 
-Different completions of a partial ultrafilter can disagree on order/equality tests for oscillatory sequences, so comparisons are inherently choice-dependent in our API. However, many computations in analysis do not branch on such comparisons; they compute standard parts of near-standard values. For this fragment, evaluation is invariant under ultrafilter completion.
+Different completions of a partial ultrafilter can disagree on order/equality tests for oscillatory sequences, so comparisons are inherently choice-dependent in our API. However, many computations in analysis do not branch on such comparisons. They compute standard parts of near-standard values. For this fragment, evaluation is invariant under ultrafilter completion.
 
 \begin{definition}[The $\sthat$–ring fragment]\label{def:st-fragment}
   Let $\mathcal{L}_{\sthat}$ be the set of closed terms generated from real constants and the distinguished infinitesimal $\delta=1/n$ using
@@ -460,15 +460,15 @@ The finite-or-cofinite detection is particularly effective. All comparisons of t
 
 \subsection{Partial Ultrafilter Growth}
 
-The partial ultrafilter grows moderately even for complex computations. Starting from the baseline commitment to $\mathbb{N}$, our benchmark suite increases the number of committed (included) sets to at most 19. The largest jump (9 additional commitments) arises in the intentionally adversarial ``intersection growth'' scenario; typical tasks stay at or below 10 committed sets, indicating that many comparisons reuse existing constraints rather than adding new ones.
+The partial ultrafilter grows moderately even for complex computations. Starting from the baseline commitment to $\mathbb{N}$, our benchmark suite increases the number of committed (included) sets to at most 19. The largest jump (9 additional commitments) arises in the intentionally adversarial ``intersection growth'' scenario. Typical tasks stay at or below 10 committed sets, indicating that many comparisons reuse existing constraints rather than adding new ones.
 
 The intersection closure adds overhead, as each newly included set must be intersected with all previously included sets. However, the total number of sets remains manageable due to our incremental approach. We only compute closures for sets that are actually included, not for all possible intersections.
 
 \subsection{SAT Solver Performance}
 
-When SAT solving is required, the workload is skewed. Our benchmarks perform 56 SAT solves: 42 disambiguation calls from membership queries, plus 14 additional finite-intersection-property checks when validating commitments. Across all runs, the solver performs 9{,}975 unit propagations and 63 branching decisions; the intersection-growth stress test accounts for 6{,}650 propagations and 28 decisions across 21 solves.
+When SAT solving is required, the workload is skewed. Our benchmarks perform 56 SAT solves: 42 disambiguation calls from membership queries, plus 14 additional finite-intersection-property checks when validating commitments. Across all runs, the solver performs 9{,}975 unit propagations and 63 branching decisions. The intersection-growth stress test accounts for 6{,}650 propagations and 28 decisions across 21 solves.
 
-The CNF formula grows gradually as comparisons are made. Transitivity constraints are added lazily only when comparison triangles close, keeping the formula size manageable. In our benchmarks, formulas range from 6 clauses at initialization to 821 clauses at peak; typical tasks stay below about 300 clauses, while the intersection-growth case reaches 774 clauses. Even this worst case stays within the capabilities of our lightweight DPLL implementation.
+The CNF formula grows gradually as comparisons are made. Transitivity constraints are added lazily only when comparison triangles close, keeping the formula size manageable. In our benchmarks, formulas range from 6 clauses at initialization to 821 clauses at peak. Typical tasks stay below about 300 clauses, while the intersection-growth case reaches 774 clauses. Even this worst case stays within the capabilities of our lightweight DPLL implementation.
 
 \subsection{Series Recognizer Coverage}
 
@@ -478,7 +478,7 @@ The recognizer's performance is predictable: arithmetic operations have linear c
 
 \subsection{Performance Boundaries and Limitations}
 
-Our implementation is a research prototype with several limitations. The series recognizer operates in floating-point and uses finite truncation; division support is intentionally restricted to keep series representations tractable. The SAT component is a lightweight DPLL solver intended for incremental consistency checks rather than large industrial CNF instances.
+Our implementation is a research prototype with several limitations. The series recognizer operates in floating-point and uses finite truncation. Division support is intentionally restricted to keep series representations tractable. The SAT component is a lightweight DPLL solver intended for incremental consistency checks rather than large industrial CNF instances.
 
 While our evaluation demonstrates strong performance on typical use cases, we acknowledge that certain adversarial patterns could stress the system. Highly interdependent oscillating sequences, such as simultaneous comparisons between $\sin(n)$, $\sin(2n)$, and $\sin(n^2)$, would generate complex webs of constraints that could challenge the SAT solver. In such cases, the constraint graph becomes densely connected, potentially requiring extensive search beyond unit propagation.
 
@@ -492,7 +492,7 @@ We compared our hyperreal-based derivative computation with a standard automatic
 
 However, our goal differs from forward-mode dual numbers. For analytic expressions, our series recognizer is closely related to Taylor-mode AD (truncated power series): evaluating $f(x+\epsilon)$ encodes higher derivatives in the coefficients of $\epsilon^k$ up to the truncation order. The distinctive contribution here is integrating that higher-order series view with hyperreal comparison semantics backed by a lazy ultrafilter, so computations can also expose completion-dependence and detect non-differentiability by probing multiple infinitesimal directions.
 
-To illustrate the distinction, consider the function $f(x) = |x|$ at $x = 0$. Standard forward-mode AD, following the execution trace, computes a one-sided derivative depending on the branch taken, but does not expose the non-differentiability. In nonstandard analysis, the derivative exists only if $(f(h)-f(0))/h$ has the same standard part for \emph{all} nonzero infinitesimals $h$. In our implementation, $h=1/n$ is a positive infinitesimal and yields the right derivative; to detect non-differentiability one must also compare against $-1/n$ (or use a sign-indeterminate infinitesimal such as $(-1)^n/n$), in which case the quotient becomes completion-dependent: its classical standard part exists but can vary across completions (e.g., $\st((-1)^n)=\pm 1$). Our extractor therefore returns failure in this case. This principled handling of discontinuities justifies the performance overhead for applications requiring mathematical rigor at non-smooth points.
+To illustrate the distinction, consider the function $f(x) = |x|$ at $x = 0$. Standard forward-mode AD, following the execution trace, computes a one-sided derivative depending on the branch taken, but does not expose the non-differentiability. In nonstandard analysis, the derivative exists only if $(f(h)-f(0))/h$ has the same standard part for \emph{all} nonzero infinitesimals $h$. In our implementation, $h=1/n$ is a positive infinitesimal and yields the right derivative. To detect non-differentiability one must also compare against $-1/n$ (or use a sign-indeterminate infinitesimal such as $(-1)^n/n$), in which case the quotient becomes completion-dependent: its classical standard part exists but can vary across completions (e.g., $\st((-1)^n)=\pm 1$). Our extractor therefore returns failure in this case. This principled handling of discontinuities justifies the performance overhead for applications requiring mathematical rigor at non-smooth points.
 
 % =====================================================================
 \section{Related Work}\label{sec:related}
@@ -513,7 +513,7 @@ In theorem proving, Fleuriot~\cite{Fleuriot1999} formalized nonstandard analysis
 
 \subsection{Computational Approaches to Infinitesimals}
 
-Previous computational approaches to infinitesimals have taken different paths from our ultrafilter-based method. Automatic differentiation~\cite{Griewank2008,Baydin2018} computes derivatives via dual numbers, computation graphs, or truncated power series (Taylor-mode). For analytic expressions, our series recognizer aligns closely with the Taylor-mode viewpoint; our distinguishing feature is pairing that capability with an ultrafilter-backed hyperreal semantics for order/equality, where comparisons can be completion-dependent and are enforced consistently by the lazy partial ultrafilter.
+Previous computational approaches to infinitesimals have taken different paths from our ultrafilter-based method. Automatic differentiation~\cite{Griewank2008,Baydin2018} computes derivatives via dual numbers, computation graphs, or truncated power series (Taylor-mode). For analytic expressions, our series recognizer aligns closely with the Taylor-mode viewpoint. Our distinguishing feature is pairing that capability with an ultrafilter-backed hyperreal semantics for order/equality, where comparisons can be completion-dependent and are enforced consistently by the lazy partial ultrafilter.
 
 Computer algebra systems like Mathematica and Maple support symbolic reasoning about limits, infinite values, and related indeterminate forms (and, in some approaches, infinitesimals)~\cite{Fateman2022}. These systems work symbolically rather than providing a numeric model of hyperreals. Our approach bridges symbolic and numeric computation through the partial ultrafilter construction.
 
