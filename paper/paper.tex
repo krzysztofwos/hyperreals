@@ -507,11 +507,7 @@ These alternative foundations highlight different paths to infinitesimals. Schmi
 
 Keisler~\cite{Keisler1976} introduced elementary calculus using infinitesimals, demonstrating their pedagogical value. Our work realizes this approach computationally, enabling students and practitioners to compute with the same infinitesimal concepts that Keisler advocated for mathematical education.
 
-Several researchers have explored nonstandard models in program semantics and hybrid systems.
-Benveniste et al.~\cite{Benveniste2012} propose a non-standard semantics of hybrid-system modelers,
-while Hasuo and Suenaga~\cite{HasuoSuenaga2012} apply nonstandard analysis to static analysis of
-hybrid systems. These works use nonstandard analysis as a mathematical tool but do not implement
-computational infinitesimals.
+Several researchers have explored nonstandard models in program semantics and hybrid systems. Benveniste et al.~\cite{Benveniste2012} propose a non-standard semantics of hybrid-system modelers, while Hasuo and Suenaga~\cite{HasuoSuenaga2012} apply nonstandard analysis to static analysis of hybrid systems. These works use nonstandard analysis as a mathematical tool but do not implement computational infinitesimals.
 
 In theorem proving, Fleuriot~\cite{Fleuriot1999} formalized nonstandard analysis in Isabelle/HOL, providing machine-checked proofs using hyperreals. Benl et al.~\cite{Benl2004} developed a constructive approach using Cauchy sequences. Our work differs in focusing on executable implementations rather than formal verification.
 
@@ -519,10 +515,7 @@ In theorem proving, Fleuriot~\cite{Fleuriot1999} formalized nonstandard analysis
 
 Previous computational approaches to infinitesimals have taken different paths from our ultrafilter-based method. Automatic differentiation~\cite{Griewank2008,Baydin2018} computes derivatives via dual numbers, computation graphs, or truncated power series (Taylor-mode). For analytic expressions, our series recognizer aligns closely with the Taylor-mode viewpoint; our distinguishing feature is pairing that capability with an ultrafilter-backed hyperreal semantics for order/equality, where comparisons can be completion-dependent and are enforced consistently by the lazy partial ultrafilter.
 
-Computer algebra systems like Mathematica and Maple support symbolic reasoning about limits,
-infinite values, and related indeterminate forms (and, in some approaches, infinitesimals)~\cite{Fateman2022}.
-These systems work symbolically rather than providing a numeric model of hyperreals. Our approach bridges symbolic and numeric computation
-through the partial ultrafilter construction.
+Computer algebra systems like Mathematica and Maple support symbolic reasoning about limits, infinite values, and related indeterminate forms (and, in some approaches, infinitesimals)~\cite{Fateman2022}. These systems work symbolically rather than providing a numeric model of hyperreals. Our approach bridges symbolic and numeric computation through the partial ultrafilter construction.
 
 The field of constructive nonstandard analysis~\cite{Palmgren1998} seeks to develop infinitesimals without the Axiom of Choice. While philosophically appealing, this approach has not yielded practical implementations. Our work embraces classical foundations while achieving computational tractability.
 
