@@ -95,5 +95,55 @@ class Seq:
             return None
         return None
 
+    def abs_bound_eventually(self) -> Optional[float]:
+        """Return M such that |self(n)| <= M for all sufficiently large n, if provable.
+
+        The reasoning is intentionally coarse and conservative. It is used to soundly
+        prove that bounded * infinitesimal terms are infinitesimal without consulting
+        the partial ultrafilter.
+        """
+        from .functions import Cos, Sin, Tanh
+        from .operations import Add, Div, Mul, Sub
+        from .primitives import AltSign, Const, InvN, NVar
+
+        if self.is_constant():
+            val = self.const_value()
+            return abs(val) if val is not None else None
+        if isinstance(self, (InvN, AltSign)):
+            return 1.0
+        if isinstance(self, (Sin, Cos, Tanh)):
+            return 1.0
+        if isinstance(self, Add) or isinstance(self, Sub):
+            a = self.left.abs_bound_eventually()
+            b = self.right.abs_bound_eventually()
+            if a is not None and b is not None:
+                return a + b
+            return None
+        if isinstance(self, Mul):
+            a = self.left.abs_bound_eventually()
+            b = self.right.abs_bound_eventually()
+            if a is not None and b is not None:
+                return a * b
+            return None
+        if isinstance(self, Div):
+            num = self.left.abs_bound_eventually()
+            if num is None:
+                return None
+            if isinstance(self.right, Const):
+                if self.right.c == 0.0:
+                    return None
+                return num / abs(self.right.c)
+            if isinstance(self.right, NVar):
+                # For n>=1, |x(n)/n| <= |x(n)|, so we can reuse the numerator bound.
+                return num
+            return None
+        if isinstance(self, NVar):
+            return None
+        return None
+
+    def is_bounded_eventually(self) -> Optional[bool]:
+        """Return True if this sequence is provably eventually bounded."""
+        return True if self.abs_bound_eventually() is not None else None
+
     def at(self, n: int) -> float:
         raise NotImplementedError

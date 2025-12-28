@@ -3,6 +3,7 @@
 from typing import Optional, Tuple
 
 from .algebra import SetExpr
+from .asymptotic import standard_part_extended
 from .sequence import (
     Add,
     AltSign,
@@ -23,7 +24,7 @@ from .sequence import (
     Tan,
     Tanh,
 )
-from .series import is_near_standard_by_series, series_from_seq
+from .series import series_from_seq
 from .ultrafilter import PartialUltrafilter
 
 
@@ -70,13 +71,11 @@ class Hyperreal:
         return self > other or self == other
 
     def standard_part(self) -> Optional[float]:
-        """Extract the standard part if this is a near-standard number."""
-        ok, c = is_near_standard_by_series(self.seq)
-        if ok:
-            return c
-        if isinstance(self.seq, Const):
-            return self.seq.c
-        return None
+        """Extract the standard part if this is a near-standard number.
+
+        Uses the conservative extended extractor (series + bounded/limit rules).
+        """
+        return standard_part_extended(self.seq)
 
     def value_at(self, n: int) -> float:
         """Evaluate the underlying sequence at index n."""

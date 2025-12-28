@@ -92,6 +92,17 @@ class Mul(Seq):
             return True
         if self.left.is_infinitesimal() and self.right.is_infinitesimal():
             return True
+        # New BV rule: bounded * infinitesimal => infinitesimal.
+        if (
+            self.left.is_infinitesimal()
+            and self.right.abs_bound_eventually() is not None
+        ):
+            return True
+        if (
+            self.right.is_infinitesimal()
+            and self.left.abs_bound_eventually() is not None
+        ):
+            return True
         return False
 
     def is_infinite(self) -> bool:
