@@ -59,7 +59,7 @@ Theory and Implementation of Non-Constructive Mathematics}
 \maketitle
 
 \begin{abstract}
-  Hyperreal numbers, which extend the reals with infinitesimals and infinite quantities, provide elegant foundations for analysis but are built from non-constructive objects (non-principal ultrafilters) whose existence depends on the Axiom of Choice. We present a practical implementation of hyperreal arithmetic through a lazy partial ultrafilter construction that commits only to constraints demanded by program execution. Comparisons are resolved by deterministic finite-or-cofinite and series-based reasoning when possible, and otherwise by incremental SAT solving. We also implement standard part extraction for a fragment of analytic functions via Laurent-series recognition in $\delta = 1/n$. In a benchmark suite of 40 membership queries, 19 (47.5\%) are resolved without SAT via finite-or-cofinite reasoning and memoization, concentrating SAT effort on genuinely choice-dependent oscillatory sequences.
+  Hyperreal numbers, which extend the reals with infinitesimals and infinite quantities, provide elegant foundations for analysis but are built from non-constructive objects (non-principal ultrafilters) whose existence depends on the Axiom of Choice. We present a practical implementation of hyperreal arithmetic through a lazy partial ultrafilter construction that commits only to constraints demanded by program execution. Comparisons are resolved by deterministic finite-or-cofinite and series-based reasoning when possible, and otherwise by incremental SAT solving. We also implement partial standard part extraction on a completion-invariant fragment: beyond Laurent-series recognition in $\delta = 1/n$ for analytic terms, we certify bounded--vanishing tails and selected non-analytic limits at infinity. In a benchmark suite of 40 membership queries, 19 (47.5\%) are resolved without SAT via finite-or-cofinite reasoning and memoization, concentrating SAT effort on genuinely choice-dependent oscillatory sequences.
 \end{abstract}
 
 \paragraph{Keywords.}
@@ -114,7 +114,7 @@ The transfer principle, formalized by Łoś's theorem~\cite{Los1955}, establishe
 
 In classical nonstandard analysis, the standard part map $\st$ is defined on finite hyperreals: if $x\in\Rstar$ is finite, there exists a unique $r\in\R$ such that $x-r$ is infinitesimal, and we write $\st(x)=r$. (Infinite hyperreals have no standard part.)
 
-In our implementation, extracting $\st(x)$ from an arbitrary representative sequence can be completion-dependent. Accordingly, we expose a \emph{partial} standard-part extractor $\sthat: \Rstar \to \R \cup \{\bot\}$ (Sec.~\ref{sec:standard}). It returns $r$ when it can certify, in a completion-invariant decidable fragment (via series recognition), that $x$ is near-standard with $\st(x)=r$, and returns $\bot$ otherwise.
+In our implementation, extracting $\st(x)$ from an arbitrary representative sequence can be completion-dependent. Accordingly, we expose a \emph{partial} standard-part extractor $\sthat: \Rstar \to \R \cup \{\bot\}$ (Sec.~\ref{sec:standard}). It returns $r$ when it can certify, in a completion-invariant decidable fragment (via series recognition and conservative closure rules), that $x$ is near-standard with $\st(x)=r$, and returns $\bot$ otherwise.
 
 \subsection{The Constructivity Challenge}
 
@@ -185,9 +185,9 @@ Several alternative choice policies merit consideration. A randomized policy wou
 The choice policy becomes observable through program behavior. For instance, when comparing $\sin(n)$ with 0, no finite constraints determine the result. Our policy will choose to make $\sin(n) > 0$ if this comparison is encountered first. Subsequent related comparisons must respect this choice to maintain consistency, creating a path-dependent semantics where the order of comparisons can affect outcomes for underdetermined expressions.
 
 % =====================================================================
-\section{Standard Part Extraction via Series Recognition}\label{sec:standard}
+\section{Standard Part Extraction via Series Recognition and Closure Rules}\label{sec:standard}
 
-The (classical) standard part map $\st$ connects finite hyperreal computations back to real analysis. Our runtime exposes a \emph{partial} extractor $\sthat$ implemented via series recognition. It returns a real number when it can certify (in a decidable fragment) that a hyperreal is near-standard with that standard part, and returns failure otherwise. Concretely, we recognize a subclass of values that admit a power series in $\delta = 1/n$ with no negative powers.
+The (classical) standard part map $\st$ connects finite hyperreal computations back to real analysis. Our runtime exposes a \emph{partial} extractor $\sthat$ that succeeds only when it can certify, in a completion-invariant decidable fragment, that a hyperreal is near-standard with that standard part; otherwise it returns failure. The core mechanism is Laurent-series recognition in $\delta = 1/n$ for analytic terms, but we additionally implement conservative closure rules that certify bounded--vanishing tails (bounded $\cdot$ infinitesimal) and selected non-analytic limits at infinity (e.g., $\sthat(\tanh(1/\delta))=1$ and $\sthat(\exp(-1/\delta))=0$).
 
 \subsection{Series Representation}
 
@@ -217,11 +217,11 @@ Our implementation supports the elementary functions $\sin$, $\cos$, $\tan$, $\t
 
 \subsection{Limitations and Extensions}
 
-The series recognizer has inherent limitations. It cannot handle expressions with oscillatory terms like $\sin(n)$ or $(-1)^n$, as these do not admit series expansions. It also cannot handle general division where the denominator has multiple terms, as this would require computing infinite series inversions.
+The series recognizer has inherent limitations. It cannot handle expressions with top-level oscillatory terms like $\sin(n)$ or $(-1)^n$, as these do not admit series expansions. It also cannot handle general division where the denominator has multiple terms, as this would require computing infinite series inversions. Nevertheless, the overall extractor $\sthat$ can sometimes certify near-standardness in the presence of oscillatory factors when they appear only in vanishing tails; for example, $\sthat(\sin(n)/n)=0$ and $\sthat(1+(-1)^n/n)=1$ follow from the closure rule ``bounded $\cdot$ infinitesimal is infinitesimal.'' We also include selected non-analytic but completion-invariant limits at infinity such as $\sthat(\tanh(n))=1$ and $\sthat(\exp(-n))=0$ (where $n=1/\delta$).
 
 These limitations are fundamental rather than implementation restrictions. The hyperreal $\sin(n)$ is finite, but its classical standard part (its ultralimit) is completion-dependent: different ultrafilter completions can yield different real values. Consequently, no completion-invariant procedure can return a unique real number for $\sin(n)$ from finite runtime information, and our extractor returns failure on such terms. Similarly, expressions like $1/(\delta + \delta^2)$ would require infinite series to represent exactly.
 
-Despite these limitations, the series recognizer successfully handles a significant fragment of hyperreal arithmetic, including all polynomial expressions in $n$ and $1/n$, and compositions of analytic functions applied to near-zero arguments.
+Despite these limitations, the series recognizer successfully handles a significant fragment of hyperreal arithmetic, including all polynomial expressions in $n$ and $1/n$, and compositions of analytic functions applied to near-zero arguments; the extended extractor additionally covers bounded--vanishing tails and the small limit library described above.
 
 % =====================================================================
 \section{Implementation Architecture}\label{sec:implementation}
@@ -317,7 +317,7 @@ Our implementation maintains several invariants that ensure soundness:
 
 \subsection{Series Recognizer Validity}
 
-The series recognizer computes standard parts through Laurent series expansion. Its correctness depends on the mathematical validity of the series manipulations and the proper handling of convergence.
+The series recognizer is the core analytic component of $\sthat$; it computes standard parts through Laurent series expansion. Its correctness depends on the mathematical validity of the series manipulations and the proper handling of convergence. The next subsection covers additional conservative closure rules used by the implementation.
 
 \begin{proposition}[Series Recognition Soundness]\label{prop:series-sound}
   If the series recognizer returns a standard part $c$ for a hyperreal $h$, then $h - c$ is infinitesimal in any completion of the partial ultrafilter.
@@ -345,9 +345,37 @@ The recognizer correctly returns failure for expressions that are not near-stand
 
 Regarding division, we distinguish between fundamental limitations and engineering choices. Division by a series with non-zero constant term is mathematically well-defined through geometric series expansion: $(1 + d_1\delta + d_2\delta^2 + \cdots)^{-1} = 1 - d_1\delta + (d_1^2 - d_2)\delta^2 + \cdots$. However, this expansion generally produces an infinite series that would require unbounded computation. Our restriction to division by monomials (single powers of $\delta$) is therefore a pragmatic engineering decision that ensures all series representations remain finite and tractable within our truncated arithmetic framework. This choice balances mathematical generality with computational efficiency.
 
+
+\subsection{Bounded--Vanishing Closure and Selected Non-analytic Limits}\label{sec:sthat-closure}
+
+While the Laurent-series recognizer covers a large analytic fragment, near-standardness can also be certified in some non-analytic yet completion-invariant cases. Concretely, our implementation extends $\sthat$ with conservative closure rules that (i) certify that bounded oscillatory factors become negligible when multiplied by an infinitesimal, and (ii) recognize a small library of standard limits at $\pm\infty$ (e.g., $\tanh(x)\to\pm 1$ and $\exp(x)\to 0$ as $x\to-\infty$). These rules never consult the partial ultrafilter; they rely only on cofinite reasoning about $n$ and uniform bounds such as $|\sin(x)|\le 1$.
+
+\begin{proposition}[Extended $\sthat$ Soundness]\label{prop:sthat-sound}
+  If the standard-part extractor $\sthat$ returns a real number $c$ for a hyperreal $h$, then $h - c$ is infinitesimal in any completion of the partial ultrafilter.
+\end{proposition}
+
+\begin{proof}
+  The extractor can succeed in several ways.
+
+  \paragraph{(i) Series recognition.}
+  If $\sthat(h)=c$ is obtained by the Laurent-series recognizer, the claim follows immediately from Proposition~\ref{prop:series-sound}.
+
+  \paragraph{(ii) Infinitesimal remainders (bounded--vanishing).}
+  The extractor may also return $c=0$ after certifying that $h$ is infinitesimal using conservative algebraic rules, including the closure principle ``bounded $\cdot$ infinitesimal is infinitesimal.'' These rules are justified by standard real bounds (e.g., $|\sin(x)|\le 1$, $|\cos(x)|\le 1$, $|\tanh(x)|\le 1$) together with the fact that $\delta=1/n\to 0$. Hence $h_n\to 0$ in the ordinary real sense. For any $\varepsilon>0$, the set $A_\varepsilon=\{n:|h_n|<\varepsilon\}$ is cofinite, and therefore lies in every non-principal completion, which is exactly the statement that $h-0$ is infinitesimal.
+
+  \paragraph{(iii) Certified limits at infinity.}
+  The extractor includes a small library of completion-invariant limits at $\pm\infty$. For example, if it returns $\sthat(\tanh(g))=1$ (resp.\ $-1$), it has certified that $g_n\to +\infty$ (resp.\ $g_n\to -\infty$) by inspecting the dominant term of a Laurent expansion in $\delta$ and its eventual sign. By the classical real limit $\lim_{x\to+\infty}\tanh(x)=1$ (resp.\ $\lim_{x\to-\infty}\tanh(x)=-1$), for any $\varepsilon>0$ there exists $M$ such that $|\tanh(x)-1|<\varepsilon$ whenever $x\ge M$. Since $g_n\to+\infty$, there exists $N$ such that $g_n\ge M$ for all $n\ge N$, hence $\{n:|\tanh(g_n)-1|<\varepsilon\}$ is cofinite. The same argument applies to $\sthat(\exp(g))=0$ when $g_n\to-\infty$ using $\lim_{x\to-\infty}\exp(x)=0$.
+
+  \paragraph{(iv) Arithmetic closure.}
+  The extractor is closed under $+,-,\cdot,/$ on already-certified standard parts. If $x-a$ and $y-b$ are infinitesimal, then $(x\pm y)-(a\pm b)$ and $(xy-ab)$ are infinitesimal by closure of infinitesimals under addition and multiplication. For division, if additionally $b\ne 0$ and $y_n\to b$, then $y$ is eventually bounded away from $0$, so $x/y$ is near-standard with standard part $a/b$.
+
+  In all cases, for every $\varepsilon>0$ the set $\{n:|h_n-c|<\varepsilon\}$ is cofinite and therefore belongs to every non-principal completion, proving that $h-c$ is infinitesimal in any completion.
+\end{proof}
+
+
 \subsection{System Consistency}
 
-The overall system maintains consistency through careful interaction between components. When the partial ultrafilter makes a choice, it affects all future comparisons involving related expressions. The series recognizer operates independently of these choices for near-standard values, ensuring that standard parts are well-defined regardless of ultrafilter completion.
+The overall system maintains consistency through careful interaction between components. When the partial ultrafilter makes a choice, it affects all future comparisons involving related expressions. The standard-part extractor $\sthat$ (series recognition plus conservative closure rules) operates independently of these choices for values it can certify, ensuring that extracted standard parts are well-defined regardless of ultrafilter completion.
 
 We validate consistency through a small executable validation suite, including:
 \begin{enumerate}[itemsep=2pt,topsep=4pt]
@@ -404,8 +432,8 @@ Different completions of a partial ultrafilter can disagree on order/equality te
   This pointwise evaluation is independent of the completion: the only role of an ultrafilter in our semantics is to interpret comparisons (membership decisions), but $\mathcal{L}_{\sthat}$ contains no comparison operators and therefore performs no ultrafilter queries during evaluation.
 
   It remains to show that calls to $\sthat$ are completion-invariant.
-  Whenever evaluation reaches an occurrence $\sthat(h)$, either the series recognizer fails, in which case $\sthat(h)=\bot$ under every completion, or it returns a real $c$.
-  In the success case, Proposition~\ref{prop:series-sound} implies that $h-c$ is infinitesimal in \emph{every} completion, hence $\st(h)=c$ in both $\PUF$ and $\PUF'$.
+  Whenever evaluation reaches an occurrence $\sthat(h)$, the extractor either fails, in which case $\sthat(h)=\bot$ under every completion, or it returns a real $c$.
+  In the success case, Proposition~\ref{prop:sthat-sound} implies that $h-c$ is infinitesimal in \emph{every} completion, hence $\st(h)=c$ in both $\PUF$ and $\PUF'$.
   Therefore each occurrence of $\sthat$ produces the same observable result under $\PUF$ and under $\PUF'$.
 
   Since all constructors are deterministic and completion-invariant on their arguments, a structural induction on the syntax of $P$ yields that the final observable outcome (a real number or failure) is identical under $\PUF$ and under $\PUF'$.
