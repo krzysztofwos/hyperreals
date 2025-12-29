@@ -5,8 +5,22 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional, Set, Tuple
 
 from .algebra import Atom, Complement, Empty, SetExpr, Universe, complement, intersect
+from .asymptotic_facts import analyze
 from .sat import SAT
-from .sequence import Add, AltSign, Const, Cos, Div, InvN, Mul, NVar, Seq, Sin, Sub, Tan
+from .sequence import (
+    Add,
+    AltSign,
+    Const,
+    Cos,
+    Div,
+    InvN,
+    Mul,
+    NVar,
+    Seq,
+    Sin,
+    Sub,
+    Tan,
+)
 from .series import eventual_sign_from_seq, series_from_seq_exact
 
 
@@ -211,6 +225,21 @@ class PartialUltrafilter:
                     return True if a.c > 0.0 else False
                 if isinstance(a, Const) and isinstance(b, Const):
                     return True if not (a.c < b.c) else False
+                # Tier-2 fallback: use asymptotic analyzer
+                diff = Sub(b, a).simplify()
+                fact = analyze(diff)
+                if fact.kind == "minus_inf":
+                    # b - a -> -∞ means a > b eventually, so {n: a < b} is finite
+                    return True
+                if fact.kind == "finite" and fact.limit is not None and fact.limit < 0:
+                    # b - a -> negative means a > b eventually
+                    return True
+                if fact.kind == "plus_inf":
+                    # b - a -> +∞ means a < b eventually, so {n: a < b} is cofinite
+                    return False
+                if fact.kind == "finite" and fact.limit is not None and fact.limit > 0:
+                    # b - a -> positive means a < b eventually
+                    return False
                 return None
         return None
 
@@ -340,6 +369,20 @@ class PartialUltrafilter:
                 nonneg = diff.is_nonnegative_eventually()
                 if diff.is_infinitesimal() and nonneg is True:
                     return True
+                # Tier-2 fallback: use asymptotic analyzer
+                fact = analyze(diff)
+                if fact.kind == "plus_inf":
+                    # b - a -> +∞ means a < b eventually, so {n: a < b} is cofinite
+                    return True
+                if fact.kind == "finite" and fact.limit is not None and fact.limit > 0:
+                    # b - a -> positive means a < b eventually
+                    return True
+                if fact.kind == "minus_inf":
+                    # b - a -> -∞ means a > b eventually, so {n: a < b} is finite
+                    return False
+                if fact.kind == "finite" and fact.limit is not None and fact.limit < 0:
+                    # b - a -> negative means a > b eventually
+                    return False
                 return None
         return None
 
@@ -502,6 +545,92 @@ class PartialUltrafilter:
             return True
         else:
             self.stats.fip_blocks += 1
+            return False
+
+    def probe(self, s: SetExpr) -> Tuple[bool, bool]:
+        """Probe feasibility of a set's membership without committing.
+
+        Returns (can_be_false, can_be_true) under current constraints.
+        Does not commit either way; this is a non-destructive query.
+
+        Uses fastpaths: if provably finite, forced false; if provably cofinite, forced true.
+        """
+        v = self._ensure_var(s)
+
+        # Fastpath checks
+        f = self._is_finite(s)
+        c = self._is_cofinite(s)
+
+        if f is True:
+            # Finite sets are forced false
+            return (True, False)
+        if c is True:
+            # Cofinite sets are forced true
+            return (False, True)
+
+        # Check SAT feasibility for both polarities
+        sat_neg = self.sat.with_unit(-v)
+        self.stats.sat_calls += 1
+        model_neg = sat_neg.solve()
+        can_be_false = model_neg is not None
+
+        sat_pos = self.sat.with_unit(v)
+        self.stats.sat_calls += 1
+        model_pos = sat_pos.solve()
+        can_be_true = model_pos is not None
+
+        return (can_be_false, can_be_true)
+
+    def commit(self, s: SetExpr, truth: bool, *, choice: bool = True) -> bool:
+        """Try to commit a set to a truth value.
+
+        Returns True if successful, False if impossible (would cause inconsistency).
+        When choice=True, this is recorded as a choice commit in statistics.
+
+        Args:
+            s: The set expression to commit.
+            truth: True to commit to "in filter", False to commit to "not in filter".
+            choice: Whether this is a choice-dependent commit (default True).
+
+        Returns:
+            True if the commit succeeded, False if it would cause inconsistency.
+        """
+        self._ensure_var(s)
+
+        # Fastpath checks
+        f = self._is_finite(s)
+        c = self._is_cofinite(s)
+
+        if truth:
+            # Trying to commit True
+            if f is True:
+                # Finite sets cannot be True
+                return False
+            if c is True:
+                # Already forced True
+                self._unit_true(s)
+                return True
+            # Check FIP and SAT
+            if self._fip_allows(s, True):
+                self._unit_true(s, choice=choice)
+                return True
+            return False
+        else:
+            # Trying to commit False
+            if c is True:
+                # Cofinite sets cannot be False
+                return False
+            if f is True:
+                # Already forced False
+                self._unit_false(s)
+                return True
+            # Check SAT feasibility
+            v = self.var_of[s]
+            sat_neg = self.sat.with_unit(-v)
+            self.stats.sat_calls += 1
+            if sat_neg.solve() is not None:
+                self._unit_false(s)
+                return True
             return False
 
     def human_readable_constraints(

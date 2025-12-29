@@ -1,7 +1,8 @@
 """Hyperreal number system with lazy ultrafilters."""
 
+from .asymptotic_facts import AsymptoticFact, analyze
 from .dual import Dual, ad_derivative_first
-from .hyperreal import Hyperreal, HyperrealSystem
+from .hyperreal import Hyperreal, HyperrealSystem, StChooseResult
 
 # Sequence types for advanced usage
 from .sequence import (
@@ -38,6 +39,9 @@ __all__ = [
     "PartialUltrafilter",
     "Dual",
     "ad_derivative_first",
+    "StChooseResult",
+    "AsymptoticFact",
+    "analyze",
     # Sequence types
     "Seq",
     "Const",
