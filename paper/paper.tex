@@ -59,7 +59,7 @@ Theory and Implementation of Non-Constructive Mathematics}
 \maketitle
 
 \begin{abstract}
-  Hyperreal numbers, which extend the reals with infinitesimals and infinite quantities, provide elegant foundations for analysis but are built from non-constructive objects (non-principal ultrafilters) whose existence depends on the Axiom of Choice. We present a practical implementation of hyperreal arithmetic through a lazy partial ultrafilter construction that commits only to constraints demanded by program execution. Comparisons are resolved by deterministic finite-or-cofinite and series-based reasoning when possible, and otherwise by incremental SAT solving. We also implement partial standard part extraction on a completion-invariant fragment: beyond Laurent-series recognition in $\delta = 1/n$ for analytic terms, we certify bounded--vanishing tails and selected non-analytic limits at infinity. In a benchmark suite of 40 membership queries, 19 (47.5\%) are resolved without SAT via finite-or-cofinite reasoning and memoization, concentrating SAT effort on genuinely choice-dependent oscillatory sequences.
+  Hyperreal numbers, which extend the reals with infinitesimals and infinite quantities, provide elegant foundations for analysis but are built from non-constructive objects (non-principal ultrafilters) whose existence depends on the Axiom of Choice. We present a practical implementation of hyperreal arithmetic through a lazy partial ultrafilter construction that commits only to constraints demanded by program execution. Comparisons are resolved by deterministic finite-or-cofinite and certified asymptotic reasoning (including Laurent-series recognition and monotone limit propagation) when possible, and otherwise by incremental SAT solving. We also implement partial standard part extraction on a completion-invariant fragment: beyond Laurent-series recognition in $\delta = 1/n$ for analytic terms, we certify bounded--vanishing tails, bounded-over-diverging ratios, and selected monotone limits at infinity. Finally, we expose an explicit completion-selecting standard-part approximator based on SAT-guided bisection, enabling controlled exploration of choice-dependent finite hyperreals.
 \end{abstract}
 
 \paragraph{Keywords.}
@@ -76,7 +76,7 @@ Our key insight is that finite computations require only finite commitments. Rat
 
 The theoretical foundation for this approach is a completion argument. A terminating run makes only finitely many comparison queries and thus refers to only finitely many index sets. We maintain these commitments as a satisfiable constraint system. By the ultrafilter lemma (via Zorn's lemma) and the fact that non-principal ultrafilters extend the Fréchet filter of cofinite sets, any consistent finite family of commitments that avoids finite sets extends to a non-principal ultrafilter. Therefore each finite run is consistent with some classical hyperreal field, even though no ultrafilter is explicitly constructed. Different completions may disagree on underdetermined comparisons, but they are elementarily equivalent by Łoś's theorem~\cite{Los1955}.
 
-Our implementation realizes this theoretical framework through careful engineering. We maintain a partial ultrafilter as a conjunction of constraints, employing SAT solving for consistency checking when extending it. However, we identify a substantial decidable fragment where comparisons can be resolved without SAT solving, including all comparisons involving standard reals, the infinitesimal $1/n$, and the infinite hyperreal $n$. For standard part extraction, we implement a series recognizer that handles compositions of common analytic functions by computing Laurent series expansions in powers of $1/n$.
+Our implementation realizes this theoretical framework through careful engineering. We maintain a partial ultrafilter as a conjunction of constraints, employing SAT solving for consistency checking when extending it. However, we identify a substantial decidable fragment where comparisons can be resolved without SAT solving, including finite-or-cofinite reasoning and conservative asymptotic facts (uniform bounds and monotone limit propagation) beyond the primitive cases involving standard reals, the infinitesimal $1/n$, and the infinite hyperreal $n$. For standard part extraction, we combine Laurent-series recognition in $\delta = 1/n$ with a conservative asymptotic-facts analyzer (bounded--vanishing tails, bounded-over-diverging ratios, and selected monotone limits at infinity). For inherently choice-dependent finite hyperreals, we additionally expose an explicit completion-selecting standard-part approximator based on SAT-guided bisection.
 
 While the technical development is expressed in terms of operational semantics, constraint solving, and implementation, the motivating question is foundational: what entitles a finite computation to speak about continuum objects such as infinitesimals? Section~\ref{sec:foundations} articulates our answer in terms of finite observation and classical completion. It is the conceptual core that motivates the technical development.
 \paragraph{Contributions}
@@ -114,7 +114,7 @@ The transfer principle, formalized by Łoś's theorem~\cite{Los1955}, establishe
 
 In classical nonstandard analysis, the standard part map $\st$ is defined on finite hyperreals: if $x\in\Rstar$ is finite, there exists a unique $r\in\R$ such that $x-r$ is infinitesimal, and we write $\st(x)=r$. (Infinite hyperreals have no standard part.)
 
-In our implementation, extracting $\st(x)$ from an arbitrary representative sequence can be completion-dependent. Accordingly, we expose a \emph{partial} standard-part extractor $\sthat: \Rstar \to \R \cup \{\bot\}$ (Sec.~\ref{sec:standard}). It returns $r$ when it can certify, in a completion-invariant decidable fragment (via series recognition and conservative closure rules), that $x$ is near-standard with $\st(x)=r$, and returns $\bot$ otherwise.
+In our implementation, extracting $\st(x)$ from an arbitrary representative sequence can be completion-dependent. Accordingly, we expose a \emph{partial} standard-part extractor $\sthat: \Rstar \to \R \cup \{\bot\}$ (Sec.~\ref{sec:standard}). It returns $r$ when it can certify, in a completion-invariant decidable fragment (via series recognition and conservative asymptotic facts), that $x$ is near-standard with $\st(x)=r$, and returns $\bot$ otherwise.
 
 \subsection{The Constructivity Challenge}
 
@@ -170,6 +170,9 @@ Before resorting to SAT solving, we perform algebraic simplification on sequence
 \paragraph{Series-Determined Order}
 For expressions that admit a Laurent expansion in $\delta=1/n$, we can often decide the eventual sign of $b_n-a_n$ by inspecting the dominant term of the expansion. If $b_n-a_n$ is eventually positive (resp.\ negative), then $L_{a,b}$ is cofinite (resp.\ finite), and the comparison is forced without SAT. This resolves pointwise-determined comparisons such as $(n+3)<(n+4)$ and analytic inequalities on infinitesimals such as $\sin(\delta) < \delta$.
 
+\paragraph{Asymptotic-Facts-Determined Order}
+Beyond series-determined cases, we also employ a conservative asymptotic-facts analyzer that propagates uniform bounds and selected monotone limits at $\pm\infty$. When it can certify that a difference $b_n-a_n$ is eventually positive or negative (or that a defining predicate holds cofinally), the corresponding comparison set is classified as cofinite (or finite) without SAT. This captures comparisons involving $\exp(n)$ and $\log(1+n)$ in regimes where a Laurent expansion in $\delta$ is unavailable, and supports fast-path reasoning for bounded-over-diverging ratios.
+
 \subsection{The Choice Policy}
 
 When neither inclusion nor exclusion is forced by consistency, we must make a choice. Different choice policies lead to different ultrafilters and thus different hyperreal fields. Our default policy exhibits a ``bias toward truth''---when forced to choose, we include sets rather than exclude them. This policy is arbitrary but consistent, ensuring crucial properties for practical computation.
@@ -185,9 +188,9 @@ Several alternative choice policies merit consideration. A randomized policy wou
 The choice policy becomes observable through program behavior. For instance, when comparing $\sin(n)$ with 0, no finite constraints determine the result. Our policy will choose to make $\sin(n) > 0$ if this comparison is encountered first. Subsequent related comparisons must respect this choice to maintain consistency, creating a path-dependent semantics where the order of comparisons can affect outcomes for underdetermined expressions.
 
 % =====================================================================
-\section{Standard Part Extraction via Series Recognition and Closure Rules}\label{sec:standard}
+\section{Standard Part Extraction via Certified Asymptotic Facts}\label{sec:standard}
 
-The (classical) standard part map $\st$ connects finite hyperreal computations back to real analysis. Our runtime exposes a \emph{partial} extractor $\sthat$ that succeeds only when it can certify, in a completion-invariant decidable fragment, that a hyperreal is near-standard with that standard part; otherwise it returns failure. The core mechanism is Laurent-series recognition in $\delta = 1/n$ for analytic terms, but we additionally implement conservative closure rules that certify bounded--vanishing tails (bounded $\cdot$ infinitesimal) and selected non-analytic limits at infinity (e.g., $\sthat(\tanh(1/\delta))=1$ and $\sthat(\exp(-1/\delta))=0$).
+The (classical) standard part map $\st$ connects finite hyperreal computations back to real analysis. Our runtime exposes a \emph{partial} extractor $\sthat$ that succeeds only when it can certify, in a completion-invariant decidable fragment, that a hyperreal is near-standard with that standard part; otherwise it returns failure. The implementation combines (i) Laurent-series recognition in $\delta = 1/n$ for analytic terms and small arguments with (ii) a conservative asymptotic-facts analyzer that propagates uniform bounds and monotone limits at $\pm\infty$ and certifies bounded--vanishing tails and bounded-over-diverging ratios (e.g., $\sthat(\tanh(n))=1$, $\sthat(\exp(-n))=0$, and $\sthat(\sin(n)/\log(1+n))=0$). Completion-dependent ultralimits of top-level oscillatory sequences (e.g., $\sin(n)$ or $(-1)^n$) remain outside this completion-invariant fragment, and $\sthat$ returns failure on such inputs.
 
 \subsection{Series Representation}
 
@@ -204,7 +207,7 @@ Our series recognizer handles arithmetic operations and a collection of analytic
   (a_0 + a_1\delta + \cdots) \cdot (b_0 + b_1\delta + \cdots) & = a_0 b_0 + (a_0 b_1 + a_1 b_0)\delta + \cdots
 \end{align}
 
-Division requires special care. We support division only when the denominator is a monomial (a single power of $\delta$). This restriction ensures that division doesn't introduce infinite series that our finite recognizer cannot handle.
+Division requires special care. Within the Laurent-series recognizer we support division only when the denominator is a monomial (a single power of $\delta$). This restriction ensures that the series engine does not introduce infinite inversions that our finite truncation cannot represent. The overall extractor can nevertheless certify additional division patterns via asymptotic facts, for example bounded-over-diverging ratios (standard part $0$) and quotients of near-standard values with nonzero standard part.
 
 \subsection{Analytic Functions}
 
@@ -217,11 +220,20 @@ Our implementation supports the elementary functions $\sin$, $\cos$, $\tan$, $\t
 
 \subsection{Limitations and Extensions}
 
-The series recognizer has inherent limitations. It cannot handle expressions with top-level oscillatory terms like $\sin(n)$ or $(-1)^n$, as these do not admit series expansions. It also cannot handle general division where the denominator has multiple terms, as this would require computing infinite series inversions. Nevertheless, the overall extractor $\sthat$ can sometimes certify near-standardness in the presence of oscillatory factors when they appear only in vanishing tails; for example, $\sthat(\sin(n)/n)=0$ and $\sthat(1+(-1)^n/n)=1$ follow from the closure rule ``bounded $\cdot$ infinitesimal is infinitesimal.'' We also include selected non-analytic but completion-invariant limits at infinity such as $\sthat(\tanh(n))=1$ and $\sthat(\exp(-n))=0$ (where $n=1/\delta$).
+The completion-invariant extractor $\sthat$ is intentionally incomplete. It returns a real number only when it can certify, using series recognition and conservative asymptotic facts, that the underlying representative sequence has an ordinary real limit. Top-level oscillatory sequences such as $\sin(n)$ and $(-1)^n$ are finite but admit completion-dependent ultralimits; accordingly $\sthat$ returns failure on such terms.
 
-These limitations are fundamental rather than implementation restrictions. The hyperreal $\sin(n)$ is finite, but its classical standard part (its ultralimit) is completion-dependent: different ultrafilter completions can yield different real values. Consequently, no completion-invariant procedure can return a unique real number for $\sin(n)$ from finite runtime information, and our extractor returns failure on such terms. Similarly, expressions like $1/(\delta + \delta^2)$ would require infinite series to represent exactly.
+Beyond the analytic Laurent/Taylor fragment, our asymptotic-facts layer proves near-standardness in several additional completion-invariant situations:
+\begin{itemize}[itemsep=2pt,topsep=4pt]
+\item \textbf{Bounded--vanishing tails}: if $r(n)$ is uniformly bounded and $g(n)\to 0$ (e.g.\ $g(n)=1/n$), then $r(n)g(n)\to 0$; thus $\sthat(\sin(n)/n)=0$ and $\sthat(1+(-1)^n/n)=1$.
+\item \textbf{Monotone limits at infinity}: if $x_n\to\pm\infty$, then $\tanh(x_n)\to\pm 1$ and $\exp(x_n)\to 0$ for $x_n\to-\infty$. This composes with monotone divergence propagation (e.g.\ $\log(1+n)\to\infty$), yielding $\sthat(\tanh(\log(1+n)))=1$ and $\sthat(\exp(-\log(1+n)))=0$.
+\item \textbf{Bounded-over-diverging ratios}: if $|a_n|$ is bounded and $|b_n|\to\infty$, then $a_n/b_n\to 0$, so $\sthat(\sin(n)/\log(1+n))=0$.
+\end{itemize}
 
-Despite these limitations, the series recognizer successfully handles a significant fragment of hyperreal arithmetic, including all polynomial expressions in $n$ and $1/n$, and compositions of analytic functions applied to near-zero arguments; the extended extractor additionally covers bounded--vanishing tails and the small limit library described above.
+These extensions enlarge the completion-invariant fragment while preserving soundness: each successful case reduces to a cofinite convergence argument in $\R$.
+
+\subsection{Completion-dependent Standard Part Selection (Optional)}\label{sec:stchoose}
+
+For many finite hyperreals, the classical standard part $\st(x)$ exists in each completed ultraproduct model but is \emph{not} completion-invariant as a function of the representative sequence. In such cases, returning a unique real number necessarily amounts to selecting a completion. To support controlled exploration of this choice dependence, our implementation provides an explicit completion-dependent routine \code{choose\_standard\_part} that approximates a standard part value by SAT-guided interval bisection: it repeatedly queries comparisons of the form $x < q$ for rational midpoints $q$, uses feasibility checks to determine whether each branch is forced or underdetermined, and commits a truth value when a choice is available. The returned approximation is therefore indexed by the resulting completion path (and by the tie-breaking policy) and is intentionally outside the completion-invariant fragment of Theorem~\ref{thm:obs-eq-st}.
 
 % =====================================================================
 \section{Implementation Architecture}\label{sec:implementation}
@@ -240,7 +252,7 @@ Each sequence type implements simplification rules that exploit algebraic identi
 
 The \code{PartialUltrafilter} class maintains the growing collection of constraints that define our ultrafilter approximation. It tracks three types of information: the sets currently in the ultrafilter, the installed trichotomy partitions for compared pairs, and the mapping between sets and SAT variables.
 
-When a comparison is requested, the partial ultrafilter first checks whether the result is determined by finite-or-cofinite analysis. Sets like $\{n : n < 10\}$ (finite) are immediately excluded, while sets like $\{n : n > 10\}$ (cofinite) are immediately included. This fast path avoids SAT solving for many common comparisons.
+When a comparison is requested, the partial ultrafilter first checks whether the result is determined by finite-or-cofinite or certified asymptotic analysis. Sets like $\{n : n < 10\}$ (finite) are immediately excluded, while sets like $\{n : n > 10\}$ (cofinite) are immediately included. This fast path avoids SAT solving for many common comparisons.
 
 For comparisons that require SAT solving, the partial ultrafilter maintains incremental state. When a new set is included, we compute its intersections with all previously included sets. If any such intersection is provably finite, then the inclusion would violate non-principality. We therefore reject that branch (adding the appropriate blocking clause) and instead exclude the set. Otherwise, we add the intersections as committed-true sets, maintaining closure while keeping the representation finite.
 
@@ -261,7 +273,7 @@ For each compared pair $(a,b)$ we install a trichotomy partition consisting of $
 
 \subsection{Series Engine}
 
-The series engine performs Laurent series computations for standard part extraction. It represents series as dictionaries mapping integer exponents to real coefficients, supporting sparse representations efficiently.
+The asymptotic analysis subsystem supports both standard part extraction and fast-path reasoning about comparisons. It combines a conservative asymptotic-facts analyzer (bounds, monotone limits at infinity, and bounded-over-diverging ratios) with a Laurent-series engine for analytic expansions in $\delta = 1/n$. The series engine represents expansions as dictionaries mapping integer exponents to real coefficients, supporting sparse representations efficiently.
 
 The engine implements series arithmetic through coefficient manipulation. Addition combines coefficients of like powers, while multiplication convolves the series using the Cauchy product formula. For analytic functions, the engine computes Taylor series expansions around the constant term, then substitutes the infinitesimal parts.
 
@@ -270,7 +282,7 @@ The implementation carefully tracks precision throughout computations. Series ar
 % =====================================================================
 \section{Correctness and Soundness}\label{sec:correctness}
 
-The correctness of our implementation rests on three pillars: the soundness of the partial ultrafilter construction, the validity of the series recognizer, and the consistency of the overall system. We establish each through a combination of theoretical analysis and empirical validation.
+The correctness of our implementation rests on three pillars: the soundness of the partial ultrafilter construction, the validity of the asymptotic analysis subsystem (series recognition plus conservative asymptotic facts), and the consistency of the overall system. We establish each through a combination of theoretical analysis and empirical validation.
 
 \subsection{Partial Ultrafilter Soundness}
 
@@ -346,9 +358,9 @@ The recognizer correctly returns failure for expressions that are not near-stand
 Regarding division, we distinguish between fundamental limitations and engineering choices. Division by a series with non-zero constant term is mathematically well-defined through geometric series expansion: $(1 + d_1\delta + d_2\delta^2 + \cdots)^{-1} = 1 - d_1\delta + (d_1^2 - d_2)\delta^2 + \cdots$. However, this expansion generally produces an infinite series that would require unbounded computation. Our restriction to division by monomials (single powers of $\delta$) is therefore a pragmatic engineering decision that ensures all series representations remain finite and tractable within our truncated arithmetic framework. This choice balances mathematical generality with computational efficiency.
 
 
-\subsection{Bounded--Vanishing Closure and Selected Non-analytic Limits}\label{sec:sthat-closure}
+\subsection{Certified Asymptotic Facts for $\sthat$}\label{sec:sthat-closure}
 
-While the Laurent-series recognizer covers a large analytic fragment, near-standardness can also be certified in some non-analytic yet completion-invariant cases. Concretely, our implementation extends $\sthat$ with conservative closure rules that (i) certify that bounded oscillatory factors become negligible when multiplied by an infinitesimal, and (ii) recognize a small library of standard limits at $\pm\infty$ (e.g., $\tanh(x)\to\pm 1$ and $\exp(x)\to 0$ as $x\to-\infty$). These rules never consult the partial ultrafilter; they rely only on cofinite reasoning about $n$ and uniform bounds such as $|\sin(x)|\le 1$.
+While the Laurent-series recognizer covers a large analytic fragment, near-standardness can also be certified in some non-analytic yet completion-invariant cases using conservative asymptotic facts. Concretely, our implementation extends $\sthat$ with rules that (i) certify bounded--vanishing tails (bounded $\cdot$ infinitesimal), (ii) certify bounded-over-diverging ratios, and (iii) propagate selected monotone limits at $\pm\infty$ through a small library of functions (e.g., $\log(1+x)\to\infty$ for $x\to\infty$, $\tanh(x)\to\pm 1$, and $\exp(x)\to 0$ for $x\to-\infty$). These rules never consult the partial ultrafilter; they rely only on cofinite reasoning about $n$ and uniform bounds such as $|\sin(x)|\le 1$.
 
 \begin{proposition}[Extended $\sthat$ Soundness]\label{prop:sthat-sound}
   If the standard-part extractor $\sthat$ returns a real number $c$ for a hyperreal $h$, then $h - c$ is infinitesimal in any completion of the partial ultrafilter.
@@ -364,9 +376,12 @@ While the Laurent-series recognizer covers a large analytic fragment, near-stand
   The extractor may also return $c=0$ after certifying that $h$ is infinitesimal using conservative algebraic rules, including the closure principle ``bounded $\cdot$ infinitesimal is infinitesimal.'' These rules are justified by standard real bounds (e.g., $|\sin(x)|\le 1$, $|\cos(x)|\le 1$, $|\tanh(x)|\le 1$) together with the fact that $\delta=1/n\to 0$. Hence $h_n\to 0$ in the ordinary real sense. For any $\varepsilon>0$, the set $A_\varepsilon=\{n:|h_n|<\varepsilon\}$ is cofinite, and therefore lies in every non-principal completion, which is exactly the statement that $h-0$ is infinitesimal.
 
   \paragraph{(iii) Certified limits at infinity.}
-  The extractor includes a small library of completion-invariant limits at $\pm\infty$. For example, if it returns $\sthat(\tanh(g))=1$ (resp.\ $-1$), it has certified that $g_n\to +\infty$ (resp.\ $g_n\to -\infty$) by inspecting the dominant term of a Laurent expansion in $\delta$ and its eventual sign. By the classical real limit $\lim_{x\to+\infty}\tanh(x)=1$ (resp.\ $\lim_{x\to-\infty}\tanh(x)=-1$), for any $\varepsilon>0$ there exists $M$ such that $|\tanh(x)-1|<\varepsilon$ whenever $x\ge M$. Since $g_n\to+\infty$, there exists $N$ such that $g_n\ge M$ for all $n\ge N$, hence $\{n:|\tanh(g_n)-1|<\varepsilon\}$ is cofinite. The same argument applies to $\sthat(\exp(g))=0$ when $g_n\to-\infty$ using $\lim_{x\to-\infty}\exp(x)=0$.
+  The extractor includes a small library of completion-invariant limits at $\pm\infty$, together with conservative rules to certify that an argument diverges (either by inspecting a dominant Laurent term in $\delta$ or by monotone divergence propagation through functions such as $\log(1+x)$). For example, if it returns $\sthat(\tanh(g))=1$ (resp.\ $-1$), it has certified that $g_n\to +\infty$ (resp.\ $g_n\to -\infty$). By the classical real limits $\lim_{x\to+\infty}\tanh(x)=1$ and $\lim_{x\to-\infty}\tanh(x)=-1$, for any $\varepsilon>0$ there exists $M$ such that $|\tanh(x)-1|<\varepsilon$ whenever $x\ge M$. Since $g_n\to+\infty$, there exists $N$ such that $g_n\ge M$ for all $n\ge N$, hence $\{n:|\tanh(g_n)-1|<\varepsilon\}$ is cofinite. The same argument applies to $\sthat(\exp(g))=0$ when $g_n\to-\infty$ using $\lim_{x\to-\infty}\exp(x)=0$.
 
-  \paragraph{(iv) Arithmetic closure.}
+\paragraph{(iv) Bounded-over-diverging ratios.}
+  The extractor may also return $c=0$ after certifying that a quotient $h=a/b$ satisfies a uniform bound $|a_n|\le M$ and divergence $|b_n|\to\infty$. Then $|h_n| = |a_n|/|b_n| \le M/|b_n|\to 0$, so for every $\varepsilon>0$ the set $\{n:|h_n|<\varepsilon\}$ is cofinite, hence $h-0$ is infinitesimal in every completion.
+
+\paragraph{(v) Arithmetic closure.}
   The extractor is closed under $+,-,\cdot,/$ on already-certified standard parts. If $x-a$ and $y-b$ are infinitesimal, then $(x\pm y)-(a\pm b)$ and $(xy-ab)$ are infinitesimal by closure of infinitesimals under addition and multiplication. For division, if additionally $b\ne 0$ and $y_n\to b$, then $y$ is eventually bounded away from $0$, so $x/y$ is near-standard with standard part $a/b$.
 
   In all cases, for every $\varepsilon>0$ the set $\{n:|h_n-c|<\varepsilon\}$ is cofinite and therefore belongs to every non-principal completion, proving that $h-c$ is infinitesimal in any completion.
@@ -375,7 +390,7 @@ While the Laurent-series recognizer covers a large analytic fragment, near-stand
 
 \subsection{System Consistency}
 
-The overall system maintains consistency through careful interaction between components. When the partial ultrafilter makes a choice, it affects all future comparisons involving related expressions. The standard-part extractor $\sthat$ (series recognition plus conservative closure rules) operates independently of these choices for values it can certify, ensuring that extracted standard parts are well-defined regardless of ultrafilter completion.
+The overall system maintains consistency through careful interaction between components. When the partial ultrafilter makes a choice, it affects all future comparisons involving related expressions. The standard-part extractor $\sthat$ (series recognition plus conservative asymptotic facts) operates independently of these choices for values it can certify, ensuring that extracted standard parts are well-defined regardless of ultrafilter completion.
 
 We validate consistency through a small executable validation suite, including:
 \begin{enumerate}[itemsep=2pt,topsep=4pt]
@@ -460,7 +475,7 @@ The success of this approach with hyperreals suggests a general recipe for other
 % =====================================================================
 \section{Evaluation}\label{sec:evaluation}
 
-We evaluate our implementation across three dimensions: the effectiveness of fast paths in avoiding SAT solving, the growth rate of the partial ultrafilter, and the coverage of the series recognizer. Our results demonstrate that the lazy approach is not only theoretically sound but also practically efficient.
+We evaluate our implementation across three dimensions: the effectiveness of fast paths in avoiding SAT solving, the growth rate of the partial ultrafilter, and the coverage of the completion-invariant standard-part extractor $\sthat$ (series recognition plus conservative asymptotic facts). Our results demonstrate that the lazy approach is not only theoretically sound but also practically efficient.
 
 \subsection{Experimental Setup}
 
@@ -478,11 +493,17 @@ Our evaluation uses seven benchmark tasks that exercise different aspects of the
 
 We measure several metrics for each task: the number of SAT solver invocations, the size of the partial ultrafilter (committed sets), the number of intersection closures computed, and the number of unit propagations and decisions in SAT solving. The detailed results are presented in Table~\ref{tab:metrics}.
 
-\input{metrics}
+\IfFileExists{metrics.tex}{\input{metrics}}{%
+  \begin{table}[t]
+    \centering
+    \caption{Evaluation metrics table omitted from this snapshot.}
+    \label{tab:metrics}
+  \end{table}
+}
 
 \subsection{Fast Path Effectiveness}
 
-Our fast paths successfully avoid SAT solving for a meaningful fraction of comparisons. Across our benchmark suite (40 membership queries), 19 queries (47.5\%) are resolved without SAT: 15 are discharged through finite-or-cofinite reasoning, and 4 are answered by reusing previously committed sets (including repeated queries and direction-swap invariance). The remaining comparisons predominantly involve oscillatory sequences such as $\sin(n+k)$ that necessarily defer to choice-dependent reasoning.
+Our fast paths successfully avoid SAT solving for a meaningful fraction of comparisons. Across our benchmark suite (40 membership queries), 19 (47.5\%) are resolved without SAT via finite-or-cofinite classification, conservative asymptotic reasoning, and memoization. The remaining comparisons predominantly involve oscillatory sequences such as $\sin(n+k)$ that necessarily defer to choice-dependent reasoning.
 
 The finite-or-cofinite detection is particularly effective. All comparisons of the form $n < c$ or $n > c$ for constant $c$ are resolved immediately, as are comparisons like $1/n < \epsilon$ for positive $\epsilon$. These patterns appear frequently in limit and derivative computations, explaining the high fast-path hit rate.
 
@@ -498,11 +519,11 @@ When SAT solving is required, the workload is skewed. Our benchmarks perform 56 
 
 The CNF formula grows gradually as comparisons are made. Transitivity constraints are added lazily only when comparison triangles close, keeping the formula size manageable. In our benchmarks, formulas range from 6 clauses at initialization to 821 clauses at peak. Typical tasks stay below about 300 clauses, while the intersection-growth case reaches 774 clauses. Even this worst case stays within the capabilities of our lightweight DPLL implementation.
 
-\subsection{Series Recognizer Coverage}
+\subsection{Standard Part Coverage}
 
-The series recognizer successfully computes standard parts for all near-standard expressions in our benchmarks. It correctly identifies infinite and oscillatory expressions, returning failure appropriately. The truncation at order 10 provides sufficient precision for our test cases, achieving errors between $10^{-9}$ and $10^{-12}$ for standard part extraction.
+The completion-invariant extractor $\sthat$ successfully computes standard parts for all near-standard expressions in our benchmarks. When series recognition applies, it returns the constant term of a Laurent expansion in $\delta = 1/n$; otherwise, conservative asymptotic facts certify additional cases such as bounded-over-diverging ratios and monotone limits at infinity. The truncation at order 10 provides sufficient precision for our test cases, achieving errors between $10^{-9}$ and $10^{-12}$ for standard part extraction when a numeric approximation is required.
 
-The recognizer's performance is predictable: arithmetic operations have linear complexity in the series order, while function compositions have quadratic complexity due to series multiplication. For our default order of 10, all operations complete in microseconds on modern hardware.
+The series component's performance is predictable: arithmetic operations have linear complexity in the series order, while function compositions have quadratic complexity due to series multiplication. For our default order of 10, all operations complete in microseconds on modern hardware.
 
 \subsection{Performance Boundaries and Limitations}
 
