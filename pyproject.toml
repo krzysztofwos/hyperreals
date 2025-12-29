@@ -3,19 +3,65 @@ name = "hyperreals"
 version = "0.1.0"
 description = "Hyperreal arithmetic with SAT-backed lazy ultrafilters for non-standard analysis and automatic differentiation"
 readme = "README.md"
-license = { text = "MIT" }
+license = { text = "MIT OR Apache-2.0" }
 requires-python = ">=3.10"
-dependencies = []
+authors = [{ name = "Krzysztof Woś", email = "krzysztof.wos@pm.me" }]
+maintainers = [{ name = "Krzysztof Woś", email = "krzysztof.wos@pm.me" }]
+keywords = [
+  "automatic-differentiation",
+  "calculus",
+  "derivatives",
+  "infinitesimals",
+  "laurent-series",
+  "non-standard-analysis",
+  "sat-solver",
+  "symbolic-computation",
+  "taylor-series",
+  "ultrafilters",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Typing :: Typed",
+]
+dependencies = ["mpmath>=1.3"]
 
 [project.urls]
+Homepage = "https://github.com/krzysztofwos/hyperreals"
 Repository = "https://github.com/krzysztofwos/hyperreals"
+Issues = "https://github.com/krzysztofwos/hyperreals/issues"
+Documentation = "https://github.com/krzysztofwos/hyperreals#readme"
+
+[project.optional-dependencies]
+dev = ["mypy>=1.19.1", "pytest>=9.0.2", "pytest-cov>=4.1.0", "ruff>=0.14.9"]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build]
-sources = ["src"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/hyperreals"]
 
-[dependency-groups]
-dev = ["mypy>=1.19.1", "pytest>=9.0.2", "ruff>=0.14.9"]
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
