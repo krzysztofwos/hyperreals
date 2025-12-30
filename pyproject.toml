@@ -1,5 +1,5 @@
 [project]
-name = "hyperreal"
+name = "hyperreals"
 version = "0.1.0"
 description = "Hyperreal arithmetic with SAT-backed lazy ultrafilters for non-standard analysis and automatic differentiation"
 readme = "README.md"

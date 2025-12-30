@@ -1,5 +1,5 @@
-from hyperreal import HyperrealSystem
-from hyperreal.algebra import Atom
+from hyperreals import HyperrealSystem
+from hyperreals.algebra import Atom
 
 
 def test_direction_swap_invariance():

@@ -1,4 +1,4 @@
-from hyperreal import HyperrealSystem
+from hyperreals import HyperrealSystem
 
 
 def test_log_over_n_goes_to_zero():

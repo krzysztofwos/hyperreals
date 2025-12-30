@@ -29,7 +29,7 @@ _SRC = Path(__file__).resolve().parents[1] / "src"
 if _SRC.is_dir() and str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from hyperreal import HyperrealSystem  # type: ignore
+from hyperreals import HyperrealSystem  # noqa: E402
 
 
 def sat_stats(sys: HyperrealSystem):
@@ -73,7 +73,7 @@ def has_transitivity_clause(
     if aS is None or bS is None or cS is None:
         return False
 
-    from hyperreal.algebra import Atom  # local import for scripts-only usage
+    from hyperreals.algebra import Atom  # local import for scripts-only usage
 
     vL_ab = sys.puf._ensure_var(Atom("LT", aS, bS))
     vL_bc = sys.puf._ensure_var(Atom("LT", bS, cS))

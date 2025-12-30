@@ -1,4 +1,4 @@
-from hyperreal import HyperrealSystem
+from hyperreals import HyperrealSystem
 
 
 def test_standard_part_bounded_times_infinitesimal_alt():

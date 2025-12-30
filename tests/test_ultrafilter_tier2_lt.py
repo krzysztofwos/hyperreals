@@ -1,6 +1,6 @@
 """Tests for Tier-2 asymptotic facts integration with LT classification."""
 
-from hyperreal import HyperrealSystem
+from hyperreals import HyperrealSystem
 
 
 def test_lt_exp_n_const_forced_false_and_true():

@@ -13,7 +13,7 @@ _SRC = Path(__file__).resolve().parents[1] / "src"
 if _SRC.is_dir() and str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from hyperreal import HyperrealSystem
+from hyperreals import HyperrealSystem  # noqa: E402
 
 TASK_NAME_MAP = {
     "near_standard_limits": "Near-Standard Limits",
@@ -494,11 +494,13 @@ def main():
     parser = argparse.ArgumentParser(
         description="Evaluation suite for hyperreal number system"
     )
+    # Default to paper/ directory so metrics.tex is available for paper builds
+    default_out = Path(__file__).resolve().parents[1] / "paper" / "metrics.csv"
     parser.add_argument(
         "--out",
         type=str,
-        default="metrics.csv",
-        help="Base output path; writes .csv/.tex/.md (default: metrics.csv)",
+        default=str(default_out),
+        help=f"Base output path; writes .csv/.tex/.md (default: {default_out})",
     )
     parser.add_argument(
         "--save-ultrafilter",

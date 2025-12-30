@@ -13,7 +13,7 @@ uv sync
 ### As a library
 
 ```python
-from hyperreal import HyperrealSystem
+from hyperreals import HyperrealSystem
 
 # Initialize the system
 sys = HyperrealSystem()
@@ -106,7 +106,7 @@ The evaluation suite generates:
  ├── demo.py  # Demonstration script
  └── eval.py  # Evaluation suite with metrics
  src
- └── hyperreal           # Main library package
+ └── hyperreals          # Main library package
      ├── algebra.py      # Set algebra
      ├── dual.py         # Dual numbers for AD
      ├── hyperreal.py    # Hyperreal and HyperrealSystem
@@ -123,10 +123,10 @@ The evaluation suite generates:
 uv run pytest
 
 # Lint code
-uv run ruff check src/hyperreal
+uv run ruff check src/hyperreals
 
 # Type check
-uv run mypy src/hyperreal
+uv run mypy src/hyperreals
 ```
 
 ## License

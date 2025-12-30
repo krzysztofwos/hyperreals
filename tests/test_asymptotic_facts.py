@@ -4,12 +4,12 @@ import math
 
 import pytest
 
-from hyperreal.asymptotic import standard_part_extended
-from hyperreal.asymptotic_facts import (
+from hyperreals.asymptotic import standard_part_extended
+from hyperreals.asymptotic_facts import (
     analyze,
     clear_cache,
 )
-from hyperreal.sequence import (
+from hyperreals.sequence import (
     Add,
     AltSign,
     Const,
@@ -300,8 +300,8 @@ class TestUltrafilterIntegration:
 
     def test_exp_n_less_than_const_is_finite(self):
         """exp(n) < 10 should be detected as finite (eventually false)."""
-        from hyperreal.algebra import Atom
-        from hyperreal.ultrafilter import PartialUltrafilter
+        from hyperreals.algebra import Atom
+        from hyperreals.ultrafilter import PartialUltrafilter
 
         puf = PartialUltrafilter()
         # {n: exp(n) < 10} is finite since exp(n) -> +inf
@@ -311,8 +311,8 @@ class TestUltrafilterIntegration:
 
     def test_log1p_n_less_than_const_is_finite(self):
         """log(1+n) < 5 should be detected as finite (eventually false)."""
-        from hyperreal.algebra import Atom
-        from hyperreal.ultrafilter import PartialUltrafilter
+        from hyperreals.algebra import Atom
+        from hyperreals.ultrafilter import PartialUltrafilter
 
         puf = PartialUltrafilter()
         # {n: log(1+n) < 5} is finite since log(1+n) -> +inf
@@ -321,8 +321,8 @@ class TestUltrafilterIntegration:
 
     def test_const_less_than_exp_n_is_cofinite(self):
         """10 < exp(n) should be detected as cofinite (eventually true)."""
-        from hyperreal.algebra import Atom
-        from hyperreal.ultrafilter import PartialUltrafilter
+        from hyperreals.algebra import Atom
+        from hyperreals.ultrafilter import PartialUltrafilter
 
         puf = PartialUltrafilter()
         # {n: 10 < exp(n)} is cofinite since exp(n) -> +inf

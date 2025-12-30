@@ -36,7 +36,7 @@ _SRC = Path(__file__).resolve().parents[1] / "src"
 if _SRC.is_dir() and str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from hyperreal import Hyperreal, HyperrealSystem, series_from_seq
+from hyperreals import Hyperreal, HyperrealSystem, series_from_seq  # noqa: E402
 
 Func = Callable[[Hyperreal, HyperrealSystem], Hyperreal]
 

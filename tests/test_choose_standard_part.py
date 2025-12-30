@@ -1,6 +1,6 @@
 """Tests for completion-sensitive standard part extraction."""
 
-from hyperreal.hyperreal import HyperrealSystem
+from hyperreals.hyperreal import HyperrealSystem
 
 
 class TestChooseStandardPartInvariant:
@@ -98,9 +98,9 @@ class TestProbeAndCommit:
 
     def test_probe_forced_finite(self):
         """probe should detect forced-false for finite sets."""
-        from hyperreal.algebra import Atom
-        from hyperreal.sequence import Const, Exp, NVar
-        from hyperreal.ultrafilter import PartialUltrafilter
+        from hyperreals.algebra import Atom
+        from hyperreals.sequence import Const, Exp, NVar
+        from hyperreals.ultrafilter import PartialUltrafilter
 
         puf = PartialUltrafilter()
         # {n: exp(n) < 10} is finite
@@ -111,9 +111,9 @@ class TestProbeAndCommit:
 
     def test_probe_forced_cofinite(self):
         """probe should detect forced-true for cofinite sets."""
-        from hyperreal.algebra import Atom
-        from hyperreal.sequence import Const, Exp, NVar
-        from hyperreal.ultrafilter import PartialUltrafilter
+        from hyperreals.algebra import Atom
+        from hyperreals.sequence import Const, Exp, NVar
+        from hyperreals.ultrafilter import PartialUltrafilter
 
         puf = PartialUltrafilter()
         # {n: 10 < exp(n)} is cofinite
@@ -124,9 +124,9 @@ class TestProbeAndCommit:
 
     def test_commit_respects_finite(self):
         """commit should fail for finite sets when trying to commit True."""
-        from hyperreal.algebra import Atom
-        from hyperreal.sequence import Const, Exp, NVar
-        from hyperreal.ultrafilter import PartialUltrafilter
+        from hyperreals.algebra import Atom
+        from hyperreals.sequence import Const, Exp, NVar
+        from hyperreals.ultrafilter import PartialUltrafilter
 
         puf = PartialUltrafilter()
         atom = Atom("LT", Exp(NVar()), Const(10.0))
@@ -138,9 +138,9 @@ class TestProbeAndCommit:
 
     def test_commit_respects_cofinite(self):
         """commit should fail for cofinite sets when trying to commit False."""
-        from hyperreal.algebra import Atom
-        from hyperreal.sequence import Const, Exp, NVar
-        from hyperreal.ultrafilter import PartialUltrafilter
+        from hyperreals.algebra import Atom
+        from hyperreals.sequence import Const, Exp, NVar
+        from hyperreals.ultrafilter import PartialUltrafilter
 
         puf = PartialUltrafilter()
         atom = Atom("LT", Const(10.0), Exp(NVar()))
