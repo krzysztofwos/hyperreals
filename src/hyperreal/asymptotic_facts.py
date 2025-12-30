@@ -17,6 +17,7 @@ import math
 from dataclasses import dataclass
 from typing import Literal, Optional
 
+from .dominance import leading_laurent_term, poly_degree_upper, poly_ratio_limit
 from .sequence import (
     Add,
     AltSign,
@@ -381,12 +382,47 @@ def _analyze_mul(left: Seq, right: Seq, *, order: int) -> AsymptoticFact:
                 return _minus_inf(reason="nonzero * inf")
         return _abs_inf(reason="nonzero * inf (sign unknown)")
 
-    # Bounds propagation
-    abs_bound = None
+    # Bounded * bounded -> bounded.
     if A.abs_bound is not None and B.abs_bound is not None:
-        abs_bound = A.abs_bound * B.abs_bound
+        return _unknown(abs_bound=A.abs_bound * B.abs_bound, reason="bounded*bounded")
 
-    return _unknown(abs_bound=abs_bound, reason="mul: insufficient info")
+    # Tier-3: log(1+poly) * 1/n -> 0 (when poly diverges polynomially).
+    # This handles the simplified form of log(1+n)/n.
+    if isinstance(left, Log1p) and isinstance(right, InvN):
+        lt_u = leading_laurent_term(left.arg, order=order)
+        if lt_u is not None:
+            k_u, a_u = lt_u
+            if k_u < 0 and a_u > 0:
+                return _finite(0.0, reason="log(1+poly)*1/n")
+    if isinstance(right, Log1p) and isinstance(left, InvN):
+        lt_u = leading_laurent_term(right.arg, order=order)
+        if lt_u is not None:
+            k_u, a_u = lt_u
+            if k_u < 0 and a_u > 0:
+                return _finite(0.0, reason="1/n*log(1+poly)")
+
+    # Tier-3: exp(-poly(n)) * poly_bounded(n) -> 0.
+    #
+    # We recognize this only when the exp argument has a Laurent leading term
+    # with negative exponent (polynomial in n) and negative coefficient (-> -∞).
+    if isinstance(left, Exp):
+        lt = leading_laurent_term(left.arg, order=order)
+        if lt is not None:
+            k, a = lt
+            if k < 0 and a < 0:
+                deg = poly_degree_upper(right, order=order)
+                if deg is not None:
+                    return _finite(0.0, reason="exp(-poly)*poly")
+    if isinstance(right, Exp):
+        lt = leading_laurent_term(right.arg, order=order)
+        if lt is not None:
+            k, a = lt
+            if k < 0 and a < 0:
+                deg = poly_degree_upper(left, order=order)
+                if deg is not None:
+                    return _finite(0.0, reason="poly*exp(-poly)")
+
+    return _unknown(reason="mul: insufficient info")
 
 
 def _analyze_div(left: Seq, right: Seq, *, order: int) -> AsymptoticFact:
@@ -410,6 +446,31 @@ def _analyze_div(left: Seq, right: Seq, *, order: int) -> AsymptoticFact:
     # Bounded / diverging = 0 (key Tier-2 rule)
     if A.abs_bound is not None and B.is_infinite():
         return _finite(0.0, reason="bounded / diverging")
+
+    # Tier-3: Polynomial ratio limits (including non-monomial denominators).
+    pr = poly_ratio_limit(left, right, order=order)
+    if pr is not None:
+        return _finite(pr, reason="poly_ratio")
+
+    # Tier-3: Polynomial numerator over exp(poly(n)) -> 0.
+    if isinstance(right, Exp):
+        lt = leading_laurent_term(right.arg, order=order)
+        if lt is not None:
+            k, a = lt
+            if k < 0 and a > 0:
+                deg = poly_degree_upper(left, order=order)
+                if deg is not None:
+                    return _finite(0.0, reason="poly/exp(poly)")
+
+    # Tier-3: log(1+poly(n)) / poly(n) -> 0 when denominator diverges polynomially.
+    if isinstance(left, Log1p):
+        lt_u = leading_laurent_term(left.arg, order=order)
+        lt_d = leading_laurent_term(right, order=order)
+        if lt_u is not None and lt_d is not None:
+            k_u, a_u = lt_u
+            k_d, a_d = lt_d
+            if k_u < 0 and a_u > 0 and k_d < 0 and a_d != 0.0:
+                return _finite(0.0, reason="log/poly")
 
     # Infinitesimal / bounded-away-from-zero = infinitesimal
     if A.is_infinitesimal() and B.abs_lower is not None and B.abs_lower > 0:
