@@ -190,7 +190,9 @@ The choice policy becomes observable through program behavior. For instance, whe
 % =====================================================================
 \section{Standard Part Extraction via Certified Asymptotic Facts}\label{sec:standard}
 
-The (classical) standard part map $\st$ connects finite hyperreal computations back to real analysis. Our runtime exposes a \emph{partial} extractor $\sthat$ that succeeds only when it can certify, in a completion-invariant decidable fragment, that a hyperreal is near-standard with that standard part; otherwise it returns failure. The implementation combines (i) Laurent-series recognition in $\delta = 1/n$ for analytic terms and small arguments with (ii) a conservative asymptotic-facts analyzer that propagates uniform bounds and monotone limits at $\pm\infty$ and certifies bounded--vanishing tails and bounded-over-diverging ratios (e.g., $\sthat(\tanh(n))=1$, $\sthat(\exp(-n))=0$, and $\sthat(\sin(n)/\log(1+n))=0$). Completion-dependent ultralimits of top-level oscillatory sequences (e.g., $\sin(n)$ or $(-1)^n$) remain outside this completion-invariant fragment, and $\sthat$ returns failure on such inputs.
+The (classical) standard part map $\st$ connects finite hyperreal computations back to real analysis. Our runtime exposes a \emph{partial} extractor $\sthat$ that succeeds only when it can certify, in a completion-invariant decidable fragment, that a hyperreal is near-standard with that standard part; otherwise it returns failure. The implementation combines (i) Laurent-series recognition in $\delta = 1/n$ for analytic terms and small arguments with (ii) a conservative asymptotic-facts analyzer that propagates uniform bounds and monotone limits at $\pm\infty$ and certifies bounded--vanishing tails, bounded-over-diverging ratios, and selected growth-dominance lemmas (e.g., $\sthat(\tanh(n))=1$, $\sthat(\exp(-n))=0$, $\sthat(\sin(n)/\log(1+n))=0$, and $\sthat(n/\exp(n))=0$).
+
+Completion-dependent ultralimits of top-level oscillatory sequences (e.g., $\sin(n)$ or $(-1)^n$) remain outside this completion-invariant fragment, and $\sthat$ returns failure on such inputs.
 
 \subsection{Series Representation}
 
@@ -227,6 +229,7 @@ Beyond the analytic Laurent/Taylor fragment, our asymptotic-facts layer proves n
 \item \textbf{Bounded--vanishing tails}: if $r(n)$ is uniformly bounded and $g(n)\to 0$ (e.g.\ $g(n)=1/n$), then $r(n)g(n)\to 0$; thus $\sthat(\sin(n)/n)=0$ and $\sthat(1+(-1)^n/n)=1$.
 \item \textbf{Monotone limits at infinity}: if $x_n\to\pm\infty$, then $\tanh(x_n)\to\pm 1$ and $\exp(x_n)\to 0$ for $x_n\to-\infty$. This composes with monotone divergence propagation (e.g.\ $\log(1+n)\to\infty$), yielding $\sthat(\tanh(\log(1+n)))=1$ and $\sthat(\exp(-\log(1+n)))=0$.
 \item \textbf{Bounded-over-diverging ratios}: if $|a_n|$ is bounded and $|b_n|\to\infty$, then $a_n/b_n\to 0$, so $\sthat(\sin(n)/\log(1+n))=0$.
+\item \textbf{Growth dominance}: a small lemma library proves additional completion-invariant limits that do not admit Laurent expansions, including polynomial ratio limits and super-polynomial decay. For example, $\sthat((n^2+1)/(n^2+n))=1$, $\sthat(\log(1+n)/n)=0$, and $\sthat(n^k\exp(-n))=0$ for fixed $k$ (in particular $\sthat(n/\exp(n))=0$).
 \end{itemize}
 
 These extensions enlarge the completion-invariant fragment while preserving soundness: each successful case reduces to a cofinite convergence argument in $\R$.
@@ -600,6 +603,9 @@ The completion-based recipe suggested by our ultrafilter interface may apply to 
 \subsection{Integration with Proof Assistants}
 
 Connecting our implementation to proof assistants would enable verified computations with hyperreals. The partial ultrafilter construction could generate proof certificates that witness the consistency of choices made during execution. This would provide the best of both worlds: efficient computation with formal correctness guarantees.
+
+More speculatively, one can view the asymptotic-facts layer as a \emph{lemma backend}: its rules are currently justified by standard real-analysis facts, but could eventually be discharged by a separate proof kernel (for example, a minimal system based on binary lambda calculus). This would preserve the current runtime performance while strengthening the provenance of certified asymptotic inferences.
+
 
 % =====================================================================
 \section{Conclusion}\label{sec:conclusion}
