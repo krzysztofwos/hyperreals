@@ -1,6 +1,6 @@
 name = "hyperreals-formalization"
 version = "0.1.0"
-defaultTargets = ["Hyperreals", "periodic_checker", "laurent_checker"]
+defaultTargets = ["Hyperreals", "periodic_checker", "laurent_checker", "residue_checker"]
 
 [leanOptions]
 pp.unicode.fun = true
@@ -22,3 +22,6 @@ root = "PeriodicChecker"
 name = "laurent_checker"
 root = "LaurentChecker"
 
+[[lean_exe]]
+name = "residue_checker"
+root = "ResidueChecker"
