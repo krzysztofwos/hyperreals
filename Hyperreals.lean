@@ -12,3 +12,5 @@ import Hyperreals.ResidueTrace
 import Hyperreals.ResidueReplay
 import Hyperreals.ObservationPrograms
 import Hyperreals.ObservationProgramExamples
+import Hyperreals.InfinitesimalCase
+import Hyperreals.AdaptiveInfinitesimal
