@@ -7,3 +7,4 @@ import Hyperreals.StandardPart
 import Hyperreals.Counterexample
 import Hyperreals.Periodic
 import Hyperreals.RuntimeInvariants
+import Hyperreals.LaurentTrace

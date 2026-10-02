@@ -4,6 +4,7 @@ from .asymptotic_facts import AsymptoticFact, analyze
 from .dual import Dual, ad_derivative_first
 from .hyperreal import Hyperreal, HyperrealSystem, StChooseResult
 from .verified import LeanBackendError, LeanPeriodicSystem, PeriodicHyperreal
+from .verified_laurent import LaurentHyperreal, LeanLaurentSystem
 from .sequence import (
     Add,
     AltSign,
@@ -34,4 +35,4 @@ from .ultrafilter import (
 
 __version__ = "0.1.0"
 
-__all__ = ['LeanPeriodicSystem', 'PeriodicHyperreal', 'LeanBackendError', 'Hyperreal', 'HyperrealSystem', 'PartialUltrafilter', 'EventuallyPeriodicSet', 'eventually_periodic_set', 'SemanticInconsistencyError', 'UnderdeterminedComparisonError', 'Dual', 'ad_derivative_first', 'StChooseResult', 'AsymptoticFact', 'analyze', 'Seq', 'Const', 'NVar', 'InvN', 'AltSign', 'Add', 'Sub', 'Mul', 'Div', 'Sin', 'Cos', 'Tan', 'Tanh', 'Exp', 'Log1p', 'Sqrt1p', 'Cosh', 'Sinh', 'series_from_seq', 'is_near_standard_by_series']
+__all__ = ['LeanPeriodicSystem', 'LeanLaurentSystem', 'LaurentHyperreal', 'PeriodicHyperreal', 'LeanBackendError', 'Hyperreal', 'HyperrealSystem', 'PartialUltrafilter', 'EventuallyPeriodicSet', 'eventually_periodic_set', 'SemanticInconsistencyError', 'UnderdeterminedComparisonError', 'Dual', 'ad_derivative_first', 'StChooseResult', 'AsymptoticFact', 'analyze', 'Seq', 'Const', 'NVar', 'InvN', 'AltSign', 'Add', 'Sub', 'Mul', 'Div', 'Sin', 'Cos', 'Tan', 'Tanh', 'Exp', 'Log1p', 'Sqrt1p', 'Cosh', 'Sinh', 'series_from_seq', 'is_near_standard_by_series']
