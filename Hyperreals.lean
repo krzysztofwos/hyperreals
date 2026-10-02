@@ -10,3 +10,5 @@ import Hyperreals.RuntimeInvariants
 import Hyperreals.LaurentTrace
 import Hyperreals.ResidueTrace
 import Hyperreals.ResidueReplay
+import Hyperreals.ObservationPrograms
+import Hyperreals.ObservationProgramExamples
