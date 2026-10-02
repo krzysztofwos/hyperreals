@@ -7,20 +7,19 @@ claim by kernel reduction. It never executes an exported source file directly.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from fractions import Fraction
 import hashlib
 import json
 import math
-from pathlib import Path
 import re
 import subprocess
 import tempfile
 import time
+from dataclasses import dataclass
+from fractions import Fraction
+from pathlib import Path
 from typing import Any, Literal, cast
 
 from .verified import LeanBackendError
-
 
 FORMAT = "hyperreals-residue-replay"
 VERSION = 1
@@ -62,8 +61,11 @@ def _object(value: Any, fields: set[str], name: str) -> dict[str, Any]:
 
 
 def _integer(value: Any, *, limited: bool = True) -> int:
-    if (type(value) is not str or (limited and len(value.lstrip("-")) > MAX_DECIMAL_DIGITS)
-            or _INTEGER.fullmatch(value) is None):
+    if (
+        type(value) is not str
+        or (limited and len(value.lstrip("-")) > MAX_DECIMAL_DIGITS)
+        or _INTEGER.fullmatch(value) is None
+    ):
         raise ValueError("integers must be bounded canonical ASCII decimal strings")
     return int(value)
 
@@ -97,7 +99,9 @@ class _Budget:
             raise ValueError(f"replay exceeds {MAX_NODES} AST nodes/table entries")
 
 
-def _normalize_ast(value: Any, budget: _Budget, depth: int = 0) -> tuple[_AST, int, int, int]:
+def _normalize_ast(
+    value: Any, budget: _Budget, depth: int = 0
+) -> tuple[_AST, int, int, int]:
     """Return immutable syntax, coefficient period, numerator degree, and shift."""
     if budget.limited and depth > MAX_DEPTH:
         raise ValueError(f"replay AST depth exceeds {MAX_DEPTH}")
@@ -107,7 +111,12 @@ def _normalize_ast(value: Any, budget: _Budget, depth: int = 0) -> tuple[_AST, i
         raise ValueError("expression must start with an operator string")
     tag = node[0]
     if tag == "const" and len(node) == 3:
-        return (tag, *_pair(_rational(node[1], node[2], limited=budget.limited))), 1, 0, 0
+        return (
+            (tag, *_pair(_rational(node[1], node[2], limited=budget.limited))),
+            1,
+            0,
+            0,
+        )
     if tag in ("index", "invn") and len(node) == 1:
         return (tag,), 1, int(tag == "index"), int(tag == "invn")
     if tag == "periodic" and len(node) == 2:
@@ -151,7 +160,10 @@ def _json_value(value: Any) -> Any:
 
 
 def _canonical_json(value: Any) -> str:
-    return json.dumps(value, sort_keys=True, ensure_ascii=True, separators=(",", ":")) + "\n"
+    return (
+        json.dumps(value, sort_keys=True, ensure_ascii=True, separators=(",", ":"))
+        + "\n"
+    )
 
 
 def _reject_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -171,7 +183,9 @@ def _load_json(text: str) -> Any:
         raise ValueError(f"non-JSON numeric constant: {value}")
 
     try:
-        return json.loads(text, object_pairs_hook=_reject_duplicates, parse_constant=invalid_constant)
+        return json.loads(
+            text, object_pairs_hook=_reject_duplicates, parse_constant=invalid_constant
+        )
     except (RecursionError, UnicodeError) as error:
         raise ValueError("invalid or excessively nested replay JSON") from error
 
@@ -196,8 +210,12 @@ class ReplayObservation:
         object.__setattr__(self, "right_ast", right)
 
     def to_dict(self) -> dict[str, Any]:
-        return {"left": _json_value(self.left_ast), "right": _json_value(self.right_ast),
-                "op": self.op, "truth": self.truth}
+        return {
+            "left": _json_value(self.left_ast),
+            "right": _json_value(self.right_ast),
+            "op": self.op,
+            "truth": self.truth,
+        }
 
     @classmethod
     def from_dict(cls, value: Any) -> ReplayObservation:
@@ -220,8 +238,12 @@ class ReplaySnapshot:
         if len(observations) > MAX_OBSERVATIONS:
             raise ValueError(f"replay exceeds {MAX_OBSERVATIONS} observations")
         support = _array(self.support, "support")
-        if (not support or len(support) > MAX_PERIOD
-                or any(type(bit) is not bool for bit in support) or not any(support)):
+        if (
+            not support
+            or len(support) > MAX_PERIOD
+            or any(type(bit) is not bool for bit in support)
+            or not any(support)
+        ):
             raise ValueError("support must be a bounded nonempty Boolean mask")
         if self.result is not None and type(self.result) is not Fraction:
             raise ValueError("replay result must be Fraction or None")
@@ -232,8 +254,12 @@ class ReplaySnapshot:
         for observation in observations:
             if type(observation) is not ReplayObservation:
                 raise ValueError("observations must be ReplayObservation objects")
-            copied = ReplayObservation(observation.left_ast, observation.right_ast,
-                                       observation.op, observation.truth)
+            copied = ReplayObservation(
+                observation.left_ast,
+                observation.right_ast,
+                observation.op,
+                observation.truth,
+            )
             _, lp, _, _ = _normalize_ast(copied.left_ast, budget)
             _, rp, _, _ = _normalize_ast(copied.right_ast, budget)
             period = _period(period, _period(lp, rp))
@@ -247,16 +273,29 @@ class ReplaySnapshot:
             raise ValueError("replay JSON exceeds the size limit")
 
     def to_dict(self) -> dict[str, Any]:
-        return {"format": FORMAT, "version": VERSION,
-                "observations": [observation.to_dict() for observation in self.observations],
-                "support": list(self.support), "expression": _json_value(self.expression),
-                "result": None if self.result is None else list(_pair(self.result))}
+        return {
+            "format": FORMAT,
+            "version": VERSION,
+            "observations": [
+                observation.to_dict() for observation in self.observations
+            ],
+            "support": list(self.support),
+            "expression": _json_value(self.expression),
+            "result": None if self.result is None else list(_pair(self.result)),
+        }
 
     @classmethod
     def from_dict(cls, value: Any) -> ReplaySnapshot:
-        obj = _object(value, {"format", "version", "observations", "support", "expression", "result"},
-                      "snapshot")
-        if obj["format"] != FORMAT or type(obj["version"]) is not int or obj["version"] != VERSION:
+        obj = _object(
+            value,
+            {"format", "version", "observations", "support", "expression", "result"},
+            "snapshot",
+        )
+        if (
+            obj["format"] != FORMAT
+            or type(obj["version"]) is not int
+            or obj["version"] != VERSION
+        ):
             raise ValueError("unsupported replay format or version")
         observations = _array(obj["observations"], "observations")
         if len(observations) > MAX_OBSERVATIONS:
@@ -267,8 +306,12 @@ class ReplaySnapshot:
             if len(pair) != 2:
                 raise ValueError("result must be a rational pair or null")
             result = _rational(*pair)
-        return cls(tuple(ReplayObservation.from_dict(item) for item in observations),
-                   obj["support"], obj["expression"], result)
+        return cls(
+            tuple(ReplayObservation.from_dict(item) for item in observations),
+            obj["support"],
+            obj["expression"],
+            result,
+        )
 
     def to_json(self) -> str:
         return _canonical_json(self.to_dict())
@@ -281,7 +324,9 @@ class ReplaySnapshot:
         """Generate fixed declarations. No caller-supplied Lean text is accepted."""
         observations = ",\n    ".join(
             f"⟨.{item.op}, {_lean_ast(item.left_ast)}, {_lean_ast(item.right_ast)}, "
-            f"{str(item.truth).lower()}⟩" for item in self.observations)
+            f"{str(item.truth).lower()}⟩"
+            for item in self.observations
+        )
         result = "none" if self.result is None else f"some {_lean_rat(self.result)}"
         source = f"""import Hyperreals.ResidueReplay
 
@@ -332,23 +377,31 @@ theorem support_correspondence (U : Ultrafilter ℕ)
         source += "\n".join(f"#print axioms {name}" for name in _roots(self.result))
         return source + "\n\nend Hyperreals.GeneratedReplay\n"
 
-    def export(self, directory: str | Path, *, project_root: str | Path | None = None) -> Path:
+    def export(
+        self, directory: str | Path, *, project_root: str | Path | None = None
+    ) -> Path:
         """Write data, generated source, and provenance. This does not verify them."""
         root = _project_root(project_root)
         directory = Path(directory).resolve()
         directory.mkdir(parents=True, exist_ok=True)
         snapshot, source = self.to_json(), self.to_lean()
         manifest = _manifest(root, snapshot, source)
-        for name, text in (("snapshot.json", snapshot), ("Replay.lean", source),
-                           ("manifest.json", _canonical_json(manifest))):
+        for name, text in (
+            ("snapshot.json", snapshot),
+            ("Replay.lean", source),
+            ("manifest.json", _canonical_json(manifest)),
+        ):
             path = directory / name
             if path.is_symlink():
-                raise ReplayVerificationError(f"refusing to overwrite symbolic link: {path}")
+                raise ReplayVerificationError(
+                    f"refusing to overwrite symbolic link: {path}"
+                )
             path.write_text(text, encoding="utf-8")
         return directory
 
-    def verify(self, project_root: str | Path | None = None, *, timeout: float = 60.0
-               ) -> ReplayVerification:
+    def verify(
+        self, project_root: str | Path | None = None, *, timeout: float = 60.0
+    ) -> ReplayVerification:
         """Rebuild imports, then kernel-check regenerated source within one timeout."""
         _validate_timeout(timeout)
         root = _project_root(project_root)
@@ -377,16 +430,27 @@ def _lean_ast(ast: _AST) -> str:
         return ".reciprocalIndex"
     if tag == "periodic":
         table = _array(ast[1], "periodic table")
-        return "(.periodic [" + ", ".join(_lean_rat(_rational(*pair)) for pair in table) + "])"
+        return (
+            "(.periodic ["
+            + ", ".join(_lean_rat(_rational(*pair)) for pair in table)
+            + "])"
+        )
     if tag == "divMonomial":
-        return (f"(.divMonomial {_lean_ast(ast[1])} "  # type: ignore[arg-type]
-                f"{_lean_rat(_rational(ast[2], ast[3]))} ({ast[4]} : Int))")
+        return (
+            f"(.divMonomial {_lean_ast(ast[1])} "  # type: ignore[arg-type]
+            f"{_lean_rat(_rational(ast[2], ast[3]))} ({ast[4]} : Int))"
+        )
     return f"(.{tag} {_lean_ast(ast[1])} {_lean_ast(ast[2])})"  # type: ignore[arg-type]
 
 
 def _roots(result: Fraction | None) -> tuple[str, ...]:
-    names = ("replay_check", "trace_consistent", "extraction_matches", "support_correspondence",
-             "extractor_unknown" if result is None else "replayed_standard_part")
+    names = (
+        "replay_check",
+        "trace_consistent",
+        "extraction_matches",
+        "support_correspondence",
+        "extractor_unknown" if result is None else "replayed_standard_part",
+    )
     return tuple(f"Hyperreals.GeneratedReplay.{name}" for name in names)
 
 
@@ -399,7 +463,9 @@ def _audit(output: str, roots: tuple[str, ...]) -> tuple[str, ...]:
     for name, dependencies, _ in reports:
         axioms = {item.strip() for item in dependencies.split(",") if item.strip()}
         if axioms - _ALLOWED_AXIOMS:
-            raise ReplayVerificationError(f"unexpected replay axioms: {sorted(axioms - _ALLOWED_AXIOMS)}")
+            raise ReplayVerificationError(
+                f"unexpected replay axioms: {sorted(axioms - _ALLOWED_AXIOMS)}"
+            )
         if name in found:
             raise ReplayVerificationError(f"duplicate theorem audit report: {name}")
         found[name] = axioms
@@ -409,9 +475,15 @@ def _audit(output: str, roots: tuple[str, ...]) -> tuple[str, ...]:
 
 
 def _validate_timeout(timeout: float) -> None:
-    if (type(timeout) not in (float, int) or not math.isfinite(timeout)
-            or timeout <= 0 or timeout > MAX_TIMEOUT):
-        raise ValueError(f"timeout must be positive, finite, and at most {MAX_TIMEOUT:g} seconds")
+    if (
+        type(timeout) not in (float, int)
+        or not math.isfinite(timeout)
+        or timeout <= 0
+        or timeout > MAX_TIMEOUT
+    ):
+        raise ValueError(
+            f"timeout must be positive, finite, and at most {MAX_TIMEOUT:g} seconds"
+        )
 
 
 def _run_lean(command: list[str], root: Path, deadline: float) -> str:
@@ -419,8 +491,14 @@ def _run_lean(command: list[str], root: Path, deadline: float) -> str:
     if remaining <= 0:
         raise ReplayVerificationError("Lean replay exceeded its total timeout")
     try:
-        process = subprocess.run(command, cwd=root, capture_output=True, text=True,
-                                 timeout=remaining, check=False)
+        process = subprocess.run(
+            command,
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=remaining,
+            check=False,
+        )
     except (OSError, subprocess.TimeoutExpired) as error:
         raise ReplayVerificationError(f"Lean replay failed: {error}") from error
     output = process.stdout + process.stderr
@@ -430,9 +508,18 @@ def _run_lean(command: list[str], root: Path, deadline: float) -> str:
 
 
 def _project_root(project_root: str | Path | None) -> Path:
-    root = Path(project_root).resolve() if project_root is not None else Path(__file__).resolve().parents[2]
-    if not (root / "lean-toolchain").is_file() or not (root / "Hyperreals/ResidueReplay.lean").is_file():
-        raise ReplayVerificationError("project_root must contain lean-toolchain and ResidueReplay.lean")
+    root = (
+        Path(project_root).resolve()
+        if project_root is not None
+        else Path(__file__).resolve().parents[2]
+    )
+    if (
+        not (root / "lean-toolchain").is_file()
+        or not (root / "Hyperreals/ResidueReplay.lean").is_file()
+    ):
+        raise ReplayVerificationError(
+            "project_root must contain lean-toolchain and ResidueReplay.lean"
+        )
     return root
 
 
@@ -441,23 +528,47 @@ def _sha(text: str) -> str:
 
 
 def _manifest(root: Path, snapshot: str, source: str) -> dict[str, Any]:
-    paths = sorted(set(root.glob("Hyperreals/*.lean")) | set(root.glob("*.lean")) | {
-        root / name for name in ("Hyperreals.lean", "lean-toolchain", "lakefile.toml",
-                                "lake-manifest.json", "src/hyperreals/replay.py",
-                                "src/hyperreals/verified_residue.py")
-        if (root / name).is_file()
-    })
-    return {"format": FORMAT + "-manifest", "version": VERSION,
-            "snapshot_sha256": _sha(snapshot), "source_sha256": _sha(source),
-            "provenance": {
-                "lean_toolchain": (root / "lean-toolchain").read_text(encoding="utf-8").strip(),
-                "files": {str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
-                          for path in paths},
-            }}
+    paths = sorted(
+        set(root.glob("Hyperreals/*.lean"))
+        | set(root.glob("*.lean"))
+        | {
+            root / name
+            for name in (
+                "Hyperreals.lean",
+                "lean-toolchain",
+                "lakefile.toml",
+                "lake-manifest.json",
+                "src/hyperreals/replay.py",
+                "src/hyperreals/verified_residue.py",
+            )
+            if (root / name).is_file()
+        }
+    )
+    return {
+        "format": FORMAT + "-manifest",
+        "version": VERSION,
+        "snapshot_sha256": _sha(snapshot),
+        "source_sha256": _sha(source),
+        "provenance": {
+            "lean_toolchain": (root / "lean-toolchain")
+            .read_text(encoding="utf-8")
+            .strip(),
+            "files": {
+                path.relative_to(root)
+                .as_posix(): hashlib.sha256(path.read_bytes())
+                .hexdigest()
+                for path in paths
+            },
+        },
+    }
 
 
-def verify_export(directory: str | Path, project_root: str | Path | None = None, *,
-                  timeout: float = 60.0) -> ReplayVerification:
+def verify_export(
+    directory: str | Path,
+    project_root: str | Path | None = None,
+    *,
+    timeout: float = 60.0,
+) -> ReplayVerification:
     """Validate artifact association, then regenerate the typed claim for Lean.
 
     Hashes bind the local artifact files to one snapshot and current project.
@@ -466,11 +577,22 @@ def verify_export(directory: str | Path, project_root: str | Path | None = None,
     _validate_timeout(timeout)
     root, directory = _project_root(project_root), Path(directory).resolve()
     try:
-        paths = [directory / name for name in ("snapshot.json", "Replay.lean", "manifest.json")]
-        if any(path.is_symlink() or not path.is_file()
-               or path.stat().st_size > 2 * MAX_JSON_BYTES for path in paths):
-            raise ValueError("replay artifacts must be bounded regular files, not symbolic links")
-        snapshot_text, source, manifest_text = (path.read_text(encoding="utf-8") for path in paths)
+        paths = [
+            directory / name
+            for name in ("snapshot.json", "Replay.lean", "manifest.json")
+        ]
+        if any(
+            path.is_symlink()
+            or not path.is_file()
+            or path.stat().st_size > 2 * MAX_JSON_BYTES
+            for path in paths
+        ):
+            raise ValueError(
+                "replay artifacts must be bounded regular files, not symbolic links"
+            )
+        snapshot_text, source, manifest_text = (
+            path.read_text(encoding="utf-8") for path in paths
+        )
         snapshot = ReplaySnapshot.from_json(snapshot_text)
         if snapshot_text != snapshot.to_json():
             raise ValueError("snapshot JSON is not in canonical export form")
@@ -486,7 +608,11 @@ def verify_export(directory: str | Path, project_root: str | Path | None = None,
         if manifest != _manifest(root, snapshot_text, source):
             raise ValueError("project provenance changed during verification")
         for path, text in zip(paths, (snapshot_text, source, manifest_text)):
-            if path.is_symlink() or not path.is_file() or path.read_text(encoding="utf-8") != text:
+            if (
+                path.is_symlink()
+                or not path.is_file()
+                or path.read_text(encoding="utf-8") != text
+            ):
                 raise ValueError("exported artifacts changed during verification")
     except (OSError, UnicodeError, ValueError) as error:
         raise ReplayVerificationError(f"invalid replay export: {error}") from error

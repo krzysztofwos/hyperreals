@@ -1,0 +1,3 @@
+# Replay verification requires the exporter's canonical JSON serialization.
+examples/**/snapshots/**/manifest.json
+examples/**/snapshots/**/snapshot.json
