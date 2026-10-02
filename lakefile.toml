@@ -1,6 +1,6 @@
 name = "hyperreals-formalization"
 version = "0.1.0"
-defaultTargets = ["Hyperreals"]
+defaultTargets = ["Hyperreals", "periodic_checker"]
 
 [leanOptions]
 pp.unicode.fun = true
@@ -13,4 +13,8 @@ rev = "v4.33.0"
 
 [[lean_lib]]
 name = "Hyperreals"
+
+[[lean_exe]]
+name = "periodic_checker"
+root = "PeriodicChecker"
 

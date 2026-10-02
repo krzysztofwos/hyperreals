@@ -5,4 +5,5 @@ import Hyperreals.Certificates
 import Hyperreals.EventuallyPeriodic
 import Hyperreals.StandardPart
 import Hyperreals.Counterexample
+import Hyperreals.Periodic
 import Hyperreals.RuntimeInvariants
