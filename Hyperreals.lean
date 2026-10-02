@@ -9,3 +9,4 @@ import Hyperreals.Periodic
 import Hyperreals.RuntimeInvariants
 import Hyperreals.LaurentTrace
 import Hyperreals.ResidueTrace
+import Hyperreals.ResidueReplay
