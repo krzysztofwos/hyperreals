@@ -15,32 +15,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install locked Python dependencies
+        run: |
+          python -m pip install uv==0.11.15
+          uv sync --locked --extra dev
+
+      - name: Install proof audit prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y ripgrep
+
       - name: Set up Lean and build formalization
         uses: leanprover/lean-action@v1
 
       - name: Audit Lean trust boundary
         run: ./scripts/check-lean-trust.sh
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
       - name: Test Python transport against the Lean executable
         run: |
-          python -m pip install -e ".[dev]"
           lake build periodic_checker laurent_checker residue_checker
-          python -m pytest tests/test_verified_periodic.py tests/test_verified_laurent.py tests/test_verified_residue.py tests/test_verified_residue_protocol.py tests/test_replay.py tests/test_replay_capture.py tests/test_infinitesimal_case.py -v
+          uv run --locked --extra dev python -m pytest tests/test_verified_periodic.py tests/test_verified_laurent.py tests/test_verified_residue.py tests/test_verified_residue_protocol.py tests/test_replay.py tests/test_replay_capture.py tests/test_infinitesimal_case.py -v
 
       - name: Kernel-check the infinitesimal and delayed-choice artifacts
         run: |
-          python scripts/verify_replay.py examples/infinitesimal/snapshots/quotient --timeout 180
-          python scripts/verify_replay.py examples/infinitesimal/snapshots/error --timeout 180
-          python scripts/verify_replay.py examples/infinitesimal/snapshots/after-odd-choice --timeout 180
-          python scripts/verify_replay.py examples/infinitesimal/snapshots/adaptive-backward --timeout 180
-          python scripts/verify_replay.py examples/infinitesimal/snapshots/adaptive-forward --timeout 180
-          python scripts/verify_replay.py examples/delayed-choice/snapshots/early-fused --timeout 180
-          python scripts/verify_replay.py examples/delayed-choice/snapshots/partial-raw --timeout 180
-          python scripts/verify_replay.py examples/delayed-choice/snapshots/final-phase --timeout 180
+          uv run --locked --extra dev python scripts/verify_replay.py examples/infinitesimal/snapshots/quotient --timeout 180
+          uv run --locked --extra dev python scripts/verify_replay.py examples/infinitesimal/snapshots/error --timeout 180
+          uv run --locked --extra dev python scripts/verify_replay.py examples/infinitesimal/snapshots/after-odd-choice --timeout 180
+          uv run --locked --extra dev python scripts/verify_replay.py examples/infinitesimal/snapshots/adaptive-backward --timeout 180
+          uv run --locked --extra dev python scripts/verify_replay.py examples/infinitesimal/snapshots/adaptive-forward --timeout 180
+          uv run --locked --extra dev python scripts/verify_replay.py examples/delayed-choice/snapshots/early-fused --timeout 180
+          uv run --locked --extra dev python scripts/verify_replay.py examples/delayed-choice/snapshots/partial-raw --timeout 180
+          uv run --locked --extra dev python scripts/verify_replay.py examples/delayed-choice/snapshots/final-phase --timeout 180
 
   test:
     runs-on: ${{ matrix.os }}
@@ -48,29 +58,28 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version-file: ".python-version"
 
-      - name: Install dependencies
+      - name: Install locked Python dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          python -m pip install uv==0.11.15
+          uv sync --locked --extra dev
 
       - name: Run type checking with mypy
-        run: mypy src/hyperreals --ignore-missing-imports
+        run: uv run --locked --extra dev mypy src/hyperreals --ignore-missing-imports
 
       - name: Run linting with ruff
-        run: ruff check src/hyperreals
+        run: uv run --locked --extra dev ruff check src/hyperreals
 
       - name: Run tests with pytest
-        run: pytest tests/ -v --tb=short
+        run: uv run --locked --extra dev pytest tests/ -v --tb=short
 
   build:
     runs-on: ubuntu-latest
@@ -80,7 +89,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version-file: ".python-version"
 
       - name: Install build tools
         run: pip install --upgrade pip build

@@ -8,10 +8,10 @@ The main entry point is `LeanResidueSystem`. The broader Python analytic and SAT
 
 ## An adaptive infinitesimal calculation
 
-Install the Python dependencies and build the exact native checker from this checkout:
+Python 3.14 is the supported version, pinned in `.python-version` for local development and CI. Install the locked dependencies and build the exact native checker from this checkout:
 
 ```bash
-uv sync
+uv sync --locked --extra dev
 lake build residue_checker
 ```
 
@@ -121,12 +121,12 @@ The [comparative benchmark](benchmarks/README.md) records exact agreement and ex
 
 ## Other APIs
 
-| API | Scope | Status |
-| --- | --- | --- |
-| `LeanResidueSystem` | Exact finite Laurent expressions with arbitrary finite periodic coefficients | Main executable core with Lean refinement proofs and optional kernel replay |
-| `LeanLaurentSystem` | Same arithmetic with even and odd coefficients | Earlier verified core, built with `lake build laurent_checker` |
-| `LeanPeriodicSystem` | Rational constants and alternating signs with arithmetic, no `n`, `1/n`, division, or standard parts | Smaller verified comparison core, built with `lake build periodic_checker` |
-| `HyperrealSystem` | Analytic expressions, approximate series/asymptotic analysis, and SAT-assisted choices | Experimental Python frontend, not a verified implementation of the Lean semantics |
+| API                  | Scope                                                                                                | Status                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `LeanResidueSystem`  | Exact finite Laurent expressions with arbitrary finite periodic coefficients                         | Main executable core with Lean refinement proofs and optional kernel replay       |
+| `LeanLaurentSystem`  | Same arithmetic with even and odd coefficients                                                       | Earlier verified core, built with `lake build laurent_checker`                    |
+| `LeanPeriodicSystem` | Rational constants and alternating signs with arithmetic, no `n`, `1/n`, division, or standard parts | Smaller verified comparison core, built with `lake build periodic_checker`        |
+| `HyperrealSystem`    | Analytic expressions, approximate series/asymptotic analysis, and SAT-assisted choices               | Experimental Python frontend, not a verified implementation of the Lean semantics |
 
 The Lean-backed APIs send unsimplified expression trees to their native checkers. Missing executables raise an error, with no fallback to Python analysis. Installed packages can pass an explicit `checker_path`. Arithmetic and comparisons between different systems are rejected.
 
@@ -195,13 +195,13 @@ uv run pytest tests/test_verified_residue.py tests/test_replay.py tests/test_rep
 
 The audit rejects unfinished proofs and project-local axioms and permits only the standard dependencies `propext`, `Classical.choice`, and `Quot.sound`. Classical choice is part of the completion-existence argument, not an executable construction of the completion. See [formalization.md](formalization.md) for the semantic definitions, theorem map, trust boundaries, and open obligations.
 
-| Location | Contents |
-| --- | --- |
-| `Hyperreals/` | Semantic specification, completion theorems, and verified executable cores |
-| `src/hyperreals/verified_residue.py` and `src/hyperreals/replay.py` | Main Python adapter and snapshot replay |
-| `src/hyperreals/hyperreal.py`, `sequence/`, and `series.py` | Experimental analytic frontend |
-| `src/hyperreals/algebra.py`, `sat.py`, and `ultrafilter.py` | Experimental set algebra and partial ultrafilter state |
-| `scripts/`, `examples/`, and `benchmarks/` | Runnable examples, replay artifacts, and bounded evaluation |
+| Location                                                            | Contents                                                                   |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `Hyperreals/`                                                       | Semantic specification, completion theorems, and verified executable cores |
+| `src/hyperreals/verified_residue.py` and `src/hyperreals/replay.py` | Main Python adapter and snapshot replay                                    |
+| `src/hyperreals/hyperreal.py`, `sequence/`, and `series.py`         | Experimental analytic frontend                                             |
+| `src/hyperreals/algebra.py`, `sat.py`, and `ultrafilter.py`         | Experimental set algebra and partial ultrafilter state                     |
+| `scripts/`, `examples/`, and `benchmarks/`                          | Runnable examples, replay artifacts, and bounded evaluation                |
 
 ## License
 

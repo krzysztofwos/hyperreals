@@ -7,8 +7,12 @@ cd "$project_root"
 
 lean_sources=(Hyperreals.lean PeriodicChecker.lean LaurentChecker.lean ResidueChecker.lean Hyperreals/*.lean)
 
-command -v rg >/dev/null
-command -v python3 >/dev/null
+for dependency in rg python3 lake; do
+  if ! command -v "$dependency" >/dev/null; then
+    echo "Lean trust audit failed: required command '$dependency' is not installed." >&2
+    exit 1
+  fi
+done
 
 if rg -n '\b(sorry|admit)\b' "${lean_sources[@]}"; then
   echo "Lean trust audit failed: unfinished proof found." >&2
