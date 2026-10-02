@@ -1,0 +1,94 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Lean and build formalization
+        uses: leanprover/lean-action@v1
+
+      - name: Audit Lean trust boundary
+        run: ./scripts/check-lean-trust.sh
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Test Python transport against the Lean executable
+        run: |
+          python -m pip install -e ".[dev]"
+          lake build periodic_checker laurent_checker residue_checker
+          python -m pytest tests/test_verified_periodic.py tests/test_verified_laurent.py tests/test_verified_residue.py tests/test_verified_residue_protocol.py tests/test_replay.py tests/test_replay_capture.py tests/test_infinitesimal_case.py -v
+
+      - name: Kernel-check the infinitesimal and delayed-choice artifacts
+        run: |
+          python scripts/verify_replay.py examples/infinitesimal/snapshots/quotient --timeout 180
+          python scripts/verify_replay.py examples/infinitesimal/snapshots/error --timeout 180
+          python scripts/verify_replay.py examples/infinitesimal/snapshots/after-odd-choice --timeout 180
+          python scripts/verify_replay.py examples/infinitesimal/snapshots/adaptive-backward --timeout 180
+          python scripts/verify_replay.py examples/infinitesimal/snapshots/adaptive-forward --timeout 180
+          python scripts/verify_replay.py examples/delayed-choice/snapshots/early-fused --timeout 180
+          python scripts/verify_replay.py examples/delayed-choice/snapshots/partial-raw --timeout 180
+          python scripts/verify_replay.py examples/delayed-choice/snapshots/final-phase --timeout 180
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run type checking with mypy
+        run: mypy src/hyperreals --ignore-missing-imports
+
+      - name: Run linting with ruff
+        run: ruff check src/hyperreals
+
+      - name: Run tests with pytest
+        run: pytest tests/ -v --tb=short
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: pip install --upgrade pip build
+
+      - name: Build package
+        run: python -m build
+
+      - name: Check package
+        run: |
+          pip install twine
+          twine check dist/*
