@@ -365,6 +365,16 @@ theorem support_correspondence (U : Ultrafilter ℕ)
             source += """theorem extractor_unknown : standardPart snapshot.support snapshot.expression = none :=
   Snapshot.unknown_result replay_check rfl
 
+theorem no_common_standard_part (r : ℝ) :
+    ¬ ∀ C : Completion snapshot.commitments,
+      NearStandardAt C.ultrafilter snapshot.expression.denote r :=
+  Snapshot.no_common_standardPart replay_check rfl r
+
+theorem failure_classified :
+    (∃ residue, diagnoseStandardPart snapshot.support snapshot.expression = .divergent residue) ∨
+      ∃ r q s v, diagnoseStandardPart snapshot.support snapshot.expression = .disagreement r q s v :=
+  Snapshot.failure_classified replay_check rfl
+
 """
         else:
             rational = _lean_rat(self.result)
@@ -444,13 +454,15 @@ def _lean_ast(ast: _AST) -> str:
 
 
 def _roots(result: Fraction | None) -> tuple[str, ...]:
-    names = (
+    names: tuple[str, ...] = (
         "replay_check",
         "trace_consistent",
         "extraction_matches",
         "support_correspondence",
         "extractor_unknown" if result is None else "replayed_standard_part",
     )
+    if result is None:
+        names += ("no_common_standard_part", "failure_classified")
     return tuple(f"Hyperreals.GeneratedReplay.{name}" for name in names)
 
 
@@ -540,6 +552,7 @@ def _manifest(root: Path, snapshot: str, source: str) -> dict[str, Any]:
                 "lake-manifest.json",
                 "src/hyperreals/replay.py",
                 "src/hyperreals/verified_residue.py",
+                "src/hyperreals/polynomial.py",
             )
             if (root / name).is_file()
         }

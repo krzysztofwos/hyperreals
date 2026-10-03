@@ -1,4 +1,5 @@
 import Hyperreals.ResidueTrace
+import Hyperreals.ResidueLimitDiagnostic
 
 /-!
 # Replay snapshots for concrete finite-period sessions
@@ -74,12 +75,33 @@ theorem Snapshot.standardPart_sound {snapshot : Snapshot} {r : Rat}
   run_standardPart_sound (Snapshot.checked_run hcheck)
     ((Snapshot.checked_result hcheck).trans hresult)
 
-/-- Unknown certifies only the executable extraction result. It does not say
-that a later refinement or an individual completion cannot have a standard part. -/
+/-- The executable rejection recorded by a successful replay. -/
 theorem Snapshot.unknown_result {snapshot : Snapshot}
     (hcheck : snapshot.check = true) (hresult : snapshot.result = none) :
     standardPart snapshot.support snapshot.expression = none :=
   (Snapshot.checked_result hcheck).trans hresult
+
+/-- Rejection rules out a common finite real standard part across all completions
+of the actual trace. Individual completions or later refinements can still have one. -/
+theorem Snapshot.no_common_standardPart {snapshot : Snapshot}
+    (hcheck : snapshot.check = true) (hresult : snapshot.result = none) (r : ℝ) :
+    ¬ ∀ C : Completion snapshot.commitments,
+      NearStandardAt C.ultrafilter snapshot.expression.denote r := by
+  intro hall
+  apply standardPart_none_no_common_real (snapshot.check_iff.mp hcheck).1
+    (snapshot.check_iff.mp hcheck).2.1 (Snapshot.unknown_result hcheck hresult) r
+  intro U hfree hsupport
+  apply hall ⟨U, hfree, ?_⟩
+  rintro A ⟨observation, hmem, rfl⟩
+  exact (Snapshot.support_mem_iff hcheck U hfree).mp hsupport observation hmem
+
+/-- Every replayed rejection is classified by a proved mathematical reason. -/
+theorem Snapshot.failure_classified {snapshot : Snapshot}
+    (hcheck : snapshot.check = true) (hresult : snapshot.result = none) :
+    (∃ residue, diagnoseStandardPart snapshot.support snapshot.expression = .divergent residue) ∨
+      ∃ r q s v, diagnoseStandardPart snapshot.support snapshot.expression = .disagreement r q s v :=
+  (standardPart_none_iff_diagnostic_failure (snapshot.check_iff.mp hcheck).1
+    (snapshot.check_iff.mp hcheck).2.1).mp (Snapshot.unknown_result hcheck hresult)
 
 #print axioms Hyperreals.Residue.Replay.Snapshot.check_iff
 #print axioms Hyperreals.Residue.Replay.Snapshot.checked_run
@@ -88,5 +110,7 @@ theorem Snapshot.unknown_result {snapshot : Snapshot}
 #print axioms Hyperreals.Residue.Replay.Snapshot.support_mem_iff
 #print axioms Hyperreals.Residue.Replay.Snapshot.standardPart_sound
 #print axioms Hyperreals.Residue.Replay.Snapshot.unknown_result
+#print axioms Hyperreals.Residue.Replay.Snapshot.no_common_standardPart
+#print axioms Hyperreals.Residue.Replay.Snapshot.failure_classified
 
 end Hyperreals.Residue.Replay

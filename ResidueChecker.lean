@@ -1,4 +1,5 @@
 import Hyperreals.ResidueRuntimeCore
+import Hyperreals.ResidueLimitDiagnosticCore
 import Lean.Data.Json
 
 /-! JSON transport for the proved arbitrary-period Laurent computation functions.
@@ -58,12 +59,28 @@ private def supportJson (support : Support) : Json :=
 private def rationalJson (value : Rat) : Json :=
   Json.arr #[Json.str (toString value.num), Json.str (toString value.den)]
 
+private def diagnosticJson (result : LimitDiagnostic) : Json :=
+  let fields := match result with
+    | .finite value => [("kind", Json.str "finite"), ("residues", Json.arr #[]),
+        ("limits", Json.arr #[rationalJson value])]
+    | .divergent residue => [("kind", Json.str "divergent"),
+        ("residues", Json.arr #[Json.str (toString residue)]), ("limits", Json.arr #[])]
+    | .disagreement left leftValue right rightValue => [("kind", Json.str "disagreement"),
+        ("residues", Json.arr #[Json.str (toString left), Json.str (toString right)]),
+        ("limits", Json.arr #[rationalJson leftValue, rationalJson rightValue])]
+    | .invalidInput => [("kind", Json.str "invalidInput")]
+  Json.mkObj fields
+
 private def handleRequest (request : Json) : Except String Json := do
   let support ← parseSupport (← request.getObjVal? "support")
   unless support.nonempty do throw "input support must be nonempty"
   let operator ← (← request.getObjVal? "op").getStr?
   let left ← parseExpr (← request.getObjVal? "left")
   unless left.valid do throw "invalid expression"
+  if operator = "diagnoseStandardPart" then
+    return Json.mkObj [("diagnostic", diagnosticJson (diagnoseStandardPart support left)),
+      ("period", Json.str (toString (Nat.lcm support.length left.period))),
+      ("support", supportJson support)]
   if operator = "standardPart" then
     let value := match standardPart support left with
       | some value => rationalJson value
@@ -72,7 +89,7 @@ private def handleRequest (request : Json) : Except String Json := do
   let comparison ← match operator with
     | "lt" => pure Hyperreals.Periodic.Comparison.lt
     | "eq" => pure Hyperreals.Periodic.Comparison.eq
-    | _ => throw "op must be lt, eq, or standardPart"
+    | _ => throw "op must be lt, eq, standardPart, or diagnoseStandardPart"
   let right ← parseExpr (← request.getObjVal? "right")
   unless right.valid do throw "invalid expression"
   let compiled := compile comparison left right

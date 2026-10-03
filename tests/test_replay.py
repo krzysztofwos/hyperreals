@@ -191,6 +191,7 @@ def test_numeric_and_unknown_sources_use_only_fixed_kernel_proofs():
         assert "theorem support_correspondence" in source
     assert "theorem replayed_standard_part" in numeric
     assert "theorem extractor_unknown" in unknown
+    assert "theorem no_common_standard_part (r : ℝ)" in unknown
     assert "theorem replayed_standard_part" not in unknown
 
 
