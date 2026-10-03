@@ -39,9 +39,9 @@ jobs:
       - name: Test Python transport against the Lean executable
         run: |
           lake build periodic_checker laurent_checker residue_checker
-          uv run --locked --extra dev python -m pytest tests/test_verified_periodic.py tests/test_verified_laurent.py tests/test_verified_residue.py tests/test_verified_residue_protocol.py tests/test_replay.py tests/test_replay_capture.py tests/test_infinitesimal_case.py -v
+          uv run --locked --extra dev python -m pytest tests/ -v
 
-      - name: Kernel-check the infinitesimal and delayed-choice artifacts
+      - name: Kernel-check the saved replay artifacts
         run: |
           uv run --locked --extra dev python scripts/verify_replay.py examples/infinitesimal/snapshots/quotient --timeout 180
           uv run --locked --extra dev python scripts/verify_replay.py examples/infinitesimal/snapshots/error --timeout 180
@@ -51,6 +51,9 @@ jobs:
           uv run --locked --extra dev python scripts/verify_replay.py examples/delayed-choice/snapshots/early-fused --timeout 180
           uv run --locked --extra dev python scripts/verify_replay.py examples/delayed-choice/snapshots/partial-raw --timeout 180
           uv run --locked --extra dev python scripts/verify_replay.py examples/delayed-choice/snapshots/final-phase --timeout 180
+          uv run --locked --extra dev python scripts/verify_replay.py examples/domain-infinitesimal/snapshots/domain-fallback --timeout 180
+          uv run --locked --extra dev python scripts/verify_replay.py examples/domain-infinitesimal/snapshots/domain-nonzero --timeout 180
+          uv run --locked --extra dev python scripts/verify_replay.py examples/domain-infinitesimal/snapshots/domain-unrefined --timeout 180
 
   test:
     runs-on: ${{ matrix.os }}

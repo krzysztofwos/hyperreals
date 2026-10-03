@@ -1,0 +1,48 @@
+{
+  "case": "observation-dependent-infinitesimal-domain",
+  "h": "periodic([0, 1]) * epsilon",
+  "represented_reciprocal": "periodic([0, 1]) * n",
+  "ordinary_derivative": "12",
+  "scope": "The formal domain program proves that the selected step is nonzero and the returned expression denotes its literal cubic quotient in every completion of the accepted trace. The represented reciprocal is justified only after the negative observation. This does not add general division to the grammar. Replay checks exported instances. Python-to-Lean capture is tested, not proved.",
+  "snapshots": [
+    {
+      "name": "domain-fallback",
+      "query": "h = 0",
+      "choice": true,
+      "selected_step": "epsilon^2",
+      "support": [true, false],
+      "accepted_observations": 1,
+      "result": "12",
+      "verification": "kernel-checked",
+      "snapshot_sha256": "14520f731e5961865a679d33f2757534ce2a03cc72ac439f191648ec3e8695ef",
+      "source_sha256": "f161f3a80b2d49b92e45c38078dacfbb83fafc7a7dced42cf3fbe2aa7bb07a12",
+      "axioms": ["Classical.choice", "Quot.sound", "propext"],
+      "lean_output": "'Hyperreals.GeneratedReplay.replay_check' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.trace_consistent' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.extraction_matches' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.support_correspondence' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.replayed_standard_part' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+    },
+    {
+      "name": "domain-nonzero",
+      "query": "h = 0",
+      "choice": false,
+      "selected_step": "h",
+      "support": [false, true],
+      "accepted_observations": 1,
+      "result": "12",
+      "verification": "kernel-checked",
+      "snapshot_sha256": "22b8f0adacde7418f2ff4b977fac3077861eaf372d7de8fc82147857769b3364",
+      "source_sha256": "cd524e2e32968ce8490024aab504cb1b2fa4226ea8da4cfb74dd1cfb6a8ab29a",
+      "axioms": ["Classical.choice", "Quot.sound", "propext"],
+      "lean_output": "'Hyperreals.GeneratedReplay.replay_check' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.trace_consistent' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.extraction_matches' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.support_correspondence' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.replayed_standard_part' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+    },
+    {
+      "name": "domain-unrefined",
+      "support": [true],
+      "accepted_observations": 0,
+      "result": null,
+      "verification": "kernel-checked",
+      "snapshot_sha256": "06fdaf87db01aa1fd4d9f15e696f2a697705c7602892f8233881b8dbff297fc0",
+      "source_sha256": "144613824251def185fc24eab3c91c0d212836eebea3bce806f3b7513718c5ea",
+      "axioms": ["Classical.choice", "Quot.sound", "propext"],
+      "lean_output": "'Hyperreals.GeneratedReplay.replay_check' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.trace_consistent' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.extraction_matches' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.support_correspondence' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.extractor_unknown' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.no_common_standard_part' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.failure_classified' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+    }
+  ]
+}

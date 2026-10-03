@@ -55,6 +55,7 @@ audited_modules=(
   Hyperreals/ResidueLimitCompleteness.lean
   Hyperreals/ResidueLimitDiagnostic.lean
   Hyperreals/PolynomialDifferentiation.lean
+  Hyperreals/DomainInfinitesimal.lean
 )
 
 for module in "${audited_modules[@]}"; do
