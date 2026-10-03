@@ -1,23 +1,94 @@
-\documentclass[11pt]{article}
+\documentclass[11pt,a4paper]{article}
 
-% arXiv-friendly preamble (no venue-specific metadata)
-\usepackage[margin=1in]{geometry}
-\usepackage[numbers]{natbib}
-\usepackage{amsmath,amsthm,amssymb,mathtools}
-\usepackage{booktabs}
-\usepackage{flafter}
+% A restrained, single-column preprint layout. All artwork is native LaTeX.
+\usepackage[T1]{fontenc}
+\usepackage[margin=27mm,top=24mm,bottom=25mm,headheight=16pt,headsep=9mm]{geometry}
+\usepackage{newpxtext}
+\usepackage{amsmath,amsthm,mathtools}
+\usepackage{newpxmath}
+\usepackage[scaled=0.94]{sourcesans}
+\usepackage[scaled=0.94]{inconsolata}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{booktabs,array}
 \usepackage{microtype}
-\setlength{\emergencystretch}{2em}
 \usepackage{xcolor}
 \usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{flafter}
+\usepackage{needspace}
+\usepackage{etoolbox}
+\usepackage{xurl}
 \usepackage{hyperref}
-\usepackage{array}
+
+\definecolor{ink}{HTML}{263E4C}
+\definecolor{muted}{HTML}{53636C}
+\definecolor{rulegray}{HTML}{C9D1D5}
+\definecolor{wash}{HTML}{F3F6F7}
+\definecolor{accent}{HTML}{295E73}
+\setlength{\emergencystretch}{2em}
+\linespread{1.035}
+\setlength{\parindent}{1.2em}
+\setlength{\parskip}{0.15em plus 0.06em minus 0.03em}
+\setlength{\textfloatsep}{18pt plus 3pt minus 3pt}
+\setlength{\intextsep}{16pt plus 3pt minus 3pt}
+\widowpenalty=10000
+\clubpenalty=10000
+\displaywidowpenalty=10000
+\raggedbottom
+
+\titleformat{\section}{\Large\sffamily\bfseries\color{ink}}{\thesection}{0.65em}{}
+\titleformat{\subsection}{\large\sffamily\bfseries\color{ink}}{\thesubsection}{0.65em}{}
+\titlespacing*{\section}{0pt}{2.1ex plus 0.8ex minus 0.3ex}{0.8ex plus 0.2ex}
+\titlespacing*{\subsection}{0pt}{1.7ex plus 0.5ex minus 0.2ex}{0.55ex plus 0.2ex}
+\pretocmd{\section}{\Needspace{7\baselineskip}}{}{}
+\pretocmd{\subsection}{\Needspace{5\baselineskip}}{}{}
+\setlist[enumerate]{leftmargin=1.7em,labelsep=0.55em}
+\captionsetup{font=small,labelfont={sf,bf,color=ink},labelsep=period,skip=8pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily\color{muted}Finite observations and infinitesimal computation}
+\fancyhead[R]{\small\sffamily\color{muted}Krzysztof Wo\'s}
+\fancyfoot[C]{\small\sffamily\color{muted}\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\headrule}{{\color{rulegray}\hrule width\headwidth height\headrulewidth\vskip-\headrulewidth}}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\small\sffamily\color{muted}\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+\lstset{
+  language=Python,
+  basicstyle=\small\ttfamily,
+  keywordstyle=\bfseries\color{accent},
+  commentstyle=\itshape\color{muted},
+  stringstyle=\color{accent},
+  backgroundcolor=\color{wash},
+  frame=l,
+  rulecolor=\color{accent},
+  framerule=1.2pt,
+  framesep=9pt,
+  xleftmargin=10pt,
+  xrightmargin=4pt,
+  aboveskip=12pt,
+  belowskip=12pt,
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true,
+  upquote=true,
+  breaklines=true
+}
+\urlstyle{tt}
+\renewcommand{\bibfont}{\small}
+\setlength{\bibsep}{6pt plus 2pt minus 1pt}
 
 \hypersetup{
   colorlinks=true,
-  linkcolor=blue,
-  citecolor=blue,
-  urlcolor=blue,
+  linkcolor=accent,
+  citecolor=accent,
+  urlcolor=accent,
   bookmarksopen=true,
   bookmarksnumbered=true,
   pdfpagemode=UseOutlines,
@@ -28,12 +99,20 @@
 }
 
 % =============== Theorem environments ===============
+\newtheoremstyle{result}{11pt}{9pt}{\itshape}{}%
+  {\bfseries\color{ink}}{.}{0.5em}{}
+\theoremstyle{result}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
-\newtheorem{definition}{Definition}
 \newtheorem{proposition}{Proposition}
 \newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
 \newtheorem{remark}{Remark}
+\BeforeBeginEnvironment{theorem}{\Needspace{8\baselineskip}}
+\BeforeBeginEnvironment{corollary}{\Needspace{8\baselineskip}}
+\BeforeBeginEnvironment{definition}{\Needspace{4\baselineskip}}
+\BeforeBeginEnvironment{proposition}{\Needspace{4\baselineskip}}
 
 % =============== Mathematical notation ===============
 \newcommand{\N}{\mathbb{N}}
@@ -45,22 +124,40 @@
 \newcommand{\sthat}{\widehat{\st}}
 \newcommand{\code}[1]{\texttt{#1}}
 
-% =============== Title & Authors ===============
-\title{Computing with Finite Observations of Non-Constructive Objects: \\
-A Verified Ultrafilter Interface}
-
-\author{Krzysztof Wo\'s\\The University of Tokyo\\Graduate School of Information Science and Technology\\Department of Creative Informatics}
-\date{}
-
+% =============== Title & Abstract ===============
 \begin{document}
-\maketitle
+\thispagestyle{plain}
 
-\begin{abstract}
+\begin{flushleft}
+  {\fontsize{23}{27}\selectfont\color{ink}
+    Computing with Finite Observations\\
+    of Non-Constructive Objects\par}
+  \vspace{7pt}
+  {\Large\sffamily\color{muted}A Verified Ultrafilter Interface\par}
+  \vspace{18pt}
+  {\large Krzysztof Wo\'s\par}
+  \vspace{4pt}
+  {\small\color{muted}The University of Tokyo\\
+    Graduate School of Information Science and Technology\\
+    Department of Creative Informatics\par}
+\end{flushleft}
+\vspace{6pt}
+{\color{rulegray}\hrule height 0.5pt}
+\vspace{12pt}
+
+\begingroup
+\small
+\setlength{\parindent}{0pt}
+\noindent{\sffamily\bfseries\color{ink}Abstract}\par\smallskip
 Can a finite program compute with infinitesimals while leaving their non-constructive mathematical interpretation unspecified? We study an interface that records only observations made during execution. Each accepted observation preserves the existence of a free-ultrafilter completion. Lean 4 proofs connect an executable periodic Laurent language to these classical completions and show that accepted finite adaptive programs can be interpreted using one fixed completion throughout the run. Whenever standard-part extraction succeeds, its ordinary rational result is shared by every remaining completion. A worked program uses a completion-dependent observation to select a forward or backward difference quotient with $\varepsilon=1/n$. The quotients lie on opposite sides of $12$, yet every accepted execution has standard part $12$, the ordinary derivative of $x^3$ at $2$. Its denominator is positive, nonzero, and infinitesimal in every free completion. The implementation computes exact finite syntax without constructing an ultrafilter, choosing a small floating-point step, or truncating a series. Kernel replay checks exported trace and extraction instances. The contribution is a precise operational bridge for this restricted language. Classical existence does not provide an algorithm for arbitrary observations, and the correspondence between Python capture and the intended external computation remains outside the proof.
-\end{abstract}
-
-\paragraph{Keywords.}
+\par
+\medskip
+\noindent{\sffamily\bfseries\color{ink}Keywords}\enspace
 Non-constructive mathematics, finite observation, infinitesimals, ultrafilters, operational semantics, Lean.
+\par\endgroup
+\vspace{10pt}
+{\color{rulegray}\hrule height 0.5pt}
+\vspace{5pt}
 
 \section{Introduction}
 
@@ -103,8 +200,9 @@ Here $Q>12$ means that the set of indices satisfying the inequality belongs to t
 
 This example makes the fraction interpretation precise. The finite increments $\Delta y$ and $\Delta x$ have a literal quotient. Its standard part is the derivative. The quotient is not equal to the derivative before taking standard part. No rule allowing arbitrary manipulation of differential notation is assumed.
 
+\Needspace{12\baselineskip}
 The public interface expresses the original quotient directly:
-\begin{verbatim}
+\begin{lstlisting}
 from hyperreals import LeanResidueSystem
 
 system = LeanResidueSystem()
@@ -112,19 +210,43 @@ epsilon = system.infinitesimal()
 x = system.constant(2)
 quotient = ((x + epsilon)**3 - x**3) / epsilon
 assert quotient.standard_part() == 12
-\end{verbatim}
+\end{lstlisting}
 The returned value is an exact rational. The expression is sent to the verified normalizer without a precomputed derivative or limit certificate. Lean proves the sequence identity, positivity and infinitesimal properties, the completion-relative limit, and the ordinary derivative in \code{InfinitesimalCase}. The theorem \path{quotientExpr_denote} connects the actual expression tree to the stated quotient, and \path{quotient_extracts} checks the executable result by kernel reduction. For a literal field interpretation, \path{hyperreal_quotient_standardPart} proves the same standard-part equality in Mathlib's existing hyperreal field, using its distinguished positive infinitesimal. The companion strict-inequality theorem proves that this field element is greater than $12$. The script \path{scripts/infinitesimal_case.py} runs the public API and exports replayable instances.
 
-The forward calculation alone requires no discretionary comparison. To connect infinitesimal computation with the observation interface, consider a program that first queries $a(n)=(-1)^n<0$. Both answers are admissible from the initial state. A true answer retains the odd indices and selects the backward quotient. A false answer retains the even indices and selects the forward quotient:
-\[
-  Q_- = \frac{8-(2-\varepsilon)^3}{\varepsilon},\qquad
-  Q_+ = \frac{(2+\varepsilon)^3-8}{\varepsilon}.
-\]
-For $n>0$, exact algebra gives
-\[
-  Q_-(n)=12-\frac6n+\frac1{n^2}<12
-  <12+\frac6n+\frac1{n^2}=Q_+(n).
-\]
+The forward calculation alone requires no discretionary comparison. To connect infinitesimal computation with the observation interface, consider a program that first queries $a(n)=(-1)^n<0$. Both answers are admissible from the initial state. A true answer retains the odd indices and selects the backward quotient. A false answer retains the even indices and selects the forward quotient. Figure~\ref{fig:adaptive-quotients} shows the two calculations and their common standard part.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+    >=Latex,
+    flow/.style={->,draw=muted,line width=0.65pt},
+    branch/.style={draw=rulegray,fill=wash,rounded corners=2pt,
+      text width=0.405\linewidth,align=center,inner sep=10pt},
+    answer/.style={font=\small\sffamily,color=muted,fill=white,inner sep=3pt}
+  ]
+    \node[font=\sffamily\bfseries\color{ink},align=center] (query)
+      {Observe $(-1)^n<0$};
+    \node[branch,below left=13mm and -12mm of query] (backward)
+      {{\sffamily\bfseries\color{ink}Backward quotient}\\[6pt]
+       $\displaystyle Q_- = \frac{8-(2-\varepsilon)^3}{\varepsilon}$\\[8pt]
+       $\displaystyle 12-\frac6n+\frac1{n^2}<12$};
+    \node[branch,below right=13mm and -12mm of query] (forward)
+      {{\sffamily\bfseries\color{ink}Forward quotient}\\[6pt]
+       $\displaystyle Q_+ = \frac{(2+\varepsilon)^3-8}{\varepsilon}$\\[8pt]
+       $\displaystyle 12+\frac6n+\frac1{n^2}>12$};
+    \node[below=53mm of query,align=center] (result)
+      {{\small\sffamily\color{muted}Common ordinary result}\\[4pt]
+       $\displaystyle\st(Q_-)=\st(Q_+)=12=f'(2)$};
+    \draw[flow] (query.south) -- ++(0,-4mm) -| node[answer,pos=0.75,above]
+      {true: odd indices} (backward.north);
+    \draw[flow] (query.south) -- ++(0,-4mm) -| node[answer,pos=0.75,above]
+      {false: even indices} (forward.north);
+    \draw[flow] (backward.south) |- (result.west);
+    \draw[flow] (forward.south) |- (result.east);
+  \end{tikzpicture}
+  \caption{Two accepted runs, different infinitesimal errors, one ordinary derivative. Here $\varepsilon(n)=1/n$ and the displayed inequalities hold for $n>0$. Each branch has its own compatible free completions. The common output does not require one completion shared by both branches.}
+  \label{fig:adaptive-quotients}
+\end{figure}
 The branch changes the computed quantity, including the sign of its error. Nevertheless, both errors are infinitesimal. Every compatible completion of either accepted run gives standard part $12$. The observation is a caller-proposed polarity checked for consistency, not an evaluation at a sampled index or an algorithm deciding membership in a preselected ultrafilter.
 
 \begin{corollary}[Adaptive derivative extraction]\label{cor:adaptive-derivative}
@@ -177,7 +299,7 @@ For a sequence $x$, completion $\PUF$, and $c\in\R$, define
 \]
 This says that $x$ converges to $c$ along $\PUF$. In the ultrapower interpretation, $x-c$ is infinitesimal and $c$ is the standard part of the represented hyperreal. Lean defines \code{NearStandardAt} with \code{Filter.Tendsto} and proves uniqueness as \code{nearStandardAt\_unique}.
 
-\begin{proposition}[Ordinary limits are completion invariant]\label{prop:series-sound}
+\begin{proposition}[Ordinary limits are completion invariant]\label{prop:ordinary-limit}
   If $x(n)\to c$ ordinarily, then $\operatorname{NearStandardAt}(\PUF,x,c)$ for every free completion $\PUF$.
 \end{proposition}
 \begin{proof}
@@ -189,6 +311,8 @@ The Lean theorem is \code{cofiniteLimit\_completion\_invariant}, where \code{Cof
 \subsection{A Choice That Remains Partial}
 
 Let $a(n)=(-1)^n$. Initially both the even and odd index classes are infinite, so either comparison choice is compatible with a free completion. Every completion selects one parity, giving $a$ standard part $1$ or $-1$, but there is no common value across all completions. The verified extractor therefore returns \code{None} on universal support. Accepting $a<0$ retains the odd class. Extraction then returns $-1$ in every compatible completion, and an attempted commitment $a=1$ is rejected. Extraction itself makes no further choice.
+
+The two observations $a<0$ and $a=1$ are individually realizable but select disjoint parity classes. Their conjunction could be satisfied if they were represented only by independent Boolean names, yet their actual sets admit no common completion. Lean proves this obstruction in \code{Counterexample}. This is why the executable state must represent the selected index sets and check their joint support.
 
 Selecting the odd class does not make all sufficiently large indices odd, nor does it identify a unique ultrafilter. It requires only that the odd class belong to the completion. This distinction motivates the runtime: it retains all currently compatible residue alternatives and returns an invariant result when those alternatives agree, without computing a complete ultrafilter.
 
@@ -235,11 +359,11 @@ Standard-part extraction performs a separate, read-only check at the least commo
   Each computed mask differs from its actual selected set only on a finite prefix, so the two sets have identical membership in every free ultrafilter. The carrier identity for least-common-multiple refinement and induction over accepted intersections give the displayed equivalence. A nonempty support of positive finite period is infinite, which supplies a free completion. Successful extraction proves the same ordinary limit for every active normalized form. There are finitely many such forms, so their eventual bounds can be combined and then specialized to the actual residue of each index in $S_T$. Restricting to any free ultrafilter containing $S_T$ preserves the resulting limit, and the equivalence applies it to every completion of the trace.
 \end{proof}
 
-The support and expression proofs are in \code{ResidueSupport} and \code{ResidueExpr}. Comparison correctness is in \code{ResidueComparison}. Transition, extraction, and trace proofs are in \code{ResidueRuntime}, \code{ResidueLimit}, and \code{ResidueTrace}. These reuse the scalar Laurent normalization, sign, and limit proofs. In particular, \code{run\_standardPart\_sound} concludes correctness for every completion of the recorded observations. Successful extraction on universal support also implies ordinary cofinite convergence. For example, \code{LeanResidueSystem} accepts $0<1/n$, recognizes $n(1/n)=1$, and extracts the exact standard part $0$ of $1/n$. Extraction on $(-1)^n$ initially returns \code{None}. After accepting $(-1)^n<0$, it returns $-1$. Successive choices $n\bmod2=1$ and $n\bmod3=2$ leave precisely residue $5$ modulo $6$, and extraction of the table $(0,1,2,3,4,5)$ then returns $5$. Extraction calls do not make further residue choices or alter the support.
+The support and expression proofs are in \code{ResidueSupport} and \code{ResidueExpr}. Comparison correctness is in \code{ResidueComparison}. Transition, extraction, and trace proofs are in \code{ResidueRuntime}, \code{ResidueLimit}, and \code{ResidueTrace}. These reuse the scalar Laurent normalization, sign, and limit proofs. In particular, \code{run\_standardPart\_sound} concludes correctness for every completion of the recorded observations. Successful extraction on universal support also implies ordinary cofinite convergence.
 
 \subsection{Implementation Boundary}
 
-The native \code{residue\_checker}, built from \code{ResidueChecker}, calls these same executable functions. The older two-parity \code{laurent\_checker} and periodic-only \code{periodic\_checker} remain available. Ordinary native calls rely on Python transport, JSON parsing, native compilation, and execution. The optional replay path below checks individual exported claims without trusting the native answer. The residue backend does not use SAT. Its dense support tables can grow to the least common multiple of introduced periods. No period minimization or general scalability guarantee is claimed.
+The native \code{residue\_checker}, built from \code{ResidueChecker}, calls these same executable functions. The Python interface constructs expression trees and records observations. Ordinary native calls rely on faithful transport, JSON parsing, native compilation, and execution. The optional replay path below checks individual exported claims without trusting the native answer. The implementation enumerates its support tables explicitly, so they can grow to the least common multiple of introduced periods. No period minimization or general scalability guarantee is claimed.
 
 \section{Adaptive Execution and Fixed Completions}\label{sec:programs}
 
@@ -290,9 +414,9 @@ Fleuriot and Paulson~\cite{FleuriotPaulson2000} constructed the hyperreals and m
 
 Nonstandard analysis also supports program semantics and verification. Benveniste et al.~\cite{Benveniste2012} give a nonstandard semantics of hybrid-system modelers, and Hasuo and Suenaga~\cite{HasuoSuenaga2012} investigate nonstandard static analysis of hybrid systems. Kido, Chaudhuri, and Hasuo~\cite{Kido2015} extend abstract interpretation with infinitesimals, proving soundness and termination under uniform widening and evaluating a prototype. The present artifact addresses a smaller expression language and an explicit finite observation trace. It does not provide a hybrid-system analyzer or a verified semantics for general programs.
 
-Automatic differentiation~\cite{Griewank2008,Baydin2018} and computer algebra provide relevant computational comparisons. The Python frontend's truncated expansions are closely related to Taylor-mode differentiation, while SymPy~\cite{Meurer2017} supplies the symbolic-limit baseline used in our evaluation. These relationships motivate separating derivative and limit calculations from the completion interface. The verified residue core covers exact rational Laurent expressions and restricted monomial division. The broader Python analytic recognizer has no corresponding remainder-correctness theorem, and the reported experiments do not establish an advantage over automatic differentiation or general symbolic algebra.
+Automatic differentiation~\cite{Griewank2008,Baydin2018} and computer algebra systems such as SymPy~\cite{Meurer2017} provide established ways to obtain the ordinary derivative in the worked example. Our question concerns the interpretation of a program whose observations and intermediate infinitesimal quantities remain underdetermined. The result $12$ is elementary. The additional obligation is to justify the selected quotient in a fixed completion and its standard part in every completion compatible with the run. We claim no computational advantage over differentiation or symbolic algebra.
 
-For the verified fragment, a support mask is an exact finite representation of the remaining residue alternatives. Intersection after lifting to a common period performs constraint refinement, so an ordinary finite-domain constraint solver can represent the same alternatives. The additional result is the proved correspondence with free-ultrafilter completions and the universal guarantee for an extracted limit. Lazy SMT~\cite{Sebastiani2007} provides an architectural analogy for the separate experimental Python layer, which combines Boolean constraints with semantic checks. The verified core itself computes masks directly. Its correctness does not depend on the prototype's SAT engine.
+For the verified fragment, a support mask is an exact finite representation of the remaining residue alternatives. Intersection after lifting to a common period performs constraint refinement, so an ordinary finite-domain constraint solver can represent the same alternatives. The mathematical contribution of this representation is its proved correspondence with free-ultrafilter completions and the universal guarantee for a successfully extracted standard part.
 
 Beeson and Wiedijk~\cite{BeesonWiedijk2005} use filters to give semantics to symbolic calculations with infinity, including partially informative outcomes and refinement. Their work is a direct precedent for interpreting calculations through filters. Our particular interface records accepted observations about index sets, proves that its finite executable states describe exactly the compatible free completions, and relates adaptive execution and extracted outputs to those completions.
 
@@ -302,15 +426,13 @@ The contribution is the composition of three obligations: executable observation
 
 \section{Artifact Evidence and Boundaries}\label{sec:evaluation}
 
-The main evidence is the Lean proof chain and the adaptive infinitesimal program. The project audit rebuilds the development, rejects unfinished proofs and project-local axioms, and checks the reported dependencies of the maintained theorem roots. The allowed classical dependencies are \code{propext}, \code{Classical.choice}, and \code{Quot.sound}. The new operational semantics and infinitesimal case are included in that audit. The source-to-theorem links distinguish the general completion criterion, executable refinement, program realization, and the concrete calculus identity.
+The main evidence is the Lean proof chain from executable observations to classical completions, adaptive execution, and standard-part extraction. The project audit rebuilds the development, rejects unfinished proofs and project-local axioms, and checks the reported dependencies of the maintained theorem roots. The allowed classical dependencies are \code{propext}, \code{Classical.choice}, and \code{Quot.sound}. The audit includes the operational semantics and the infinitesimal case. The source-to-theorem links distinguish the general completion criterion, executable refinement, program realization, and the concrete calculus identity.
 
-Integration tests exercise the original expression syntax, exact rational results, positive nonzero infinitesimals, rejected inconsistent choices, snapshots captured before later refinement, and both adaptive branches with distinct recorded expressions and common extracted value. Replay rejects incorrect claimed results. These tests cover the execution boundary. The all-indices and all-completions claims are supplied by the Lean theorems. In particular, testing $\varepsilon$ against a few small constants would not prove that it is smaller than every positive real. That universal statement is part of the mathematical case proof.
-
-The existing comparative artifact under \path{benchmarks} contains twelve hand-selected finite workloads checked against independent rational and SymPy implementations. The separate paired-channel model under \path{examples/delayed-choice} has three kernel-replay snapshots and illustrates invariant outputs while phase alternatives remain. Their raw measurements and reproduction scripts remain available. They are supplementary implementation studies. Repeated timings of these fixed cases do not establish coverage or a scaling law, and the different transport paths do not isolate a cost of verification. The present argument does not depend on a performance ranking.
+The worked case connects these layers in two ways. The theorem \path{accepted_result} covers every accepted answer stream for the explicit Lean program. The saved backward and forward snapshots separately check the concrete traces and quotient expressions captured through the public API. Both extract $12$, and the case theorems place their infinitesimal errors on opposite sides of zero. The snapshots provide inspectable instances. The Lean theorems supply the universal claims, including positivity, nonzeroness, and the bound $\varepsilon<a$ for every positive real constant $a$.
 
 The proof boundaries are concrete. The executable language has exact rational coefficients, finite coefficient periods, and monomial division. General analytic functions and arbitrary sequence predicates are outside it. Ordinary native calls assume faithful transport, parsing, compilation, and execution. Replay checks a regenerated mathematical instance, but faithful capture of the intended external computation remains unverified. The finite program syntax has no loops, and the Python API is not formally translated to it. A successful standard-part result has a universal semantic guarantee. The converse, and semantic certificates explaining failure, remain open.
 
-A natural next step is to prove extraction complete for the supported fragment and return checked witnesses when active branches diverge or have different limits. More general observations would require executable checks with their own correctness arguments. The classical assertion that one consistent polarity exists is not such a procedure. Likewise, analytic expansions require domain and remainder proofs before their outputs can join the same guarantee. These are extensions of the observation interface, not consequences of finite execution alone.
+A natural next step is to prove extraction complete for the supported fragment and return checked witnesses when active branches diverge or have different limits. A verified translation from the public API to the finite program syntax would address the capture boundary. More general observations would require executable checks with their own correctness arguments. The classical assertion that one consistent polarity exists does not supply such a procedure.
 
 \section{Conclusion}
 
@@ -320,20 +442,13 @@ The cubic program exhibits the connection in a single case. A completion-depende
 
 \section*{Artifact and Reproducibility}
 
-The repository contains the Lean modules under \path{Hyperreals}, Python adapters under \path{src/hyperreals}, and pinned Lean and Mathlib dependencies. Run \code{lake build}, \code{make lean-audit}, and \code{uv run pytest}. The worked calculation is reproduced by \path{scripts/infinitesimal_case.py}. Its saved snapshots can also be checked individually with \path{scripts/verify_replay.py}. The example README records the exact commands and the distinction between native output and kernel replay.
+The repository contains the Lean modules under \path{Hyperreals}, Python adapters under \path{src/hyperreals}, and pinned Lean, Mathlib, and Python~3.14 configurations. Install the locked development dependencies with \code{uv sync --locked --extra dev}, then run \code{make lean-audit} and \code{uv run --locked --extra dev pytest}. The worked calculation is reproduced by \path{scripts/infinitesimal_case.py}. Its saved snapshots can also be checked individually with \path{scripts/verify_replay.py}. The example README records the exact commands and the distinction between native output and kernel replay. Supplementary exact-arithmetic comparisons and a delayed-choice example are documented under \path{benchmarks} and \path{examples/delayed-choice}. Their measurements support no scaling or performance-ranking claim.
 
 The repository is \href{https://github.com/krzysztofwos/hyperreals}{github.com/krzysztofwos/hyperreals}. A submission should archive the exact accompanying revision. A moving repository URL does not fix the evaluated artifact.
 
 \section*{Acknowledgements}
 
 I thank Stephen Fitz for discussions about finite symbolic computation and the ontological status of the continuum, which motivated the question of how a finite interface can be justified by a classical completion theorem.
-
-\appendix
-\section{Experimental Analytic Frontend}\label{sec:python-frontend}
-
-The original \code{HyperrealSystem} remains available for experiments with floating-point sequence evaluation, analytic recognition, truncated expansions, and a separate SAT layer. It is not the verified execution path used by the main case. Its safe comparison mode requires supported semantic checks. The explicitly unsafe SAT-only mode carries no completion guarantee, since Boolean consistency of atom names does not imply consistency of their denoted index sets.
-
-Its analytic standard-part candidates do not carry Lean remainder proofs. Truncation must account for subsequent division: a discarded power of $1/n$ may later become a constant term. The repository includes mathematical counterexamples and repaired runtime guards for these issues. The small diagnostic trace in \path{paper/metrics.md} and the older demo scripts remain implementation evidence for this experimental frontend. They add no theorems to the exact core.
 
 \bibliographystyle{plainnat}
 \bibliography{references}
