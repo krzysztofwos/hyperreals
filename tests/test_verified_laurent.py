@@ -4,16 +4,15 @@ The direct Fraction evaluations below are finite regression checks of transport
 and execution. The corresponding all-indices tail statements are Lean theorems.
 """
 
-from fractions import Fraction
 import json
-from pathlib import Path
 import random
 import subprocess
+from fractions import Fraction
+from pathlib import Path
 
 import pytest
 
 from hyperreals import LeanBackendError, LeanLaurentSystem
-
 
 CHECKER = Path(__file__).resolve().parents[1] / ".lake/build/bin/laurent_checker"
 requires_lean = pytest.mark.skipif(
@@ -37,7 +36,9 @@ def test_infinitesimal_arithmetic_and_finite_difference_derivative():
     assert n * epsilon == one
     assert epsilon.standard_part() == 0
     assert n.standard_part() is None
-    derivative = (((two + epsilon) ** 3 - three * (two + epsilon)) - (two**3 - three * two)) / epsilon
+    derivative = (
+        ((two + epsilon) ** 3 - three * (two + epsilon)) - (two**3 - three * two)
+    ) / epsilon
     assert derivative.standard_part() == Fraction(9)
     assert system.support == (True, True)
 
@@ -50,7 +51,9 @@ def test_high_order_terms_survive_later_shifts():
     tiny = system.constant(7) * epsilon**12
     assert tiny.standard_part() == 0
     assert tiny.divide_monomial(1, -12).standard_part() == 7
-    assert (n**12 - n**12 + system.constant(Fraction(2, 5))).standard_part() == Fraction(2, 5)
+    assert (
+        n**12 - n**12 + system.constant(Fraction(2, 5))
+    ).standard_part() == Fraction(2, 5)
 
 
 @requires_lean
@@ -61,7 +64,9 @@ def test_division_by_signed_rational_monomials(power):
     base = system.infinite() if power >= 0 else system.infinitesimal()
     numerator = system.constant(coefficient) * base ** abs(power)
     assert numerator.divide_monomial(coefficient, power).standard_part() == 1
-    assert (system.constant(Fraction(3, 7)) / system.constant(-2)).standard_part() == Fraction(-3, 14)
+    assert (
+        system.constant(Fraction(3, 7)) / system.constant(-2)
+    ).standard_part() == Fraction(-3, 14)
 
 
 @requires_lean
@@ -107,7 +112,9 @@ def test_eliminating_a_divergent_parity_enables_standard_part():
 
     other = LeanLaurentSystem()
     even = (other.constant(1) + other.alt()) / other.constant(2)
-    expression = even * other.infinite() + (other.constant(1) - even) * other.constant(3)
+    expression = even * other.infinite() + (other.constant(1) - even) * other.constant(
+        3
+    )
     assert other.alt() == other.constant(1)
     assert expression.standard_part() is None
     assert other.support == (True, False)
@@ -157,19 +164,27 @@ def _evaluate(ast, n):
 
 def _random_ast(rng, depth):
     if depth == 0 or rng.random() < 0.3:
-        return rng.choice([
-            ["index"], ["invn"], ["alt"],
-            ["const", str(rng.randint(-7, 7)), str(rng.randint(1, 13))],
-        ])
+        return rng.choice(
+            [
+                ["index"],
+                ["invn"],
+                ["alt"],
+                ["const", str(rng.randint(-7, 7)), str(rng.randint(1, 13))],
+            ]
+        )
     if rng.random() < 0.25:
         coefficient = rng.choice([-7, -2, 1, 3])
         return [
-            "divMonomial", _random_ast(rng, depth - 1),
-            str(coefficient), "5", str(rng.randint(-3, 3)),
+            "divMonomial",
+            _random_ast(rng, depth - 1),
+            str(coefficient),
+            "5",
+            str(rng.randint(-3, 3)),
         ]
     return [
         rng.choice(["add", "sub", "mul"]),
-        _random_ast(rng, depth - 1), _random_ast(rng, depth - 1),
+        _random_ast(rng, depth - 1),
+        _random_ast(rng, depth - 1),
     ]
 
 
@@ -185,11 +200,16 @@ def test_emitted_cutoffs_cover_direct_exact_source_evaluations():
     ]
     requests = [
         {"support": [True, True], "op": op, "left": left, "right": right}
-        for left, right in pairs for op in ("lt", "eq")
+        for left, right in pairs
+        for op in ("lt", "eq")
     ]
     completed = subprocess.run(
-        [str(CHECKER)], input="".join(json.dumps(r) + "\n" for r in requests),
-        text=True, capture_output=True, check=True, timeout=30,
+        [str(CHECKER)],
+        input="".join(json.dumps(r) + "\n" for r in requests),
+        text=True,
+        capture_output=True,
+        check=True,
+        timeout=30,
     )
     responses = [json.loads(line) for line in completed.stdout.splitlines()]
     assert len(responses) == len(requests)
@@ -214,13 +234,24 @@ def test_invalid_protocol_lines_are_rejected_without_poisoning_following_request
         dict(valid, left=["divMonomial", ["index"], "1", "1", "1.5"]),
         dict(valid, left=["index", "unexpected"]),
         dict(valid, left=["exp", ["invn"]]),
-        {"support": [True, True], "op": "lt", "left": ["invn"],
-         "right": ["const", "0", "1"], "choice": "true"},
+        {
+            "support": [True, True],
+            "op": "lt",
+            "left": ["invn"],
+            "right": ["const", "0", "1"],
+            "choice": "true",
+        },
     ]
-    lines = ["{not json}"] + [json.dumps(item) for item in invalid] + [json.dumps(valid)]
+    lines = (
+        ["{not json}"] + [json.dumps(item) for item in invalid] + [json.dumps(valid)]
+    )
     completed = subprocess.run(
-        [str(CHECKER)], input="\n".join(lines) + "\n", text=True,
-        capture_output=True, check=True, timeout=30,
+        [str(CHECKER)],
+        input="\n".join(lines) + "\n",
+        text=True,
+        capture_output=True,
+        check=True,
+        timeout=30,
     )
     responses = [json.loads(line) for line in completed.stdout.splitlines()]
     assert len(responses) == len(lines)

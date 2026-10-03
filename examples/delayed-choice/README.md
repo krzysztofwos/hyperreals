@@ -26,13 +26,13 @@ An observation here restricts the recurring index classes a free-ultrafilter com
 
 The following compatible observations arrive incrementally:
 
-| Observation | Stored support period / active residues | Compatible phases modulo 60 | Raw standard part | Fused standard part |
-|---|---:|---:|---:|---:|
-| None | 1 / 1 | 60 | unknown | 12 |
-| `n mod 4` is odd | 4 / 2 | 30 | unknown | 12 |
-| `n mod 6 = 5` | 12 / 2 | 10 | 19 | 12 |
-| `n mod 5 = 3` | 60 / 2 | 2 | 19 | 12 |
-| `n mod 4 = 3` | 60 / 1 | 1, namely residue 23 | 19 | 12 |
+| Observation      | Stored support period / active residues | Compatible phases modulo 60 | Raw standard part | Fused standard part |
+| ---------------- | --------------------------------------: | --------------------------: | ----------------: | ------------------: |
+| None             |                                   1 / 1 |                          60 |           unknown |                  12 |
+| `n mod 4` is odd |                                   4 / 2 |                          30 |           unknown |                  12 |
+| `n mod 6 = 5`    |                                  12 / 2 |                          10 |                19 |                  12 |
+| `n mod 5 = 3`    |                                  60 / 2 |                           2 |                19 |                  12 |
+| `n mod 4 = 3`    |                                  60 / 1 |        1, namely residue 23 |                19 |                  12 |
 
 After the coarse observation, the fused sensitivity is already available while thirty phases remain possible. After the shared-clock observation, the individual channel's standard part is 19 while ten phases remain possible. Solving every phase choice is unnecessary for either output. The exact finite-difference syntax, rather than a hand-supplied limit assertion, is sent to the Lean extractor.
 
@@ -53,11 +53,11 @@ The script writes [results.json](results.json), [results.md](results.md), and th
 
 The snapshots capture these particular points in the actual session:
 
-| Snapshot | Accepted observations at capture | Extracted result | Remaining phases modulo 60 |
-|---|---:|---:|---:|
-| [early-fused](snapshots/early-fused/Replay.lean) | 1 | 12 | 30 |
-| [partial-raw](snapshots/partial-raw/Replay.lean) | 2 | 19 | 10 |
-| [final-phase](snapshots/final-phase/Replay.lean) | 4 | 23 | 1 |
+| Snapshot                                         | Accepted observations at capture | Extracted result | Remaining phases modulo 60 |
+| ------------------------------------------------ | -------------------------------: | ---------------: | -------------------------: |
+| [early-fused](snapshots/early-fused/Replay.lean) |                                1 |               12 |                         30 |
+| [partial-raw](snapshots/partial-raw/Replay.lean) |                                2 |               19 |                         10 |
+| [final-phase](snapshots/final-phase/Replay.lean) |                                4 |               23 |                          1 |
 
 The early snapshots are immutable and are replayed only after the session has reached its final state. Each export contains `snapshot.json`, generated `Replay.lean`, and `manifest.json`. Successful replay checks the actual finite trace, final support, and coefficient-extractor result by Lean kernel reduction, then applies the general all-compatible-completions theorem. The generated theorem says that the returned rational is the standard part in every free completion of that snapshot's observations. It does not prove that these observations occurred in a physical experiment or that exported data honestly records an external history. Hashes bind the artifact components and source provenance. They are not signatures authenticating that history.
 

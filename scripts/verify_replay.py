@@ -3,23 +3,30 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import time
+from pathlib import Path
 
 from hyperreals import ReplayVerificationError, verify_export
-
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("directory", type=Path, help="directory containing snapshot.json and Replay.lean")
-    parser.add_argument("--timeout", type=float, default=60.0, help="kernel replay timeout in seconds")
+    parser.add_argument(
+        "directory",
+        type=Path,
+        help="directory containing snapshot.json and Replay.lean",
+    )
+    parser.add_argument(
+        "--timeout", type=float, default=60.0, help="kernel replay timeout in seconds"
+    )
     args = parser.parse_args()
     start = time.perf_counter()
     try:
-        verified = verify_export(args.directory, project_root=ROOT, timeout=args.timeout)
+        verified = verify_export(
+            args.directory, project_root=ROOT, timeout=args.timeout
+        )
     except (ReplayVerificationError, ValueError, OSError) as error:
         parser.exit(1, f"Replay verification failed: {error}\n")
     print(f"Kernel replay verified in {time.perf_counter() - start:.3f}s.")

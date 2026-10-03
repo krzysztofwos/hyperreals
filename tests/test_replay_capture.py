@@ -7,9 +7,10 @@ import pytest
 
 from hyperreals import LeanBackendError, LeanResidueSystem, ReplayVerificationError
 
-
 CHECKER = Path(__file__).resolve().parents[1] / ".lake/build/bin/residue_checker"
-pytestmark = pytest.mark.skipif(not CHECKER.is_file(), reason="run lake build residue_checker")
+pytestmark = pytest.mark.skipif(
+    not CHECKER.is_file(), reason="run lake build residue_checker"
+)
 requires_replay = pytest.mark.skipif(
     not (CHECKER.parents[1] / "lib/lean/Hyperreals/ResidueReplay.olean").is_file(),
     reason="run lake build Hyperreals.ResidueReplay",
@@ -101,7 +102,9 @@ def test_actual_session_exports_the_requested_completion_invariant_result():
 def test_retained_powers_and_large_exact_rationals_replay():
     system = LeanResidueSystem()
     exact = Fraction(9007199254740993, 97)
-    expression = system.infinite()**11 * system.infinitesimal()**11 + system.constant(exact)
+    expression = (
+        system.infinite() ** 11 * system.infinitesimal() ** 11 + system.constant(exact)
+    )
     snapshot = system.snapshot(expression)
     assert snapshot.result == 1 + exact
     snapshot.verify(timeout=120)
@@ -110,9 +113,14 @@ def test_retained_powers_and_large_exact_rationals_replay():
 @requires_replay
 def test_wrong_native_result_cannot_become_a_verified_snapshot(monkeypatch):
     system = LeanResidueSystem()
-    monkeypatch.setattr(system, "_exchange", lambda request: {
-        "support": [True], "value": ["2", "1"],
-    })
+    monkeypatch.setattr(
+        system,
+        "_exchange",
+        lambda request: {
+            "support": [True],
+            "value": ["2", "1"],
+        },
+    )
     snapshot = system.snapshot(system.constant(1))
     assert snapshot.result == 2  # Structurally valid transport is not a proof.
     with pytest.raises(ReplayVerificationError, match="did not verify"):

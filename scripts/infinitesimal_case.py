@@ -10,10 +10,10 @@ choose the backward or forward quotient. Both branches have standard part 12.
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
-from fractions import Fraction
 import json
 import math
+from dataclasses import dataclass
+from fractions import Fraction
 from pathlib import Path
 from typing import Any, Literal
 
@@ -25,7 +25,6 @@ from hyperreals import (
     verify_export,
 )
 from hyperreals.replay import MAX_TIMEOUT
-
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -67,9 +66,11 @@ class CaseResult:
 def model(system: LeanResidueSystem) -> CubicExpressions:
     """Construct the unexpanded finite difference using exact constants."""
     epsilon, x = system.infinitesimal(), system.constant(Fraction(2))
-    dy = (x + epsilon)**3 - x**3
+    dy = (x + epsilon) ** 3 - x**3
     quotient = dy / epsilon
-    return CubicExpressions(epsilon, dy, quotient, quotient - system.constant(Fraction(12)))
+    return CubicExpressions(
+        epsilon, dy, quotient, quotient - system.constant(Fraction(12))
+    )
 
 
 def run_adaptive(choice: bool) -> AdaptiveResult:
@@ -82,20 +83,24 @@ def run_adaptive(choice: bool) -> AdaptiveResult:
         raise LeanBackendError("the adaptive parity choice was unexpectedly rejected")
     if choice:
         branch: Literal["backward", "forward"] = "backward"
-        quotient = (x**3 - (x - epsilon)**3) / epsilon
+        quotient = (x**3 - (x - epsilon) ** 3) / epsilon
     else:
         branch = "forward"
-        quotient = ((x + epsilon)**3 - x**3) / epsilon
+        quotient = ((x + epsilon) ** 3 - x**3) / epsilon
     history, support = system.history, system.support
     snapshot = system.snapshot(quotient)
     if system.history != history or system.support != support:
-        raise LeanBackendError("adaptive extraction changed the accepted trace or support")
+        raise LeanBackendError(
+            "adaptive extraction changed the accepted trace or support"
+        )
     if snapshot.result != Fraction(12):
         raise LeanBackendError("the adaptive quotient has an unexpected standard part")
     return AdaptiveResult(choice, branch, snapshot)
 
 
-def run_case(*, include_parity: bool = True, include_adaptive: bool = True) -> CaseResult:
+def run_case(
+    *, include_parity: bool = True, include_adaptive: bool = True
+) -> CaseResult:
     """Capture choice-free results and optional fixed and adaptive parity runs."""
     system = LeanResidueSystem()
     expressions = model(system)
@@ -105,9 +110,13 @@ def run_case(*, include_parity: bool = True, include_adaptive: bool = True) -> C
         raise LeanBackendError("the checker did not establish epsilon > 0")
     if system.probe(derivative, expressions.quotient) != (False, True):
         raise LeanBackendError("the checker did not establish quotient > 12")
-    before, error = system.snapshot(expressions.quotient), system.snapshot(expressions.error)
+    before, error = system.snapshot(expressions.quotient), system.snapshot(
+        expressions.error
+    )
     if before.result != Fraction(12) or error.result != Fraction(0):
-        raise LeanBackendError("the cubic standard parts differ from the expected exact values")
+        raise LeanBackendError(
+            "the cubic standard parts differ from the expected exact values"
+        )
     after = None
     if include_parity:
         if not system.commit(system.alt(), zero, truth=True):
@@ -120,7 +129,11 @@ def run_case(*, include_parity: bool = True, include_adaptive: bool = True) -> C
 
 
 def export_case(
-    case: CaseResult, output: Path, *, verify: bool = True, timeout: float = 60.0,
+    case: CaseResult,
+    output: Path,
+    *,
+    verify: bool = True,
+    timeout: float = 60.0,
 ) -> dict[str, Any]:
     """Export immutable snapshots, optionally checking their generated claims."""
     output.mkdir(parents=True, exist_ok=True)
@@ -137,22 +150,29 @@ def export_case(
         }
         if name in adaptive_runs:
             run = adaptive_runs[name]
-            record.update({
-                "query": "(-1)^n < 0",
-                "choice": run.choice,
-                "branch": run.branch,
-                "quotient": ("(2^3 - (2 - epsilon)^3) / epsilon" if run.choice
-                             else "((2 + epsilon)^3 - 2^3) / epsilon"),
-            })
+            record.update(
+                {
+                    "query": "(-1)^n < 0",
+                    "choice": run.choice,
+                    "branch": run.branch,
+                    "quotient": (
+                        "(2^3 - (2 - epsilon)^3) / epsilon"
+                        if run.choice
+                        else "((2 + epsilon)^3 - 2^3) / epsilon"
+                    ),
+                }
+            )
         if verify:
             checked = verify_export(directory, project_root=ROOT, timeout=timeout)
-            record.update({
-                "verification": "kernel-checked",
-                "snapshot_sha256": checked.snapshot_sha256,
-                "source_sha256": checked.source_sha256,
-                "axioms": list(checked.axioms),
-                "lean_output": checked.stdout,
-            })
+            record.update(
+                {
+                    "verification": "kernel-checked",
+                    "snapshot_sha256": checked.snapshot_sha256,
+                    "source_sha256": checked.source_sha256,
+                    "axioms": list(checked.axioms),
+                    "lean_output": checked.stdout,
+                }
+            )
         reports.append(record)
     report = {
         "case": "cubic-difference-quotient",
@@ -168,23 +188,37 @@ def export_case(
         ),
         "snapshots": reports,
     }
-    (output / "results.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    (output / "results.json").write_text(
+        json.dumps(report, indent=2) + "\n", encoding="utf-8"
+    )
     return report
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "examples/infinitesimal")
-    parser.add_argument("--no-parity", action="store_true", help="omit the later fixed odd choice")
-    parser.add_argument("--no-adaptive", action="store_true", help="omit both adaptive branch runs")
-    parser.add_argument("--skip-replay", action="store_true", help="export without kernel checking")
-    parser.add_argument("--timeout", type=float, default=60.0, help="seconds per snapshot verification")
+    parser.add_argument(
+        "--no-parity", action="store_true", help="omit the later fixed odd choice"
+    )
+    parser.add_argument(
+        "--no-adaptive", action="store_true", help="omit both adaptive branch runs"
+    )
+    parser.add_argument(
+        "--skip-replay", action="store_true", help="export without kernel checking"
+    )
+    parser.add_argument(
+        "--timeout", type=float, default=60.0, help="seconds per snapshot verification"
+    )
     args = parser.parse_args()
     if not math.isfinite(args.timeout) or not 0 < args.timeout <= MAX_TIMEOUT:
         parser.error(f"--timeout must be positive, finite, and at most {MAX_TIMEOUT:g}")
     try:
-        case = run_case(include_parity=not args.no_parity, include_adaptive=not args.no_adaptive)
-        export_case(case, args.output, verify=not args.skip_replay, timeout=args.timeout)
+        case = run_case(
+            include_parity=not args.no_parity, include_adaptive=not args.no_adaptive
+        )
+        export_case(
+            case, args.output, verify=not args.skip_replay, timeout=args.timeout
+        )
     except (LeanBackendError, ValueError, OSError) as error:
         parser.exit(1, f"Infinitesimal example failed: {error}\n")
     print("epsilon = 1/n is positive and nonzero in every free completion.")
@@ -193,10 +227,15 @@ def main() -> None:
     if case.after is not None:
         print("After choosing odd parity, st(dy/dx) is still 12.")
     for run in case.adaptive:
-        print(f"Adaptive choice {str(run.choice).lower()}: {run.branch} quotient, "
-              f"standard part {run.snapshot.result}.")
-    print("Snapshots exported without verification." if args.skip_replay
-          else "All exported snapshots passed Lean kernel replay.")
+        print(
+            f"Adaptive choice {str(run.choice).lower()}: {run.branch} quotient, "
+            f"standard part {run.snapshot.result}."
+        )
+    print(
+        "Snapshots exported without verification."
+        if args.skip_replay
+        else "All exported snapshots passed Lean kernel replay."
+    )
     print(f"Artifacts: {args.output.resolve()}")
 
 

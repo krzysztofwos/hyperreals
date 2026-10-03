@@ -9,14 +9,13 @@ of the execution trust boundary. See formalization.md.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from fractions import Fraction
 import json
 import math
-from pathlib import Path
 import subprocess
+from dataclasses import dataclass
+from fractions import Fraction
+from pathlib import Path
 from typing import Any, Literal
-
 
 _Operation = Literal["lt", "eq"]
 _Mask = tuple[bool, bool]
@@ -34,7 +33,10 @@ class PeriodicHyperreal:
     _ast: tuple[object, ...]
 
     def _check(self, other: PeriodicHyperreal) -> None:
-        if not isinstance(other, PeriodicHyperreal) or self._system is not other._system:
+        if (
+            not isinstance(other, PeriodicHyperreal)
+            or self._system is not other._system
+        ):
             raise ValueError("periodic operands must belong to the same Lean system")
 
     def __add__(self, other: PeriodicHyperreal) -> PeriodicHyperreal:
@@ -84,7 +86,8 @@ class LeanPeriodicSystem:
         self._checker = (
             Path(checker_path).resolve()
             if checker_path is not None
-            else Path(__file__).resolve().parents[2] / ".lake/build/bin/periodic_checker"
+            else Path(__file__).resolve().parents[2]
+            / ".lake/build/bin/periodic_checker"
         )
         if not self._checker.is_file():
             raise LeanBackendError(
@@ -112,15 +115,19 @@ class LeanPeriodicSystem:
     @staticmethod
     def _mask(value: Any) -> _Mask:
         if (
-            not isinstance(value, list) or len(value) != 2
+            not isinstance(value, list)
+            or len(value) != 2
             or any(type(bit) is not bool for bit in value)
         ):
             raise LeanBackendError("invalid mask in Lean response")
         return value[0], value[1]
 
     def _request(
-        self, left: PeriodicHyperreal, right: PeriodicHyperreal,
-        op: _Operation, choice: bool | None = None,
+        self,
+        left: PeriodicHyperreal,
+        right: PeriodicHyperreal,
+        op: _Operation,
+        choice: bool | None = None,
     ) -> dict[str, Any]:
         left._check(right)
         if left._system is not self:
@@ -130,15 +137,21 @@ class LeanPeriodicSystem:
         if choice is not None and type(choice) is not bool:
             raise ValueError("choice must be a boolean")
         request: dict[str, Any] = {
-            "support": self._support, "op": op,
-            "left": left._ast, "right": right._ast,
+            "support": self._support,
+            "op": op,
+            "left": left._ast,
+            "right": right._ast,
         }
         if choice is not None:
             request["choice"] = choice
         try:
             process = subprocess.run(
-                [str(self._checker)], input=json.dumps(request) + "\n",
-                capture_output=True, text=True, timeout=self._timeout, check=False,
+                [str(self._checker)],
+                input=json.dumps(request) + "\n",
+                capture_output=True,
+                text=True,
+                timeout=self._timeout,
+                check=False,
             )
         except (OSError, subprocess.TimeoutExpired) as error:
             raise LeanBackendError(f"Lean checker failed: {error}") from error
@@ -181,8 +194,12 @@ class LeanPeriodicSystem:
         return bool(result["canBeFalse"]), bool(result["canBeTrue"])
 
     def commit(
-        self, left: PeriodicHyperreal, right: PeriodicHyperreal,
-        op: _Operation = "lt", *, truth: bool,
+        self,
+        left: PeriodicHyperreal,
+        right: PeriodicHyperreal,
+        op: _Operation = "lt",
+        *,
+        truth: bool,
     ) -> bool:
         """Apply a Lean-accepted transition. Rejection leaves support unchanged."""
         result = self._request(left, right, op, truth)

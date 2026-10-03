@@ -1,6 +1,11 @@
 name = "hyperreals-formalization"
 version = "0.1.0"
-defaultTargets = ["Hyperreals", "periodic_checker", "laurent_checker", "residue_checker"]
+defaultTargets = [
+  "Hyperreals",
+  "periodic_checker",
+  "laurent_checker",
+  "residue_checker",
+]
 
 [leanOptions]
 pp.unicode.fun = true

@@ -7,11 +7,11 @@ Python transport and JSON parser remain tested execution assumptions.
 
 from __future__ import annotations
 
+import json
+import subprocess
 from dataclasses import dataclass
 from fractions import Fraction
-import json
 from pathlib import Path
-import subprocess
 from typing import Any, Literal
 
 from .verified import LeanBackendError, LeanPeriodicSystem, PeriodicHyperreal
@@ -60,21 +60,31 @@ class LaurentHyperreal(PeriodicHyperreal):
         rational = Fraction(coefficient)
         if rational == 0:
             raise ZeroDivisionError("monomial divisor must be nonzero")
-        return LaurentHyperreal(self._system, (
-            "divMonomial", self._ast, str(rational.numerator),
-            str(rational.denominator), str(power),
-        ))
+        return LaurentHyperreal(
+            self._system,
+            (
+                "divMonomial",
+                self._ast,
+                str(rational.numerator),
+                str(rational.denominator),
+                str(power),
+            ),
+        )
 
     def __truediv__(self, other: PeriodicHyperreal) -> LaurentHyperreal:
         """Divide by a constant, n, or epsilon. Use divide_monomial for c*n**k."""
         self._check(other)
         if other._ast[0] == "const":
-            return self.divide_monomial(Fraction(int(str(other._ast[1])), int(str(other._ast[2]))), 0)
+            return self.divide_monomial(
+                Fraction(int(str(other._ast[1])), int(str(other._ast[2]))), 0
+            )
         if other._ast == ("index",):
             return self.divide_monomial(1, 1)
         if other._ast == ("invn",):
             return self.divide_monomial(1, -1)
-        raise ValueError("division requires a primitive monomial. Use divide_monomial(coefficient, power)")
+        raise ValueError(
+            "division requires a primitive monomial. Use divide_monomial(coefficient, power)"
+        )
 
     def standard_part(self) -> Fraction | None:
         """Return a proved-core rational limit shared by all remaining parities."""
@@ -93,7 +103,8 @@ class LeanLaurentSystem(LeanPeriodicSystem):
         self, *, checker_path: str | Path | None = None, timeout: float = 30.0
     ) -> None:
         path = (
-            checker_path if checker_path is not None
+            checker_path
+            if checker_path is not None
             else Path(__file__).resolve().parents[2] / ".lake/build/bin/laurent_checker"
         )
         if not Path(path).is_file():
@@ -111,7 +122,9 @@ class LeanLaurentSystem(LeanPeriodicSystem):
 
     def constant(self, value: int | float | Fraction) -> LaurentHyperreal:
         rational = Fraction(value)
-        return LaurentHyperreal(self, ("const", str(rational.numerator), str(rational.denominator)))
+        return LaurentHyperreal(
+            self, ("const", str(rational.numerator), str(rational.denominator))
+        )
 
     def alt(self) -> LaurentHyperreal:
         return LaurentHyperreal(self, ("alt",))
@@ -125,12 +138,19 @@ class LeanLaurentSystem(LeanPeriodicSystem):
         return LaurentHyperreal(self, ("invn",))
 
     def _request(
-        self, left: PeriodicHyperreal, right: PeriodicHyperreal,
-        op: Literal["lt", "eq"], choice: bool | None = None,
+        self,
+        left: PeriodicHyperreal,
+        right: PeriodicHyperreal,
+        op: Literal["lt", "eq"],
+        choice: bool | None = None,
     ) -> dict[str, Any]:
         result = super()._request(left, right, op, choice)
         cutoff = result.get("cutoff")
-        if not isinstance(cutoff, str) or not cutoff.isascii() or not cutoff.isdecimal():
+        if (
+            not isinstance(cutoff, str)
+            or not cutoff.isascii()
+            or not cutoff.isdecimal()
+        ):
             raise LeanBackendError("invalid cutoff in Lean response")
         self._last_cutoff = int(cutoff)
         if self._last_cutoff < 1:
@@ -138,13 +158,24 @@ class LeanLaurentSystem(LeanPeriodicSystem):
         return result
 
     def standard_part(self, expression: LaurentHyperreal) -> Fraction | None:
-        if not isinstance(expression, LaurentHyperreal) or expression._system is not self:
+        if (
+            not isinstance(expression, LaurentHyperreal)
+            or expression._system is not self
+        ):
             raise ValueError("Laurent expression must belong to this Lean system")
-        request = {"support": self._support, "op": "standardPart", "left": expression._ast}
+        request = {
+            "support": self._support,
+            "op": "standardPart",
+            "left": expression._ast,
+        }
         try:
             process = subprocess.run(
-                [str(self._checker)], input=json.dumps(request) + "\n",
-                capture_output=True, text=True, timeout=self._timeout, check=False,
+                [str(self._checker)],
+                input=json.dumps(request) + "\n",
+                capture_output=True,
+                text=True,
+                timeout=self._timeout,
+                check=False,
             )
         except (OSError, subprocess.TimeoutExpired) as error:
             raise LeanBackendError(f"Lean checker failed: {error}") from error
@@ -161,7 +192,11 @@ class LeanLaurentSystem(LeanPeriodicSystem):
             value = result["value"]
             if value is None:
                 return None
-            if not isinstance(value, list) or len(value) != 2 or any(type(v) is not str for v in value):
+            if (
+                not isinstance(value, list)
+                or len(value) != 2
+                or any(type(v) is not str for v in value)
+            ):
                 raise ValueError("invalid rational result")
             numerator, denominator = int(value[0]), int(value[1])
             if denominator <= 0:

@@ -1,19 +1,20 @@
 """Arbitrary-period integration checks against the actual Lean executable."""
 
-from fractions import Fraction
 import json
-from math import lcm
-from pathlib import Path
 import random
 import subprocess
+from fractions import Fraction
+from math import lcm
+from pathlib import Path
 
 import pytest
 
 from hyperreals import LeanResidueSystem
 
-
 CHECKER = Path(__file__).resolve().parents[1] / ".lake/build/bin/residue_checker"
-pytestmark = pytest.mark.skipif(not CHECKER.is_file(), reason="run lake build residue_checker")
+pytestmark = pytest.mark.skipif(
+    not CHECKER.is_file(), reason="run lake build residue_checker"
+)
 
 
 def test_modulo_two_and_three_select_residue_five_modulo_six():
@@ -35,7 +36,10 @@ def test_modulo_two_and_three_select_residue_five_modulo_six():
 
 def test_new_periods_preserve_every_previous_commitment():
     system = LeanResidueSystem()
-    expressions = [(system.periodic(range(period)), residue) for period, residue in [(3, 2), (5, 3), (7, 4)]]
+    expressions = [
+        (system.periodic(range(period)), residue)
+        for period, residue in [(3, 2), (5, 3), (7, 4)]
+    ]
     for expression, residue in expressions:
         assert expression == system.constant(residue)
     assert system.period == 105
@@ -68,7 +72,9 @@ def test_standard_part_checks_expression_period_beyond_current_state():
     assert system.periodic([0, 1]) == system.constant(1)
     assert period_three.standard_part() is None
     assert system.support == (False, True)
-    assert (period_three * system.infinitesimal() + system.constant(7)).standard_part() == 7
+    assert (
+        period_three * system.infinitesimal() + system.constant(7)
+    ).standard_part() == 7
     assert system.support == (False, True)
     assert period_three == system.constant(30)
     assert period_three.standard_part() == 30
@@ -95,7 +101,9 @@ def test_exact_tables_and_existing_laurent_arithmetic():
     assert (table * system.constant(3)).standard_part() == 1
     epsilon = system.infinitesimal()
     assert (system.infinite() ** 11 * epsilon**11).standard_part() == 1
-    assert (table * epsilon**12).divide_monomial(1, -12).standard_part() == Fraction(1, 3)
+    assert (table * epsilon**12).divide_monomial(1, -12).standard_part() == Fraction(
+        1, 3
+    )
 
 
 def test_invalid_tables_and_mixed_contexts_are_rejected():
@@ -123,7 +131,9 @@ def _evaluate(ast, n):
     if tag == "invn":
         return Fraction(1, n)
     if tag == "divMonomial":
-        return _evaluate(ast[1], n) / (Fraction(int(ast[2]), int(ast[3])) * Fraction(n) ** int(ast[4]))
+        return _evaluate(ast[1], n) / (
+            Fraction(int(ast[2]), int(ast[3])) * Fraction(n) ** int(ast[4])
+        )
     a, b = _evaluate(ast[1], n), _evaluate(ast[2], n)
     return {"add": lambda: a + b, "sub": lambda: a - b, "mul": lambda: a * b}[tag]()
 
@@ -140,11 +150,26 @@ def _period(ast):
 
 def _random_ast(rng, depth):
     if depth == 0 or rng.random() < 0.3:
-        values = [[str(rng.randint(-3, 3)), str(rng.randint(1, 7))] for _ in range(rng.randint(1, 5))]
-        return rng.choice([["periodic", values], ["index"], ["invn"], ["const", "2", "3"]])
+        values = [
+            [str(rng.randint(-3, 3)), str(rng.randint(1, 7))]
+            for _ in range(rng.randint(1, 5))
+        ]
+        return rng.choice(
+            [["periodic", values], ["index"], ["invn"], ["const", "2", "3"]]
+        )
     if rng.random() < 0.2:
-        return ["divMonomial", _random_ast(rng, depth - 1), "-2", "3", str(rng.randint(-2, 2))]
-    return [rng.choice(["add", "sub", "mul"]), _random_ast(rng, depth - 1), _random_ast(rng, depth - 1)]
+        return [
+            "divMonomial",
+            _random_ast(rng, depth - 1),
+            "-2",
+            "3",
+            str(rng.randint(-2, 2)),
+        ]
+    return [
+        rng.choice(["add", "sub", "mul"]),
+        _random_ast(rng, depth - 1),
+        _random_ast(rng, depth - 1),
+    ]
 
 
 def test_direct_exact_evaluations_validate_each_emitted_residue_at_cutoff():
@@ -154,10 +179,22 @@ def test_direct_exact_evaluations_validate_each_emitted_residue_at_cutoff():
         left, right = _random_ast(rng, 2), _random_ast(rng, 2)
         support = [True, False, True]
         for op in ("lt", "eq"):
-            requests.append({"support": support, "op": op, "left": left, "right": right, "choice": True})
+            requests.append(
+                {
+                    "support": support,
+                    "op": op,
+                    "left": left,
+                    "right": right,
+                    "choice": True,
+                }
+            )
     completed = subprocess.run(
-        [str(CHECKER)], input="".join(json.dumps(r) + "\n" for r in requests),
-        text=True, capture_output=True, check=True, timeout=30,
+        [str(CHECKER)],
+        input="".join(json.dumps(r) + "\n" for r in requests),
+        text=True,
+        capture_output=True,
+        check=True,
+        timeout=30,
     )
     responses = [json.loads(line) for line in completed.stdout.splitlines()]
     assert len(responses) == len(requests)
@@ -169,11 +206,21 @@ def test_direct_exact_evaluations_validate_each_emitted_residue_at_cutoff():
         for residue in range(period):
             n = cutoff + (residue - cutoff) % period
             for index in (n, n + period, n + 11 * period):
-                a, b = _evaluate(request["left"], index), _evaluate(request["right"], index)
-                assert response["predicate"][residue] is (a < b if request["op"] == "lt" else a == b)
+                a, b = _evaluate(request["left"], index), _evaluate(
+                    request["right"], index
+                )
+                assert response["predicate"][residue] is (
+                    a < b if request["op"] == "lt" else a == b
+                )
         common_period = lcm(len(request["support"]), period)
-        positive = [request["support"][r % 3] and response["predicate"][r % period] for r in range(common_period)]
-        negative = [request["support"][r % 3] and not response["predicate"][r % period] for r in range(common_period)]
+        positive = [
+            request["support"][r % 3] and response["predicate"][r % period]
+            for r in range(common_period)
+        ]
+        negative = [
+            request["support"][r % 3] and not response["predicate"][r % period]
+            for r in range(common_period)
+        ]
         assert response["trueSupport"] == positive
         assert response["falseSupport"] == negative
         assert response["accepted"] is any(positive)
@@ -181,16 +228,26 @@ def test_direct_exact_evaluations_validate_each_emitted_residue_at_cutoff():
 
 
 def test_parser_rejects_empty_tables_and_invalid_states_then_recovers():
-    valid = {"support": [True], "op": "standardPart", "left": ["periodic", [["2", "3"]]]}
+    valid = {
+        "support": [True],
+        "op": "standardPart",
+        "left": ["periodic", [["2", "3"]]],
+    }
     invalid = [
-        dict(valid, support=[]), dict(valid, support=[False, False, False]),
-        dict(valid, support=[1]), dict(valid, left=["periodic", []]),
+        dict(valid, support=[]),
+        dict(valid, support=[False, False, False]),
+        dict(valid, support=[1]),
+        dict(valid, left=["periodic", []]),
         dict(valid, left=["periodic", [["1", "0"]]]),
         dict(valid, left=["periodic", [["1", "2", "3"]]]),
     ]
     completed = subprocess.run(
-        [str(CHECKER)], input="".join(json.dumps(r) + "\n" for r in invalid + [valid]),
-        text=True, capture_output=True, check=True, timeout=30,
+        [str(CHECKER)],
+        input="".join(json.dumps(r) + "\n" for r in invalid + [valid]),
+        text=True,
+        capture_output=True,
+        check=True,
+        timeout=30,
     )
     responses = [json.loads(line) for line in completed.stdout.splitlines()]
     assert all("error" in response for response in responses[:-1])

@@ -32,10 +32,10 @@ The result needs no comparison choice. The script optionally accepts `(-1)^n < 0
 
 The script also runs an adaptive calculation twice, each time in a fresh system. It explicitly accepts one answer to `(-1)^n < 0` and then selects the expression to evaluate from that accepted answer.
 
-| Accepted answer | Remaining indices | Selected quotient | Standard part |
-| --- | --- | --- | --- |
-| `true` | Odd | `(2^3 - (2 - epsilon)^3) / epsilon` | `12` |
-| `false` | Even | `((2 + epsilon)^3 - 2^3) / epsilon` | `12` |
+| Accepted answer | Remaining indices | Selected quotient                   | Standard part |
+| --------------- | ----------------- | ----------------------------------- | ------------- |
+| `true`          | Odd               | `(2^3 - (2 - epsilon)^3) / epsilon` | `12`          |
+| `false`         | Even              | `((2 + epsilon)^3 - 2^3) / epsilon` | `12`          |
 
 These are different original expressions. Their exact expansions at positive indices are `12 - 6*epsilon + epsilon^2` and `12 + 6*epsilon + epsilon^2`. The backward quotient is below `12` and the forward quotient is above it. Both errors are infinitesimal. The accepted choice therefore changes the computation while leaving its extracted standard part unchanged.
 

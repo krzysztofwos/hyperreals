@@ -1,18 +1,19 @@
 """Integration checks of the actual Lean executable, not a Python mock."""
 
-from fractions import Fraction
 import itertools
 import json
-from pathlib import Path
 import subprocess
+from fractions import Fraction
+from pathlib import Path
 
 import pytest
 
 from hyperreals import LeanBackendError, LeanPeriodicSystem
 
-
 CHECKER = Path(__file__).resolve().parents[1] / ".lake/build/bin/periodic_checker"
-requires_lean = pytest.mark.skipif(not CHECKER.is_file(), reason="run lake build periodic_checker")
+requires_lean = pytest.mark.skipif(
+    not CHECKER.is_file(), reason="run lake build periodic_checker"
+)
 
 
 def test_missing_checker_does_not_fall_back_to_python(tmp_path):
@@ -74,15 +75,30 @@ def test_exhaustive_finite_protocol_cases_match_rational_semantics():
     requests, expectations = [], []
     for support, op, (left, lv), (right, rv), choice in itertools.product(
         [(True, True), (True, False), (False, True)],
-        ["lt", "eq"], expressions, expressions, [True, False],
+        ["lt", "eq"],
+        expressions,
+        expressions,
+        [True, False],
     ):
         predicate = [a < b if op == "lt" else a == b for a, b in zip(lv, rv)]
         selected = [s and (p == choice) for s, p in zip(support, predicate)]
-        requests.append({"support": support, "op": op, "left": left, "right": right, "choice": choice})
+        requests.append(
+            {
+                "support": support,
+                "op": op,
+                "left": left,
+                "right": right,
+                "choice": choice,
+            }
+        )
         expectations.append((predicate, selected))
     completed = subprocess.run(
-        [str(CHECKER)], input="".join(json.dumps(r) + "\n" for r in requests),
-        capture_output=True, text=True, check=True, timeout=30,
+        [str(CHECKER)],
+        input="".join(json.dumps(r) + "\n" for r in requests),
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=30,
     )
     responses = [json.loads(line) for line in completed.stdout.splitlines()]
     assert len(responses) == len(expectations)
@@ -93,11 +109,22 @@ def test_exhaustive_finite_protocol_cases_match_rational_semantics():
 
 
 @requires_lean
-@pytest.mark.parametrize("bad_constant", [["const", "1", "0"], ["const", "1", "-2"], ["const", "nan", "1"]])
+@pytest.mark.parametrize(
+    "bad_constant", [["const", "1", "0"], ["const", "1", "-2"], ["const", "nan", "1"]]
+)
 def test_lean_parser_rejects_invalid_rationals(bad_constant):
-    request = {"support": [True, True], "op": "lt", "left": bad_constant, "right": ["alt"]}
+    request = {
+        "support": [True, True],
+        "op": "lt",
+        "left": bad_constant,
+        "right": ["alt"],
+    }
     completed = subprocess.run(
-        [str(CHECKER)], input=json.dumps(request) + "\n", capture_output=True,
-        text=True, check=True, timeout=30,
+        [str(CHECKER)],
+        input=json.dumps(request) + "\n",
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=30,
     )
     assert "error" in json.loads(completed.stdout)
