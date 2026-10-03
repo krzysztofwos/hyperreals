@@ -149,7 +149,7 @@
 \small
 \setlength{\parindent}{0pt}
 \noindent{\sffamily\bfseries\color{ink}Abstract}\par\smallskip
-Can a finite program compute with infinitesimals while leaving their non-constructive mathematical interpretation unspecified? We study an interface that records only observations made during execution. Each accepted observation preserves the existence of a free-ultrafilter completion. Lean 4 proofs connect an executable periodic Laurent language to these classical completions and show that accepted finite adaptive programs can be interpreted using one fixed completion throughout the run. Whenever standard-part extraction succeeds, its ordinary rational result is shared by every remaining completion. A worked program uses a completion-dependent observation to select a forward or backward difference quotient with $\varepsilon=1/n$. The quotients lie on opposite sides of $12$, yet every accepted execution has standard part $12$, the ordinary derivative of $x^3$ at $2$. Its denominator is positive, nonzero, and infinitesimal in every free completion. The implementation computes exact finite syntax without constructing an ultrafilter, choosing a small floating-point step, or truncating a series. Kernel replay checks exported trace and extraction instances. The contribution is a precise operational bridge for this restricted language. Classical existence does not provide an algorithm for arbitrary observations, and the correspondence between Python capture and the intended external computation remains outside the proof.
+Can a finite program compute with infinitesimals while leaving their non-constructive mathematical interpretation unspecified? We study an interface that records only observations made during execution. Each accepted observation preserves the existence of a free-ultrafilter completion. Lean 4 proofs connect an executable periodic Laurent language to these completions and interpret each accepted finite adaptive run using one fixed completion. Standard-part extraction is sound and complete for a value shared by all remaining completions. Every such finite real value is rational and is found by the extractor. A generic compiler builds literal difference quotients for arbitrary rational polynomials at rational points with steps $c/n^k$, where $c\ne0$ and $k\ge1$. The extractor returns the ordinary derivative. A separate adaptive example makes an observation discharge a necessary division condition: an infinitesimal step may be zero in some completions, so the program either establishes its nonzeroness or selects a fallback. Both accepted branches extract $12$ for the cubic at $2$. The implementation retains exact finite syntax without constructing an ultrafilter or truncating a series. Kernel replay checks exported instances. The result is an operational bridge for a restricted language. General sequence predicates and verified capture of arbitrary Python computations remain outside it.
 \par
 \medskip
 \noindent{\sffamily\bfseries\color{ink}Keywords}\enspace
@@ -165,17 +165,17 @@ A classical existence theorem can justify a mathematical object without supplyin
 
 We investigate this separation through an executable interface. The program builds exact expressions for real sequences and records selected comparison sets. The runtime accepts a selection only after checking that the retained recurring indices remain infinite. A classical extension theorem then supplies a free ultrafilter containing the observations. This existence proof justifies the execution without becoming an algorithm that constructs its witness.
 
-There are two distinct guarantees. First, an accepted execution has a compatible completion, so its choices can be read as observations of one mathematical object. Second, a successfully extracted standard part is shared by every completion compatible with that execution. The first permits underdetermined choices. The second permits an ordinary result before all choices have been made. For example, $(-1)^n$ has completion-dependent sign, but $1+(-1)^n/n$ has standard part $1$ in every free completion.
+There are two distinct guarantees. First, an accepted execution has a compatible completion, so its choices can be read as observations of one mathematical object. Second, standard-part extraction returns exactly the finite values shared by every completion compatible with that execution. The first permits underdetermined choices. The second permits an ordinary result before all choices have been made. For example, $(-1)^n$ has completion-dependent sign, but $1+(-1)^n/n$ has standard part $1$ in every free completion.
 
 The fact that a program makes finitely many observations is not sufficient for an algorithm. Those observations concern actual subsets of $\N$, and their consistency can itself require mathematical reasoning. Propositional satisfiability of opaque names does not establish it. We therefore distinguish the general semantic requirement from an executable instance: finite periodic rational coefficients, $n$, $1/n$, arithmetic, and division by nonzero rational monomials. On this language, exact normalization and comparison masks discharge the required obligations. Unsupported sequence predicates are outside this implementation.
 
 The paper develops three connected results:
 \begin{enumerate}[itemsep=3pt,topsep=4pt]
   \item A specification of finite observations and classical completion, with an explicit separation between existential consistency and executable decisions.
-  \item Verified normalization, comparison, and state refinement for a periodic Laurent language, together with a semantics connecting accepted adaptive programs to fixed completions and their extracted outputs.
-  \item A worked adaptive infinitesimal program whose branch and literal quotient depend on an observation, while every accepted execution returns the same ordinary derivative, with executable capture and kernel replay of both branches.
+  \item Verified normalization, comparison, and state refinement for a periodic Laurent language, with sound and complete extraction of completion-invariant standard parts and fixed-completion semantics for accepted adaptive programs.
+  \item Generic executable infinitesimal differentiation for rational polynomials, and an adaptive example in which an observation establishes a necessary denominator condition. Both branches compute the same ordinary derivative.
 \end{enumerate}
-The extension theorem is classical supporting mathematics. The worked derivative is elementary. Their role is to make the connection between finite execution and a non-constructive interpretation precise and inspectable. We do not claim a new construction of the hyperreals, a general algorithm for ultrafilter membership, or a performance advantage over symbolic algebra.
+The extension theorem is classical supporting mathematics. The calculus identities are elementary. Their role is to make the connection between finite execution and a non-constructive interpretation precise and inspectable. We do not claim a new construction of the hyperreals, a general algorithm for ultrafilter membership, or a performance advantage over symbolic algebra.
 
 \section{An Adaptive Infinitesimal Calculation}\label{sec:infinitesimal-case}
 
@@ -213,7 +213,16 @@ assert quotient.standard_part() == 12
 \end{lstlisting}
 The returned value is an exact rational. The expression is sent to the verified normalizer without a precomputed derivative or limit certificate. Lean proves the sequence identity, positivity and infinitesimal properties, the completion-relative limit, and the ordinary derivative in \code{InfinitesimalCase}. The theorem \path{quotientExpr_denote} connects the actual expression tree to the stated quotient, and \path{quotient_extracts} checks the executable result by kernel reduction. For a literal field interpretation, \path{hyperreal_quotient_standardPart} proves the same standard-part equality in Mathlib's existing hyperreal field, using its distinguished positive infinitesimal. The companion strict-inequality theorem proves that this field element is greater than $12$. The script \path{scripts/infinitesimal_case.py} runs the public API and exports replayable instances.
 
-The forward calculation alone requires no discretionary comparison. To connect infinitesimal computation with the observation interface, consider a program that first queries $a(n)=(-1)^n<0$. Both answers are admissible from the initial state. A true answer retains the odd indices and selects the backward quotient. A false answer retains the even indices and selects the forward quotient. Figure~\ref{fig:adaptive-quotients} shows the two calculations and their common standard part.
+\subsection{An Observation Establishes the Domain}
+
+The forward calculation alone requires no discretionary observation. To make the observation mathematically necessary, instead consider
+\[
+  b(n)=\begin{cases}0&n\text{ even},\\1&n\text{ odd},\end{cases}
+  \qquad h=b\varepsilon,\qquad g=bn.
+\]
+The step $h$ is infinitesimal in every free completion. It is exactly zero in completions selecting even indices and nonzero in those selecting odd indices. The represented reciprocal $g$ satisfies $hg=1$ only in the latter. The runtime can represent $g$ using existing multiplication and a periodic table, but this fact does not add unrestricted division to the language.
+
+The program queries $h=0$. A true answer retains even indices and replaces $h$ by the fallback $\delta=\varepsilon^2$. A false answer retains odd indices, keeps $\delta=h$, and licenses multiplication by $g$ as division by $h$. Figure~\ref{fig:adaptive-quotients} shows the two branches. The observation is a caller-proposed polarity checked against the remaining support, not evaluation at a sampled index or membership testing in a preselected ultrafilter.
 
 \begin{figure}[htbp]
   \centering
@@ -225,40 +234,71 @@ The forward calculation alone requires no discretionary comparison. To connect i
     answer/.style={font=\small\sffamily,color=muted,fill=white,inner sep=3pt}
   ]
     \node[font=\sffamily\bfseries\color{ink},align=center] (query)
-      {Observe $(-1)^n<0$};
-    \node[branch,below left=13mm and -12mm of query] (backward)
-      {{\sffamily\bfseries\color{ink}Backward quotient}\\[6pt]
-       $\displaystyle Q_- = \frac{8-(2-\varepsilon)^3}{\varepsilon}$\\[8pt]
-       $\displaystyle 12-\frac6n+\frac1{n^2}<12$};
-    \node[branch,below right=13mm and -12mm of query] (forward)
-      {{\sffamily\bfseries\color{ink}Forward quotient}\\[6pt]
-       $\displaystyle Q_+ = \frac{(2+\varepsilon)^3-8}{\varepsilon}$\\[8pt]
-       $\displaystyle 12+\frac6n+\frac1{n^2}>12$};
+      {Observe $h=0$};
+    \node[branch,below left=13mm and -12mm of query] (fallback)
+      {{\sffamily\bfseries\color{ink}Replace the zero step}\\[6pt]
+       $\displaystyle\delta=\varepsilon^2\ne0$\\[6pt]
+       $\displaystyle Q=\frac{(2+\delta)^3-8}{\delta}$};
+    \node[branch,below right=13mm and -12mm of query] (nonzero)
+      {{\sffamily\bfseries\color{ink}Use the certified inverse}\\[6pt]
+       $\displaystyle\delta=h\ne0,\quad hg=1$\\[6pt]
+       $\displaystyle Q=\bigl((2+h)^3-8\bigr)g$};
     \node[below=53mm of query,align=center] (result)
       {{\small\sffamily\color{muted}Common ordinary result}\\[4pt]
-       $\displaystyle\st(Q_-)=\st(Q_+)=12=f'(2)$};
+       $\displaystyle\st(Q)=12=f'(2)$};
     \draw[flow] (query.south) -- ++(0,-4mm) -| node[answer,pos=0.75,above]
-      {true: odd indices} (backward.north);
+      {true: even indices} (fallback.north);
     \draw[flow] (query.south) -- ++(0,-4mm) -| node[answer,pos=0.75,above]
-      {false: even indices} (forward.north);
-    \draw[flow] (backward.south) |- (result.west);
-    \draw[flow] (forward.south) |- (result.east);
+      {false: odd indices} (nonzero.north);
+    \draw[flow] (fallback.south) |- (result.west);
+    \draw[flow] (nonzero.south) |- (result.east);
   \end{tikzpicture}
-  \caption{Two accepted runs, different infinitesimal errors, one ordinary derivative. Here $\varepsilon(n)=1/n$ and the displayed inequalities hold for $n>0$. Each branch has its own compatible free completions. The common output does not require one completion shared by both branches.}
+  \caption{The observation supplies a division obligation. Each accepted branch uses a nonzero infinitesimal step and has its own compatible free completions. The inverse identity $hg=1$ is valid in every completion of the negative branch. It is false in every completion of the positive branch, where the step is replaced.}
   \label{fig:adaptive-quotients}
 \end{figure}
-The branch changes the computed quantity, including the sign of its error. Nevertheless, both errors are infinitesimal. Every compatible completion of either accepted run gives standard part $12$. The observation is a caller-proposed polarity checked for consistency, not an evaluation at a sampled index or an algorithm deciding membership in a preselected ultrafilter.
 
-\begin{corollary}[Adaptive derivative extraction]\label{cor:adaptive-derivative}
-  For every proposed Boolean answer stream on which this program executes successfully, its extracted result is $12$. There exists one free completion reproducing the run's selected observation and literal quotient. In every completion compatible with that run, the selected quotient has standard part $12=f'(2)$, although it is strictly below $12$ on the backward branch and strictly above $12$ on the forward branch.
+\begin{corollary}[Observation-dependent derivative extraction]\label{cor:adaptive-derivative}
+  Every accepted execution has one fixed compatible free completion. In every completion of its recorded trace, the selected step $\delta$ is nonzero and infinitesimal, its returned expression denotes the literal quotient $((2+\delta)^3-8)/\delta$, and that quotient has standard part $12$. The executable extractor returns $12$ on both branches. On the positive branch, the original $h$ has no multiplicative inverse.
 \end{corollary}
 \begin{proof}
-  The first proposed answer selects a nonempty parity support. The executable extractor reduces to $12$ on both resulting expression trees and supports. Any remaining answers are unused. The fixed-completion theorem in Section~\ref{sec:programs} supplies realization and universal standard-part soundness. The displayed identities give the strict inequalities. These obligations are proved in \code{AdaptiveInfinitesimal}, including \path{execute_cons}, \path{accepted_result}, \path{accepted_realized}, \path{accepted_standardPart}, and \path{accepted_branch_side}.
+  The accepted observation gives eventual equality $h=0$ or eventual inequality $h\ne0$ in the same completion. On the negative branch, the periodic indicator takes value $1$, so $hg=1$. On the positive branch, replacing $h$ by $\varepsilon^2$ establishes a nonzero infinitesimal denominator. The two resulting expression trees extract $12$ by kernel reduction. Fixed-completion realization then applies to the entire selected run. The declarations \path{selected_step_nonzero}, \path{selected_step_infinitesimal}, \path{accepted_quotient_correspondence}, \path{accepted_result}, and \path{zero_branch_has_no_inverse} in \code{DomainInfinitesimal} prove these obligations.
 \end{proof}
 
-The demonstration script runs the two choices in separate fresh systems and exports both selected traces and expression trees. Tests compare the captured expression trees with the intended quotient formulas at four selected positive indices using an independent rational evaluator. Those tests and the exported replay instances do not prove a compiler-correctness theorem for Python. The corollary is a universal theorem about the explicit Lean program.
+Before the observation, the multiplication expression $((2+h)^3-8)g$ has standard part $0$ in even completions and $12$ in odd completions. It therefore has no shared finite standard part, as proved by \path{guarded_no_common_standardPart}. The zero branch cannot be repaired by cancelling $h$. Its fallback changes the step. This is the distinction between an infinitesimal quantity and an invertible infinitesimal quantity that the observation enforces.
 
-This case isolates a useful distinction. An ordinary answer can be determined even when the observations and intermediate infinitesimal quantities are not. Computing this derivative does not require an ultrafilter, and ordinary symbolic algebra also obtains $12$. The purpose of the case is to justify a program that uses underdetermined observations and nonzero infinitesimal denominators while returning a result independent of both remaining completions and the selected branch.
+The script \path{scripts/domain_infinitesimal_case.py} captures the two branches in fresh systems and exports their traces and expressions for kernel replay. Tests separately evaluate the formulas with rational arithmetic and check that the opposite observation is rejected after a branch has been selected. These concrete checks do not establish a compiler-correctness theorem for Python. The corollary quantifies over all accepted answer streams for the explicit Lean program.
+
+\subsection{Generic Polynomial Differentiation}
+
+The cubic is not the limit of the arithmetic result. A second compiler accepts an arbitrary finite list of rational coefficients and constructs the Horner expression for its polynomial. Given $P\in\Q[X]$, $a,c\in\Q$, $c\ne0$, and $k\in\N$ with $k\ge1$, it forms the original syntax
+\[
+  h(n)=\frac{c}{n^k},\qquad
+  Q_{P,a,c,k}=\frac{P(a+h)-P(a)}{h}.
+\]
+No derivative value, expanded numerator, or convergence certificate is supplied to this compiler.
+
+\begin{theorem}[Executable polynomial differentiation]\label{thm:polynomial-derivative}
+  For every such polynomial, point, scale, and exponent, and every nonempty residue support $S$, the generated expression denotes the literal quotient at positive indices and
+  \[
+    \sthat_S(Q_{P,a,c,k})=P'(a).
+  \]
+  The returned rational agrees with the usual real derivative. Its standard part is $P'(a)$ in every compatible free completion.
+\end{theorem}
+\begin{proof}
+  A recursive polynomial divided difference $D_{P,a}(h)$ satisfies the exact identity
+  \[
+    hD_{P,a}(h)=P(a+h)-P(a)
+  \]
+  even when $h=0$. Writing $P(X)=p_0+XR(X)$ gives the executable recursion
+  \[
+    D_{P,a}(h)=R(a+h)+aD_{R,a}(h).
+  \]
+  The same recursion proves convergence to $P'(a)$ whenever $h\to0$, and an independent differentiation proof identifies that value with the ordinary derivative. The specified $c/n^k$ is nonzero at positive indices, so cancellation identifies the divided difference with the literal quotient. Completeness of extraction, proved in Section~\ref{sec:verified-laurent}, converts this convergence proof into the claimed executable result on every nonempty support.
+\end{proof}
+
+The proofs are in \code{PolynomialDifferentiation}. The declaration \path{rational_polynomial_representable} covers every rational polynomial with a finite coefficient list. The declarations \path{quotientExpr_denote} and \path{quotientExpr_computes_derivative} connect the generated expression, its executable extraction, and the usual derivative. The more general \path{dividedDifference_standardPart_of_standardPart} requires only that the executable extractor return zero for the increment on the current support. It therefore handles represented increments whose infinitesimality becomes established after an observation, including increments that are zero on some active residues. That polynomial expression remains meaningful at zero. Calling it a literal quotient still requires a separate nonzero condition, exactly the obligation isolated by the adaptive case.
+
+Computing an ordinary derivative does not require an ultrafilter, and symbolic algebra also obtains these values. The contribution is the proof connecting exact executable syntax, completion-dependent domain conditions, and an ordinary output that is invariant over the remaining completions.
 
 \section{Finite Observations and Classical Completion}\label{sec:background}
 
@@ -361,6 +401,24 @@ Standard-part extraction performs a separate, read-only check at the least commo
 
 The support and expression proofs are in \code{ResidueSupport} and \code{ResidueExpr}. Comparison correctness is in \code{ResidueComparison}. Transition, extraction, and trace proofs are in \code{ResidueRuntime}, \code{ResidueLimit}, and \code{ResidueTrace}. These reuse the scalar Laurent normalization, sign, and limit proofs. In particular, \code{run\_standardPart\_sound} concludes correctness for every completion of the recorded observations. Successful extraction on universal support also implies ordinary cofinite convergence.
 
+\begin{theorem}[Completeness of shared extraction]\label{thm:extraction-completeness}
+  Let $e$ be a valid expression and $S$ a nonempty residue support. For each $q\in\Q$,
+  \[
+    \sthat_S(e)=q
+    \quad\Longleftrightarrow\quad
+    \forall\PUF\supseteq\mathcal F_{\mathrm{cof}},\quad
+      S\in\PUF\Longrightarrow\lim_{\PUF}e(n)=q.
+  \]
+  Moreover, if the limit is shared for any $r\in\R$, then $r$ is rational and the extractor returns it. A failed extraction therefore rules out every shared finite real value, not only the rational candidates searched by the implementation.
+\end{theorem}
+\begin{proof}
+  Soundness was proved above. For the converse, each active residue of the support/expression common period is infinite and supports a free ultrafilter containing $S$. Restricting to that residue identifies $e$ with one rational Laurent form. A scalar Laurent form with a nonzero positive power of $n$ has unbounded absolute value along every free filter. Otherwise its limit is its rational constant term. A common finite limit consequently forces every active residue to have the same rational constant term, exactly the finite checks performed by the extractor.
+\end{proof}
+
+The declarations \path{standardPart_complete_real}, \path{standardPart_iff_all_completions}, and \path{standardPart_none_no_common_real} in \code{ResidueLimitCompleteness} prove the converse and its failure consequence. Validity and nonempty support are essential hypotheses. Invalid syntax is not a divergent sequence, and an empty set of completions would make a universal limit claim vacuous. The equivalence with trace completions in Theorem~\ref{thm:laurent-runtime} transfers completeness to accepted traces.
+
+The executable diagnostic returns either the common rational, an active residue whose normalized form diverges, or two active residues with different finite limits. Residues are reported modulo the support/expression common period. A separate invalid-input result keeps malformed syntax and empty support distinct from mathematical failure. The declarations \path{standardPart_none_iff_diagnostic_failure}, \path{diagnoseStandardPart_divergent_completion}, and \path{diagnoseStandardPart_disagreement_completions} in \code{ResidueLimitDiagnostic} prove that these failure cases are exhaustive and exhibit compatible completions realizing them. The classification explains why a shared standard part is unavailable on the current support.
+
 \subsection{Implementation Boundary}
 
 The native \code{residue\_checker}, built from \code{ResidueChecker}, calls these same executable functions. The Python interface constructs expression trees and records observations. Ordinary native calls rely on faithful transport, JSON parsing, native compilation, and execution. The optional replay path below checks individual exported claims without trusting the native answer. The implementation enumerates its support tables explicitly, so they can grow to the least common multiple of introduced periods. No period minimization or general scalability guarantee is claimed.
@@ -380,9 +438,9 @@ The result records the selected trace, final support, leaf expression, extracted
   Induction on the executable program connects each accepted query to its recorded observation and its chosen continuation. The trace theorem supplies a free completion containing every selected observation. For a positive answer the comparison set belongs to that completion. For a negative answer its complement belongs, so the comparison set does not. A second induction therefore follows the same continuation at each node under the fixed ultrafilter interpretation. The support characterization and extraction theorem give the final standard part.
 \end{proof}
 
-The corresponding Lean declarations are \path{Program.execute_interpret}, \path{Program.execute_realized}, and \path{Program.execute_standardPart_sound}. Corollary~\ref{cor:adaptive-derivative} instantiates these declarations with two distinct infinitesimal quotient expressions and proves a common result for every accepted input stream. Further kernel-checked examples exercise different later queries, rejected contradictory choices, exhausted choice streams, and accepted unknown outputs.
+The corresponding Lean declarations are \path{Program.execute_interpret}, \path{Program.execute_realized}, and \path{Program.execute_standardPart_sound}. Corollary~\ref{cor:adaptive-derivative} instantiates these declarations with an observation-dependent denominator obligation and proves a common result for every accepted input stream. Further kernel-checked examples exercise different later queries, rejected contradictory choices, exhausted choice streams, and accepted unknown outputs.
 
-The quantifiers matter. Each accepted run admits a fixed completion. Incompatible alternative runs need not share one. Nor does the interpreter compute the completion used in the proof. Its proposed answers can come from a caller or search procedure, but acceptance depends on the semantic check. Only the visited queries and returned expression are validated. A common ordinary result across alternative runs requires an additional argument about their extracted values, as supplied by \path{accepted_result} in the cubic case. Fixed-completion realization alone does not imply that all branches compute the same value.
+The quantifiers matter. Each accepted run admits a fixed completion. Incompatible alternative runs need not share one. Nor does the interpreter compute the completion used in the proof. Its proposed answers can come from a caller or search procedure, but acceptance depends on the semantic check. Only the visited queries and returned expression are validated. A common ordinary result across alternative runs requires an additional argument about their extracted values, as supplied by \path{accepted_result} in the domain example. Fixed-completion realization alone does not imply that all branches compute the same value.
 
 For a continuing mathematical history, there is a related classical observation. If $\Gamma_0\subseteq\Gamma_1\subseteq\cdots$ and every $\Gamma_k$ has a free completion, then $\bigcup_k\Gamma_k$ has one free completion. Every finite subfamily of the union lies in a sufficiently late stage, giving the free finite-intersection property required by Theorem~\ref{thm:completion}. Lean proves this as \path{extendible_iUnion_of_monotone}. This is a compactness consequence of the existing completion criterion. It neither supplies an executable ultrafilter nor certifies future behavior from one finite snapshot. A running system needs an invariant covering every accepted step.
 
@@ -396,7 +454,7 @@ The Lean structure \code{Residue.Replay.Snapshot} contains these data and no fie
   \qquad
   \operatorname{standardPart}(S,e)=v.
 \]
-For a closed exported snapshot $\sigma$, generated source proves $\operatorname{check}(\sigma)=\operatorname{true}$ using \code{decide +kernel}. The theorems \code{Snapshot.trace\_extendible} and \code{Snapshot.support\_mem\_iff} then establish existence of a compatible free completion and the exact final-support characterization. If $v=\operatorname{some}(q)$, \code{Snapshot.standardPart\_sound} yields the standard part $q$ in every completion of that actual exported trace. For $v=\operatorname{none}$, the artifact proves only the extractor's failure result, not impossibility of a standard part in an individual completion or after later refinement.
+For a closed exported snapshot $\sigma$, generated source proves $\operatorname{check}(\sigma)=\operatorname{true}$ using \code{decide +kernel}. The theorems \code{Snapshot.trace\_extendible} and \code{Snapshot.support\_mem\_iff} then establish existence of a compatible free completion and the exact final-support characterization. If $v=\operatorname{some}(q)$, \code{Snapshot.standardPart\_sound} yields the standard part $q$ in every completion of that actual exported trace. For $v=\operatorname{none}$, \path{Snapshot.no_common_standardPart} excludes a common finite real standard part, and \path{Snapshot.failure_classified} proves that the computed diagnosis is divergence or disagreement. Replay does not check the particular witness fields returned separately by the native diagnostic interface. Individual completions can still have standard parts, and later observations may select a value.
 
 Verification regenerates fixed Lean syntax from validated snapshot data, checks artifact association, refreshes the imported build, and elaborates the regenerated source under a resource deadline. Every generated theorem has an axiom report. The accepted set is \code{propext}, \code{Classical.choice}, and \code{Quot.sound}. The replay uses neither \code{native\_decide} nor native evaluation as proof evidence: those shortcuts would add compiler trust beyond kernel reduction. The dependency libraries, their stated axioms, the Lean kernel, and the surrounding operating system and hardware remain part of the assurance assumptions.
 
@@ -422,27 +480,27 @@ Beeson and Wiedijk~\cite{BeesonWiedijk2005} use filters to give semantics to sym
 
 Harrison and Th\'ery~\cite{HarrisonThery1998} separate external solution computation from formal checking in their integration of HOL and Maple. Kernel replay follows that established architecture. The statements checked here concern a recorded observation trace, its compatible completions, and a completion-invariant standard part. The general idea of checking an externally obtained symbolic result is not a novelty claim.
 
-The contribution is the composition of three obligations: executable observations preserve a nonempty class of classical completions, one completion reproduces the control flow of each accepted adaptive run, and successful extraction is valid in every completion of that run. The cubic program then discharges a separate obligation that both branches extract the same ordinary value. This combination makes the witness-free execution claim precise for the implemented language. It does not make finite-domain refinement, filter semantics, or infinitesimal differentiation new in themselves. Reusing the pattern with another non-constructive object would require a representation of finite observations, an executable consistency check connected to an extension theorem, and a sound extraction operation. The present artifact supplies one such instance, not a formal abstraction covering all such objects.
+The contribution is the composition of three obligations: executable observations preserve a nonempty class of classical completions, one completion reproduces the control flow of each accepted adaptive run, and successful extraction is valid in every completion of that run. Completeness characterizes exactly when that ordinary value exists across all remaining completions. Generic polynomial differentiation and the domain example separately connect this interface to literal infinitesimal quotients. This combination makes the witness-free execution claim precise for the implemented language. It does not make finite-domain refinement, filter semantics, or infinitesimal differentiation new in themselves. Reusing the pattern with another non-constructive object would require a representation of finite observations, an executable consistency check connected to an extension theorem, and a sound extraction operation. The present artifact supplies one such instance, not a formal abstraction covering all such objects.
 
 \section{Artifact Evidence and Boundaries}\label{sec:evaluation}
 
 The main evidence is the Lean proof chain from executable observations to classical completions, adaptive execution, and standard-part extraction. The project audit rebuilds the development, rejects unfinished proofs and project-local axioms, and checks the reported dependencies of the maintained theorem roots. The allowed classical dependencies are \code{propext}, \code{Classical.choice}, and \code{Quot.sound}. The audit includes the operational semantics and the infinitesimal case. The source-to-theorem links distinguish the general completion criterion, executable refinement, program realization, and the concrete calculus identity.
 
-The worked case connects these layers in two ways. The theorem \path{accepted_result} covers every accepted answer stream for the explicit Lean program. The saved backward and forward snapshots separately check the concrete traces and quotient expressions captured through the public API. Both extract $12$, and the case theorems place their infinitesimal errors on opposite sides of zero. The snapshots provide inspectable instances. The Lean theorems supply the universal claims, including positivity, nonzeroness, and the bound $\varepsilon<a$ for every positive real constant $a$.
+The artifact combines universal theorems with concrete replay. Polynomial differentiation covers arbitrary rational coefficients, rational points, nonzero rational scales, and positive integer step powers. Every accepted domain-program run establishes a nonzero denominator and returns $12$. Three saved snapshots check both branches and the absence of a common finite value before the observation. Supplementary forward and backward cubic snapshots exhibit distinct infinitesimal errors with the same standard part.
 
-The proof boundaries are concrete. The executable language has exact rational coefficients, finite coefficient periods, and monomial division. General analytic functions and arbitrary sequence predicates are outside it. Ordinary native calls assume faithful transport, parsing, compilation, and execution. Replay checks a regenerated mathematical instance, but faithful capture of the intended external computation remains unverified. The finite program syntax has no loops, and the Python API is not formally translated to it. A successful standard-part result has a universal semantic guarantee. The converse, and semantic certificates explaining failure, remain open.
+The proof boundaries are concrete. The executable language has exact rational coefficients, finite coefficient periods, and monomial division. Representing an inverse on selected support does not implement general rational-function division. General analytic functions and arbitrary sequence predicates are outside the fragment. Ordinary native calls assume faithful transport, parsing, compilation, and execution. Replay checks a regenerated mathematical instance, but faithful capture of the intended external computation remains unverified. The finite program syntax has no loops, and the Python API is not formally translated to it. Extraction completeness concerns values shared across every compatible completion, not the selection of a preferred completion.
 
-A natural next step is to prove extraction complete for the supported fragment and return checked witnesses when active branches diverge or have different limits. A verified translation from the public API to the finite program syntax would address the capture boundary. More general observations would require executable checks with their own correctness arguments. The classical assertion that one consistent polarity exists does not supply such a procedure.
+The next boundary is faithful capture and richer domains. A verified translation from the public API to finite program syntax would address capture. General rational functions would require a verified denominator check and exact comparison and limit procedures. More general observations would likewise require executable checks with their own correctness arguments. The classical assertion that one consistent polarity exists does not supply such a procedure.
 
 \section{Conclusion}
 
-A finite computation can use infinitesimals through observations whose consistency has been checked, while its ultrafilter interpretation remains non-constructive. The executable state records the observations. The completion theorem supplies their classical interpretation. The program theorem shows that accepted adaptive execution is compatible with one fixed completion, and successful extraction supplies an ordinary value shared by all remaining completions.
+A finite computation can use infinitesimals through observations whose consistency has been checked, while its ultrafilter interpretation remains non-constructive. The executable state records the observations. The completion theorem supplies their classical interpretation. The program theorem shows that accepted adaptive execution is compatible with one fixed completion, and sound and complete extraction identifies exactly the finite values shared by all remaining completions.
 
-The cubic program exhibits the connection in a single case. A completion-dependent observation selects one of two literal quotients with a positive nonzero infinitesimal denominator. Exact algebra retains their different infinitesimal errors, and every accepted execution extracts the ordinary derivative. The implementation never constructs the ultrafilter that justifies the selected execution. The verified periodic Laurent language is one concrete realization of this idea. Extending the same account to richer observations and more substantial applications remains the research direction.
+Generic polynomial differentiation connects that interface to exact literal quotients and the ordinary derivative. The adaptive case makes the semantic obligation visible: an infinitesimal may be zero, so an observation must establish invertibility or cause the program to choose a different step. Both branches then extract the same ordinary value. The implementation never constructs the ultrafilter that justifies the selected execution. The verified periodic Laurent language supplies a precise instance of this connection, with faithful capture and richer mathematical domains remaining to be established.
 
 \section*{Artifact and Reproducibility}
 
-The repository contains the Lean modules under \path{Hyperreals}, Python adapters under \path{src/hyperreals}, and pinned Lean, Mathlib, and Python~3.14 configurations. Install the locked development dependencies with \code{uv sync --locked --extra dev}, then run \code{make lean-audit} and \code{uv run --locked --extra dev pytest}. The worked calculation is reproduced by \path{scripts/infinitesimal_case.py}. Its saved snapshots can also be checked individually with \path{scripts/verify_replay.py}. The example README records the exact commands and the distinction between native output and kernel replay. Supplementary exact-arithmetic comparisons and a delayed-choice example are documented under \path{benchmarks} and \path{examples/delayed-choice}. Their measurements support no scaling or performance-ranking claim.
+The repository contains the Lean modules under \path{Hyperreals}, Python adapters under \path{src/hyperreals}, and pinned Lean, Mathlib, and Python~3.14 configurations. Install the locked development dependencies with \code{uv sync --locked --extra dev}, then run \code{make lean-audit} and \code{uv run --locked --extra dev pytest}. The domain example is reproduced by \path{scripts/domain_infinitesimal_case.py}, and the elementary cubic calculations by \path{scripts/infinitesimal_case.py}. Their saved snapshots can also be checked individually with \path{scripts/verify_replay.py}. The example README records the exact commands and the distinction between native output and kernel replay. Supplementary exact-arithmetic comparisons and a delayed-choice example are documented under \path{benchmarks} and \path{examples/delayed-choice}. Their measurements support no scaling or performance-ranking claim.
 
 The repository is \href{https://github.com/krzysztofwos/hyperreals}{github.com/krzysztofwos/hyperreals}. A submission should archive the exact accompanying revision. A moving repository URL does not fix the evaluated artifact.
 
