@@ -3,8 +3,6 @@ TEX = pdflatex
 BIB = bibtex
 TEXFLAGS = -interaction=nonstopmode
 
-METRICS = metrics.csv metrics.tex metrics.md
-
 # Default target
 .PHONY: all
 all: $(PAPER).pdf
@@ -25,24 +23,17 @@ quick: $(PAPER).tex
 	$(TEX) $(TEXFLAGS) $(PAPER).tex
 	@echo "Quick build complete: $(PAPER).pdf"
 
-.PHONY: metrics
-metrics: ../scripts/eval.py
-	@echo "Generating metrics via evaluation suite..."
-	python ../scripts/eval.py --out metrics.csv
-
 # Lint LaTeX source files
 # Suppressed warnings:
 #   -n3: parenthesis enclosure (false positives for \code{})
 #   -n13: intersentence spacing (stylistic)
 #   -n36: space before parenthesis (false positives for \code{})
 #   -n38: punctuation before quotes (standard LaTeX style)
-#   -n44: booktabs (auto-generated metrics.tex uses \hline)
-#   -n24: spacing before label (auto-generated metrics.tex)
 .PHONY: lint
 lint:
 	@echo "Linting LaTeX source files..."
 	@if command -v chktex >/dev/null; then \
-		chktex -q -n3 -n13 -n24 -n36 -n38 -n44 $(PAPER).tex || true; \
+		chktex -q -n3 -n13 -n36 -n38 $(PAPER).tex || true; \
 	else \
 		echo "chktex not found. Please install it to lint LaTeX files."; \
 	fi
@@ -87,7 +78,6 @@ help:
 	@echo "Available targets:"
 	@echo "  make         - Build the PDF (two passes for references)"
 	@echo "  make quick   - Quick build (single pass)"
-	@echo "  make metrics - Regenerate metrics (requires Python)"
 	@echo "  make view    - Build and open the PDF"
 	@echo "  make lint    - Lint the LaTeX source files (chktex)"
 	@echo "  make fmt     - Format the LaTeX source files (latexindent)"
