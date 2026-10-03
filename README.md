@@ -4,7 +4,7 @@ A computational interface to infinitesimal arithmetic that records finite observ
 
 The mathematical question is how a finite computation can use a nonconstructive object while leaving that object unspecified. Here, each accepted comparison records a set of sequence indices that a free-ultrafilter completion must contain. Lean connects checked adaptive execution to one fixed completion and proves that a successfully extracted real value is shared by every completion of that execution. The executable core computes with exact finite periodic Laurent expressions. It does not select or enumerate whole ultrafilters.
 
-The main entry point is `LeanResidueSystem`. The broader Python analytic and SAT frontend remains available for experiments, with a separate trust boundary. See [formalization.md](formalization.md) for the precise statements, proof sources, and research questions.
+The main entry point is `LeanResidueSystem`, an exact interface to the Lean residue checker. Optional kernel replay verifies a recorded computation independently of the native result. See [formalization.md](formalization.md) for the precise statements, proof sources, and research questions.
 
 ## An adaptive infinitesimal calculation
 
@@ -74,7 +74,7 @@ The state represents recurring residues. Committing a comparison intersects its 
 
 The grammar includes exact rational constants, `n`, `1/n`, nonempty rational periodic tables, addition, subtraction, multiplication, and division by an explicit nonzero rational monomial. Use `expression.divide_monomial(c, k)` for division by `c * n**k`, including negative integer `k`. `/` accepts primitive constants, `n`, and `eps`. General denominators and analytic functions are outside this backend. Float inputs denote their exact binary rational values. Use `Fraction` for intended rational constants.
 
-Comparisons expose an inclusive natural-index cutoff through `last_cutoff`. The proved comparison mask agrees with the real sequence at every index from that cutoff onward. Coefficients are never truncated. Support masks are explicitly enumerated, so coprime periods can make the state large. This is an exact reference implementation, with no claimed performance advantage and no SAT dependency in its verified core.
+Comparisons expose an inclusive natural-index cutoff through `last_cutoff`. The proved comparison mask agrees with the real sequence at every index from that cutoff onward. Coefficients are never truncated. Support masks are explicitly enumerated, so coprime periods can make the state large. This is an exact reference implementation, with no claimed performance advantage.
 
 ## Kernel-checked session replay
 
@@ -110,7 +110,7 @@ The proof concerns the exported expressions and choices. Python capture and its 
 # Exact arithmetic and successive choices across different periods
 uv run python scripts/residue_demo.py
 
-# Earlier two-parity Laurent example
+# Restricted two-parity Laurent example
 lake build laurent_checker
 uv run python scripts/verified_demo.py
 ```
@@ -119,67 +119,15 @@ The [paired-channel calibration model](examples/delayed-choice/README.md) illust
 
 The [comparative benchmark](benchmarks/README.md) records exact agreement and execution costs against direct rational residue enumeration and SymPy on twelve hand-selected workloads. These measurements document the artifact. They do not establish scalability, application coverage, or a general speed advantage.
 
-## Other APIs
+## Verified interfaces
 
-| API                  | Scope                                                                                                | Status                                                                            |
-| -------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `LeanResidueSystem`  | Exact finite Laurent expressions with arbitrary finite periodic coefficients                         | Main executable core with Lean refinement proofs and optional kernel replay       |
-| `LeanLaurentSystem`  | Same arithmetic with even and odd coefficients                                                       | Earlier verified core, built with `lake build laurent_checker`                    |
-| `LeanPeriodicSystem` | Rational constants and alternating signs with arithmetic, no `n`, `1/n`, division, or standard parts | Smaller verified comparison core, built with `lake build periodic_checker`        |
-| `HyperrealSystem`    | Analytic expressions, approximate series/asymptotic analysis, and SAT-assisted choices               | Experimental Python frontend, not a verified implementation of the Lean semantics |
+| API                  | Scope                                                                                                                               | Build                         |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `LeanResidueSystem`  | Main core: exact finite Laurent expressions with arbitrary finite periodic coefficients, standard parts, and optional kernel replay | `lake build residue_checker`  |
+| `LeanLaurentSystem`  | Restricted interface with even and odd Laurent coefficients                                                                         | `lake build laurent_checker`  |
+| `LeanPeriodicSystem` | Restricted comparison interface with rational constants and alternating signs, without `n`, `1/n`, division, or standard parts      | `lake build periodic_checker` |
 
-The Lean-backed APIs send unsimplified expression trees to their native checkers. Missing executables raise an error, with no fallback to Python analysis. Installed packages can pass an explicit `checker_path`. Arithmetic and comparisons between different systems are rejected.
-
-### Experimental Python analytic and SAT frontend
-
-```python
-from hyperreals import HyperrealSystem
-
-sys = HyperrealSystem()
-eps = sys.infinitesimal()
-x = sys.constant(2.0)
-
-def f(x):
-    return x * x * x - sys.constant(3.0) * x
-
-print(((f(x + eps) - f(x)) / eps).standard_part())  # 9.0
-
-alt = sys.alt()
-assert alt < sys.constant(0.0)
-assert not (alt == sys.constant(1.0))
-```
-
-Supported comparisons are checked against an exact eventual-periodic model and an infinite joint support, in addition to SAT feasibility. Unsupported comparisons return `None` through `compare_lt`, `compare_eq`, or `compare_gt`. Using them as Python booleans raises `UnderdeterminedComparisonError`. `HyperrealSystem(allow_uncertified_choices=True)` enables the legacy SAT-only policy and invalidates the state's semantic certificate.
-
-The Python comparison compiler uses exact rational coefficients and preserves expressions when constant folding would round. That compiler remains trusted code. The eventual-periodic infinitude checker is proved sound in Lean, but the complete Python pipeline is not. `standard_part()` returns candidates from floating-point series and asymptotic analysis, not Lean proof certificates, and returns `None` when it does not recognize a limit. Supplied standard-part brackets are checked jointly before a completion is selected.
-
-Run the experimental demo and inspect or save its state:
-
-```bash
-uv run python scripts/demo.py
-uv run python scripts/demo.py --save-ultrafilter ultrafilter_state.json
-uv run python scripts/demo.py --clause-limit 0
-uv run python scripts/demo.py --help
-```
-
-The Taylor script reads coefficients of powers of `ε = 1/n` to recover function values and derivatives in one pass. Its floating-point expansions are outside the verified fragment:
-
-```bash
-uv run python scripts/taylor.py
-uv run python scripts/taylor.py --func exp --x 0.7 --order 5
-uv run python scripts/taylor.py --func sin --func cos --x 0.0 --order 5
-```
-
-The older evaluation script records implementation diagnostics from seven tasks sharing one growing state. Its counters are not independent workload measurements or evidence of SAT scalability:
-
-```bash
-uv run python scripts/eval.py
-uv run python scripts/eval.py --verbose
-uv run python scripts/eval.py --out results.csv
-uv run python scripts/eval.py --save-ultrafilter final_state.json
-```
-
-It generates `metrics.csv`, `metrics.tex`, and `metrics.md` for the selected output stem.
+The APIs send unsimplified expression trees to their native checkers. Missing executables raise an error. Installed packages can pass an explicit `checker_path`. Arithmetic and comparisons between different systems are rejected. All three interfaces use exact finite representations with Lean refinement proofs. Their Python adapters and native execution retain the implementation boundaries described above.
 
 ## Development and proof checks
 
@@ -191,17 +139,17 @@ lake build
 make lean-audit
 uv run pytest tests/test_verified_periodic.py tests/test_verified_laurent.py
 uv run pytest tests/test_verified_residue.py tests/test_replay.py tests/test_replay_capture.py
+uv run pytest tests/test_infinitesimal_case.py
 ```
 
 The audit rejects unfinished proofs and project-local axioms and permits only the standard dependencies `propext`, `Classical.choice`, and `Quot.sound`. Classical choice is part of the completion-existence argument, not an executable construction of the completion. See [formalization.md](formalization.md) for the semantic definitions, theorem map, trust boundaries, and open obligations.
 
-| Location                                                            | Contents                                                                   |
-| ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `Hyperreals/`                                                       | Semantic specification, completion theorems, and verified executable cores |
-| `src/hyperreals/verified_residue.py` and `src/hyperreals/replay.py` | Main Python adapter and snapshot replay                                    |
-| `src/hyperreals/hyperreal.py`, `sequence/`, and `series.py`         | Experimental analytic frontend                                             |
-| `src/hyperreals/algebra.py`, `sat.py`, and `ultrafilter.py`         | Experimental set algebra and partial ultrafilter state                     |
-| `scripts/`, `examples/`, and `benchmarks/`                          | Runnable examples, replay artifacts, and bounded evaluation                |
+| Location                                                              | Contents                                                                   |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `Hyperreals/`                                                         | Semantic specification, completion theorems, and verified executable cores |
+| `src/hyperreals/verified_residue.py` and `src/hyperreals/replay.py`   | Main Python adapter and snapshot replay                                    |
+| `src/hyperreals/verified.py` and `src/hyperreals/verified_laurent.py` | Restricted periodic and two-parity adapters                                |
+| `scripts/`, `examples/`, and `benchmarks/`                            | Runnable examples, replay artifacts, and bounded evaluation                |
 
 ## License
 

@@ -1,16 +1,17 @@
 import Hyperreals.StandardPart
 
 /-!
-# Mathematical guards used by the runtime repairs
+# Limit side conditions and exact Laurent terms
 
 A nonzero denominator limit permits division of convergent sequences. It does
 not imply that the quotient stays away from zero: that conclusion requires a
 nonzero quotient limit. The reciprocal-index counterexample records the missing
-hypothesis in the former asymptotic division rule.
+hypothesis in a rule that would infer a positive lower bound from denominator
+convergence alone.
 
 The final theorem records why truncating a positive power before Laurent
-division can change the constant coefficient. These are the mathematical rules
-behind the repairs. They do not identify Python's analyzer with Lean semantics.
+division can change the constant coefficient. This explains why vanishing terms
+must be retained when later operations can divide by powers of an infinitesimal.
 -/
 
 set_option autoImplicit false

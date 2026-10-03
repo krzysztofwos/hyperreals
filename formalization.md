@@ -8,7 +8,7 @@ Mathlib already supplies a hyperreal field using a noncomputably chosen free ult
 
 ## The central semantic statement
 
-[Semantics.lean](Hyperreals/Semantics.lean) treats a sequence as an exact total function `ℕ → ℝ`. A strict comparison denotes the set `{n | x n < y n}`. An equality denotes `{n | x n = y n}`. A negative observation commits the complement of its comparison set. Propositional consistency of names for sets is insufficient because the names have mathematical meanings.
+[Semantics.lean](Hyperreals/Semantics.lean) treats a sequence as an exact total function `ℕ → ℝ`. A strict comparison denotes the set `{n | x n < y n}`. An equality denotes `{n | x n = y n}`. A negative observation commits the complement of its comparison set. Propositional consistency of names for sets is insufficient because the names have mathematical meanings. [Counterexample.lean](Hyperreals/Counterexample.lean) proves that `(-1)^n < 0` and `(-1)^n = 1` have no common completion, despite being compatible as independent Boolean atoms. Accepted observations must preserve an infinite joint support, which the executable residue checks enforce.
 
 [Completion.lean](Hyperreals/Completion.lean) defines a family of commitments `Γ` and `Completion Γ`, a free ultrafilter containing every set in `Γ`. Freeness means extending the cofinite filter. `HasFreeFIP Γ` requires every finite subfamily of `Γ`, together with cofinite sets, to have nonempty intersection.
 
@@ -86,13 +86,13 @@ The main API, [`LeanResidueSystem`](src/hyperreals/verified_residue.py), sends r
 
 `periodic(values)` denotes `values[n % len(values)]`. Constants, `n`, and `1/n` have coefficient period one, although the last two sequences are not themselves periodic. Binary expressions combine coefficient periods by LCM. Each residue normalizes to an exact rational polynomial divided by `n^shift`. All coefficients are retained, including arbitrarily high-order terms. Use `divide_monomial(c, k)` for division by `c * n^k`, with negative integer powers allowed. Python `/` accepts primitive constants, `n`, and `1/n`.
 
-| Layer | Executable definitions | Proved connection |
-| --- | --- | --- |
-| Support | [ResidueSupportCore](Hyperreals/ResidueSupportCore.lean) | [ResidueSupport](Hyperreals/ResidueSupport.lean): lifting, LCM intersection, complement, and infinitude |
-| Expressions | [ResidueExprCore](Hyperreals/ResidueExprCore.lean) | [ResidueExpr](Hyperreals/ResidueExpr.lean): positive coefficient periods and exact source denotation |
-| Comparisons | [ResidueComparisonCore](Hyperreals/ResidueComparisonCore.lean) | [ResidueComparison](Hyperreals/ResidueComparison.lean): agreement from a computed cutoff onward |
-| Standard parts | [ResidueLimitCore](Hyperreals/ResidueLimitCore.lean) | [ResidueLimit](Hyperreals/ResidueLimit.lean): successful extraction implies convergence along every free filter containing the support |
-| Observations | [ResidueRuntimeCore](Hyperreals/ResidueRuntimeCore.lean) | [ResidueRuntime](Hyperreals/ResidueRuntime.lean), [ResidueTrace](Hyperreals/ResidueTrace.lean): accepted traces and all compatible completions |
+| Layer          | Executable definitions                                         | Proved connection                                                                                                                              |
+| -------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Support        | [ResidueSupportCore](Hyperreals/ResidueSupportCore.lean)       | [ResidueSupport](Hyperreals/ResidueSupport.lean): lifting, LCM intersection, complement, and infinitude                                        |
+| Expressions    | [ResidueExprCore](Hyperreals/ResidueExprCore.lean)             | [ResidueExpr](Hyperreals/ResidueExpr.lean): positive coefficient periods and exact source denotation                                           |
+| Comparisons    | [ResidueComparisonCore](Hyperreals/ResidueComparisonCore.lean) | [ResidueComparison](Hyperreals/ResidueComparison.lean): agreement from a computed cutoff onward                                                |
+| Standard parts | [ResidueLimitCore](Hyperreals/ResidueLimitCore.lean)           | [ResidueLimit](Hyperreals/ResidueLimit.lean): successful extraction implies convergence along every free filter containing the support         |
+| Observations   | [ResidueRuntimeCore](Hyperreals/ResidueRuntimeCore.lean)       | [ResidueRuntime](Hyperreals/ResidueRuntime.lean), [ResidueTrace](Hyperreals/ResidueTrace.lean): accepted traces and all compatible completions |
 
 The state starts as `[true]`. A commitment intersects its comparison mask with the existing support over their LCM and succeeds only if the result is nonempty. Introducing a new period therefore preserves earlier observations. Shared factors retain correlations between residue choices. Since each nonempty periodic support is infinite, successful states satisfy the semantic extension condition.
 
@@ -110,15 +110,15 @@ Extraction enumerates the LCM of the expression and state periods and tests ever
 
 Build and run the core with `lake build residue_checker` and `uv run python scripts/residue_demo.py`. The demonstration accepts `(-1)^n < 0` and `periodic([0,1,2]) = 2`, retains precisely residue 5 modulo 6, and rejects an incompatible later observation. Integration tests also evaluate raw syntax with `Fraction` at reported cutoffs. These sampled checks test transport and native behavior. The tail-wide mathematical guarantee comes from the Lean proofs.
 
-### Scalar arithmetic and earlier interfaces
+### Scalar arithmetic and restricted interfaces
 
 The residue implementation reuses the scalar Laurent algorithms. [LaurentExpr](Hyperreals/LaurentExpr.lean) proves exact normalization, [LaurentSign](Hyperreals/LaurentSign.lean) proves computed sign bounds, and [LaurentLimit](Hyperreals/LaurentLimit.lean) proves convergence from the executable coefficient test. The sign algorithm traverses Horner coefficients. For nonzero tail leading coefficient `a` and head `b`, it raises the cutoff to at least `ceil(abs(b) / abs(a)) + 1`. Induction bounds the entire remaining tail, rather than checking selected sample indices.
 
 The finite-limit test rejects nonzero numerator coefficients above the denominator shift and reads the coefficient at that shift. Lower powers vanish. `Laurent.Form.standardPart?_sound` connects success to ordinary convergence. Exact finite sums need neither a truncation rule nor an approximate remainder estimate.
 
-The earlier [`LeanLaurentSystem`](src/hyperreals/verified_laurent.py) exposes this arithmetic with only even and odd coefficients. Its compiled results include `Laurent.Expr.normalize_sequence_correct`, `Laurent.Form.sign_correct`, `Laurent.compile_correct`, `Laurent.run_universe_mem_iff`, and `Laurent.run_standardPart_sound`. [`LeanPeriodicSystem`](src/hyperreals/verified.py) is smaller still, with rational constants and alternating signs but no `n`, `1/n`, division, or standard parts. [Periodic.lean](Hyperreals/Periodic.lean) proves its evaluator, comparisons, transitions, and trace completion theorem. These interfaces remain available, but the arbitrary-period backend is the main executable realization.
+[`LeanLaurentSystem`](src/hyperreals/verified_laurent.py) exposes this arithmetic with only even and odd coefficients. Its compiled results include `Laurent.Expr.normalize_sequence_correct`, `Laurent.Form.sign_correct`, `Laurent.compile_correct`, `Laurent.run_universe_mem_iff`, and `Laurent.run_standardPart_sound`. [`LeanPeriodicSystem`](src/hyperreals/verified.py) is smaller still, with rational constants and alternating signs but no `n`, `1/n`, division, or standard parts. [Periodic.lean](Hyperreals/Periodic.lean) proves its evaluator, comparisons, transitions, and trace completion theorem. These restricted interfaces share the exact arithmetic approach. The arbitrary-period backend is the main executable realization.
 
-None of the verified cores uses SAT. They explicitly enumerate residue masks and retain dense scalar coefficient lists. Potential LCM growth limits this representation. A compact implementation would be an engineering extension requiring its own refinement proof, not the central mathematical research question.
+The executable cores explicitly enumerate residue masks and retain dense scalar coefficient lists. Potential LCM growth limits this representation. A compact implementation would be an engineering extension requiring its own refinement proof, not the central mathematical research question.
 
 ## Kernel replay of a finite computation
 
@@ -147,15 +147,11 @@ Tests cover immutable snapshots, negative observations, rejected transitions, la
 - The normalization and extraction theorems cover the specified finite Laurent grammar. They do not cover general division, analytic expansions, or floating-point coefficients with approximate error bounds.
 - A mathematical model's association with an external application is an assumption. Neither completion existence nor kernel replay validates an empirical interpretation of the recorded index sets.
 
-### Secondary experimental Python frontend
+### Supporting semantic lemmas
 
-The broader [`HyperrealSystem`](src/hyperreals/hyperreal.py) offers analytic expressions, floating-point Taylor/asymptotic analysis, and SAT-assisted observations. In safe mode, supported comparisons must preserve an infinite eventual-periodic joint support in addition to being SAT-feasible. Unsupported comparisons return `unknown`. The explicit `allow_uncertified_choices=True` option restores SAT-only choices and invalidates the state's semantic certificate.
+[EventuallyPeriodic.lean](Hyperreals/EventuallyPeriodic.lean) proves an infinitude checker for represented eventual-periodic sets. [Certificates.lean](Hyperreals/Certificates.lean) proves that an eventual comparison certificate selects a cofinite set and preserves existing completions. The generic `safePositiveChoice_extendible` theorem in [Completion.lean](Hyperreals/Completion.lean) requires the semantic finite-intersection condition explicitly. These are supporting mathematical interfaces. They do not extend the executable grammar.
 
-[EventuallyPeriodic.lean](Hyperreals/EventuallyPeriodic.lean) proves `EventuallyPeriodicSet.checkInfinite_sound` for represented eventual-periodic sets. It does not prove that Python's expression-to-set compiler produces the correct representation. [Certificates.lean](Hyperreals/Certificates.lean) proves that an eventual comparison certificate selects a cofinite set and preserves existing completions. The generic `safePositiveChoice_extendible` theorem requires the backend to discharge the semantic finite-intersection condition. These conditional interfaces do not prove the Python dispatcher sound.
-
-The Lean theorems do not establish refinement of Python's comparison compiler, expression keys, floating-point series recognizer, or complete runtime. SAT satisfiability alone does not imply semantic consistency. [Counterexample.lean](Hyperreals/Counterexample.lean) proves that the commitments `(-1)^n < 0` and `(-1)^n = 1` have no common completion. That regression explains why checking only propositional names was insufficient.
-
-Earlier runtime repairs have regression coverage: rational comparison arithmetic, exact-only constant folding, domain-preserving cancellation, sufficient child precision for exponent shifts, exact monomial recognition, order-sensitive analysis caches, compositional fallback after numerical failure, quotient lower bounds, context separation, and atomic bracket commitments. [RuntimeInvariants.lean](Hyperreals/RuntimeInvariants.lean) proves the corrected lower-bound rule and a truncation counterexample. A vanishing term cannot be discarded before a later Laurent shift makes it visible. These proofs explain individual repairs, not refinement of the whole analyzer. For example, `epsilon / (epsilon / tanh(n))` returns `None` instead of the formerly false zero. Proving and implementing that cancellation remains open.
+[RuntimeInvariants.lean](Hyperreals/RuntimeInvariants.lean) records a quotient lower-bound rule and a truncation counterexample. The latter shows why a vanishing term cannot be discarded before a later Laurent shift makes it visible. The exact core avoids that loss by retaining every coefficient.
 
 ## Supporting examples and measurements
 
@@ -163,7 +159,7 @@ The [paired-channel calibration model](examples/delayed-choice/README.md) uses e
 
 Three saved snapshots certify the early fused result, partially resolved raw result, and final phase after the live session has advanced. An exhaustive exact reference agrees on accepted observations and candidate sets. A specified eager policy selects the smallest compatible full-period residue and then needs backtracking to accommodate later evidence. Its rejection is sound for its extra choice. This is a constructive example of one early commitment's cost, not a finding that all eager algorithms fail or that physical sensors behave according to the model.
 
-Exact evaluation at 180 selected positive indices corroborates the finite-difference identities. The generated Lean theorems establish the standard-part claims for the exported expressions. [Comparative benchmarks](benchmarks/README.md) record exact result agreement and timings for twelve hand-selected finite workloads against sparse rational enumeration and SymPy. Public API, persistent native execution, direct Python formulas, and full replay have different measured scopes. These artifacts document behavior and costs without establishing scalability, application coverage, or a speed advantage. The original seven-task Python/SAT evaluation is a shared-state implementation diagnostic.
+Exact evaluation at 180 selected positive indices corroborates the finite-difference identities. The generated Lean theorems establish the standard-part claims for the exported expressions. [Comparative benchmarks](benchmarks/README.md) record exact result agreement and timings for twelve hand-selected finite workloads against sparse rational enumeration and SymPy. Public API, persistent native execution, direct Python formulas, and full replay have different measured scopes. These artifacts document behavior and costs without establishing scalability, application coverage, or a speed advantage.
 
 ## Research direction and remaining obligations
 
@@ -173,7 +169,7 @@ The following are separate obligations rather than claims of an already complete
 
 1. **Beyond the finite program model.** The finite adaptive interpreter and conditional monotone-union completion theorem are proved. Relating them to a larger host language, infinite operational behavior, or liveness would require new semantics and refinement arguments. The whole-run existence result does not supply executable witness extraction.
 2. **A stronger output specification.** Characterize when the exact extractor succeeds and provide checked reasons for negative answers. Disagreeing finite branch limits would rule out one shared answer, not near-standardness in every individual completion. Such a converse is distinct from the existing successful-extraction soundness theorem.
-3. **A broader analytic bridge.** Extend beyond exact finite Laurent expressions only with explicit domains, valuations/precision, remainder guarantees, and coefficient error bounds. The Python analytic recognizer is not a certificate of these conditions.
+3. **A broader analytic bridge.** Extend beyond exact finite Laurent expressions only with explicit domains, valuations/precision, remainder guarantees, and coefficient error bounds. The current executable grammar supplies none of these analytic extensions.
 4. **Faithful execution capture.** Refine serialization, parsing, and transcript capture to the formal semantics, or keep their assumptions explicit. Kernel replay already checks the exported mathematical instance, not its historical provenance.
 5. **Independent application value.** Find a problem whose naturally occurring observations and required outputs benefit from this interface. Compare the same tasks with ordinary exact algebra and finite-constraint methods. The constructed calibration model and small benchmarks do not settle that question. Compact state and runtime improvements are supporting engineering work, not substitutes for it.
 
@@ -206,4 +202,4 @@ uv run python scripts/residue_demo.py
 uv run python scripts/verify_replay.py examples/delayed-choice/snapshots/early-fused
 ```
 
-The audit rebuilds the import graph and native checker, rejects unfinished proofs and local axioms including private declarations, re-elaborates every audited module, and rejects dependencies outside `propext`, `Classical.choice`, and `Quot.sound`. Lean CI runs the Python/Lean integration tests and verifies the saved calibration snapshots. Ordinary Python-only installations skip tests requiring built Lean artifacts. Reproducing the calibration timings with `uv run python scripts/delayed_choice_case_study.py --repeat 5` is optional evaluation work, not a prerequisite for the completion theorem.
+The audit rebuilds the import graph and native checker, rejects unfinished proofs and local axioms including private declarations, re-elaborates every audited module, and rejects dependencies outside `propext`, `Classical.choice`, and `Quot.sound`. Lean CI runs the Python/Lean integration tests and verifies the five saved infinitesimal snapshots and three calibration snapshots. Ordinary Python-only installations skip tests requiring built Lean artifacts. Reproducing the calibration timings with `uv run python scripts/delayed_choice_case_study.py --repeat 5` is optional evaluation work, not a prerequisite for the completion theorem.

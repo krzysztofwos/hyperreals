@@ -4,9 +4,9 @@ import Mathlib.Analysis.SpecialFunctions.Exp
 /-!
 # Exact expression semantics
 
-This module defines an exact algebraic core of the Python sequence language.
-Constants are mathematical real numbers, so connecting Python floating-point
-values to this syntax remains an explicit refinement obligation.
+This module defines a mathematical expression language with real constants and
+total real-sequence semantics. The executable residue language uses rational
+coefficients and has its own normalization and refinement proofs.
 -/
 
 set_option autoImplicit false

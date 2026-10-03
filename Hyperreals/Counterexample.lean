@@ -4,10 +4,10 @@ import Hyperreals.Expressions
 /-!
 # Counterexample to propositional-only consistency
 
-The current Python prototype can commit both comparison sets below for the
-alternating sequence. Their intersection is empty, so no ultrafilter completion
-can contain them both. This is the semantic obligation that propositional SAT
-does not see when comparison atoms are treated as opaque names.
+The comparison sets below are disjoint, so no ultrafilter completion can
+contain them both. For the alternating sequence, each set is individually
+compatible with a free completion. Treating the comparisons as independent
+Boolean atoms loses this obstruction to their joint consistency.
 -/
 
 set_option autoImplicit false
@@ -17,7 +17,7 @@ open Filter Set
 
 namespace Hyperreals
 
-/-- The two semantically incompatible observations reproduced in the audit. -/
+/-- Two semantically incompatible observations of the same sequence. -/
 def contradictoryComparisons (a : Sequence) : Commitments :=
   {comparisonLt a (Sequence.constant 0), comparisonEq a (Sequence.constant 1)}
 
@@ -50,11 +50,11 @@ theorem contradictoryComparisons_not_hasFreeFIP (a : Sequence) :
   rw [hasFreeFIP_iff_extendible]
   exact contradictoryComparisons_not_extendible a
 
-/-- The inconsistent state instantiated at the Python DSL's alternating sequence. -/
+/-- The incompatible observations instantiated at the alternating sequence. -/
 def alternatingContradictoryComparisons : Commitments :=
   contradictoryComparisons Expr.alternatingSign.denote
 
-/-- The two concrete observations accepted by the current Python prototype have no completion. -/
+/-- The two concrete alternating-sequence observations have no common completion. -/
 theorem alternatingContradictoryComparisons_not_extendible :
     ¬ Extendible alternatingContradictoryComparisons :=
   contradictoryComparisons_not_extendible Expr.alternatingSign.denote

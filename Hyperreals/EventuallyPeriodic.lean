@@ -3,13 +3,12 @@ import Hyperreals.Completion
 /-!
 # Executable infinitude checks for eventual-periodic certificates
 
-This is the first-order certificate format mirrored by the Python runtime.
-A certificate records a periodic tail but deliberately says nothing about the
+This certificate records a periodic tail but deliberately says nothing about the
 finite prefix, which is invisible to every free ultrafilter.
 
 The Boolean checker is executable. Its soundness theorem proves that an accepted
-certificate denotes an infinite set. Relating a Python comparison expression to
-the certificate it emits remains a separate refinement obligation.
+certificate denotes an infinite set. The theorem concerns the represented tail.
+Connecting a comparison expression to such a tail requires a separate proof.
 -/
 
 set_option autoImplicit false

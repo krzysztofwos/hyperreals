@@ -6,9 +6,9 @@ import Mathlib.Order.Interval.Finset.Nat
 # Certificates for safe comparison commitments
 
 A certificate records one comparison polarity together with an eventual proof.
-The proof is load-bearing: this module establishes the consequence checked by
-the Lean kernel, but it does not claim that the Python analyzer can manufacture
-such a proof from floating-point evidence.
+The eventual proof is an explicit premise. This module establishes its
+consequences for completions, without providing an algorithm that produces
+certificates for arbitrary expressions.
 -/
 
 set_option autoImplicit false
