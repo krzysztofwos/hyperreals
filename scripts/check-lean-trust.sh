@@ -51,6 +51,9 @@ audited_modules=(
   Hyperreals/ObservationProgramExamples.lean
   Hyperreals/InfinitesimalCase.lean
   Hyperreals/AdaptiveInfinitesimal.lean
+  Hyperreals/LaurentLimitCompleteness.lean
+  Hyperreals/ResidueLimitCompleteness.lean
+  Hyperreals/ResidueLimitDiagnostic.lean
 )
 
 for module in "${audited_modules[@]}"; do
