@@ -17,3 +17,4 @@ import Hyperreals.AdaptiveInfinitesimal
 import Hyperreals.LaurentLimitCompleteness
 import Hyperreals.ResidueLimitCompleteness
 import Hyperreals.ResidueLimitDiagnostic
+import Hyperreals.PolynomialDifferentiation
