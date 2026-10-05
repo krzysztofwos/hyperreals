@@ -1,33 +1,32 @@
-"""Mathematical boundary checks against the actual Lean Laurent executable.
+"""Mathematical boundary checks against the Lean residue executable.
 
 The direct Fraction evaluations below are finite regression checks of transport
 and execution. The corresponding all-indices tail statements are Lean theorems.
 """
 
+# trunk-ignore-all(bandit/B101): pytest assertions are test oracles, not runtime validation.
+
 import json
 import random
+
+# trunk-ignore(bandit/B404): These tests invoke the repository's built Lean checker.
 import subprocess
 from fractions import Fraction
 from pathlib import Path
 
 import pytest
 
-from hyperreals import LeanBackendError, LeanLaurentSystem
+from hyperreals import LeanResidueSystem
 
-CHECKER = Path(__file__).resolve().parents[1] / ".lake/build/bin/laurent_checker"
+CHECKER = Path(__file__).resolve().parents[1] / ".lake/build/bin/residue_checker"
 requires_lean = pytest.mark.skipif(
-    not CHECKER.is_file(), reason="run lake build laurent_checker"
+    not CHECKER.is_file(), reason="run lake build residue_checker"
 )
-
-
-def test_missing_laurent_checker_does_not_fall_back_to_analyzer(tmp_path):
-    with pytest.raises(LeanBackendError, match="not found"):
-        LeanLaurentSystem(checker_path=tmp_path / "absent")
 
 
 @requires_lean
 def test_infinitesimal_arithmetic_and_finite_difference_derivative():
-    system = LeanLaurentSystem()
+    system = LeanResidueSystem()
     epsilon, n = system.infinitesimal(), system.infinite()
     zero, one, two, three = (system.constant(i) for i in (0, 1, 2, 3))
     assert zero < epsilon
@@ -40,12 +39,12 @@ def test_infinitesimal_arithmetic_and_finite_difference_derivative():
         ((two + epsilon) ** 3 - three * (two + epsilon)) - (two**3 - three * two)
     ) / epsilon
     assert derivative.standard_part() == Fraction(9)
-    assert system.support == (True, True)
+    assert system.support == (True,)
 
 
 @requires_lean
 def test_high_order_terms_survive_later_shifts():
-    system = LeanLaurentSystem()
+    system = LeanResidueSystem()
     epsilon, n = system.infinitesimal(), system.infinite()
     assert ((n**11) * (epsilon**11)).standard_part() == 1
     tiny = system.constant(7) * epsilon**12
@@ -59,7 +58,7 @@ def test_high_order_terms_survive_later_shifts():
 @requires_lean
 @pytest.mark.parametrize("power", [-4, -1, 0, 3])
 def test_division_by_signed_rational_monomials(power):
-    system = LeanLaurentSystem()
+    system = LeanResidueSystem()
     coefficient = Fraction(-7, 13)
     base = system.infinite() if power >= 0 else system.infinitesimal()
     numerator = system.constant(coefficient) * base ** abs(power)
@@ -71,7 +70,7 @@ def test_division_by_signed_rational_monomials(power):
 
 @requires_lean
 def test_large_constants_and_small_coefficients_remain_exact():
-    system = LeanLaurentSystem()
+    system = LeanResidueSystem()
     huge = 10**400
     a, one = system.constant(huge), system.constant(1)
     assert a < a + one
@@ -79,18 +78,18 @@ def test_large_constants_and_small_coefficients_remain_exact():
     assert (system.constant(Fraction(1, 10**400)) * a).standard_part() == 1
     assert a < system.infinite()
     assert system.last_cutoff is not None and system.last_cutoff > huge
-    assert system.support == (True, True)
+    assert system.support == (True,)
 
 
 @requires_lean
 def test_standard_part_uses_remaining_support_without_choosing():
-    system = LeanLaurentSystem()
+    system = LeanResidueSystem()
     alt, zero, one = system.alt(), system.constant(0), system.constant(1)
     assert alt.standard_part() is None
     assert (one + alt * system.infinitesimal()).standard_part() == 1
-    assert system.support == (True, True)
+    assert system.support == (True,)
     assert system.probe(alt, zero) == (True, True)
-    assert system.support == (True, True)
+    assert system.support == (True,)
     assert alt < zero
     assert alt.standard_part() == -1
     assert system.support == (False, True)
@@ -100,17 +99,17 @@ def test_standard_part_uses_remaining_support_without_choosing():
 
 @requires_lean
 def test_eliminating_a_divergent_parity_enables_standard_part():
-    system = LeanLaurentSystem()
+    system = LeanResidueSystem()
     alt, one, three = system.alt(), system.constant(1), system.constant(3)
     even = (one + alt) / system.constant(2)
     expression = even * system.infinite() + (one - even) * three
     assert expression.standard_part() is None
-    assert system.support == (True, True)
+    assert system.support == (True,)
     assert alt < system.constant(0)
     assert expression.standard_part() == 3
     assert system.support == (False, True)
 
-    other = LeanLaurentSystem()
+    other = LeanResidueSystem()
     even = (other.constant(1) + other.alt()) / other.constant(2)
     expression = even * other.infinite() + (other.constant(1) - even) * other.constant(
         3
@@ -122,7 +121,7 @@ def test_eliminating_a_divergent_parity_enables_standard_part():
 
 @requires_lean
 def test_domain_errors_and_impossible_choices_preserve_support():
-    system = LeanLaurentSystem()
+    system = LeanResidueSystem()
     one, zero, epsilon = system.constant(1), system.constant(0), system.infinitesimal()
     with pytest.raises(ZeroDivisionError):
         _ = one / zero
@@ -134,7 +133,7 @@ def test_domain_errors_and_impossible_choices_preserve_support():
         with pytest.raises(ValueError, match="nonnegative integers"):
             _ = epsilon**power
     assert not system.commit(epsilon, zero, truth=True)
-    assert system.support == (True, True)
+    assert system.support == (True,)
     assert epsilon.standard_part() == 0
 
 
@@ -147,8 +146,9 @@ def _evaluate(ast, n):
         return Fraction(n)
     if tag == "invn":
         return Fraction(1, n)
-    if tag == "alt":
-        return Fraction((-1) ** n)
+    if tag == "periodic":
+        numerator, denominator = ast[1][n % len(ast[1])]
+        return Fraction(int(numerator), int(denominator))
     if tag == "divMonomial":
         divisor = Fraction(int(ast[2]), int(ast[3])) * Fraction(n) ** int(ast[4])
         return _evaluate(ast[1], n) / divisor
@@ -168,7 +168,7 @@ def _random_ast(rng, depth):
             [
                 ["index"],
                 ["invn"],
-                ["alt"],
+                ["periodic", [["1", "1"], ["-1", "1"]]],
                 ["const", str(rng.randint(-7, 7)), str(rng.randint(1, 13))],
             ]
         )
@@ -190,19 +190,24 @@ def _random_ast(rng, depth):
 
 @requires_lean
 def test_emitted_cutoffs_cover_direct_exact_source_evaluations():
+    # trunk-ignore(bandit/B311): A fixed seed makes arithmetic samples reproducible.
     rng = random.Random(20261001)
     pairs = [(_random_ast(rng, 3), _random_ast(rng, 3)) for _ in range(30)]
     pairs += [(ast, ast) for ast, _ in pairs[:5]]
     pairs += [
         (["index"], ["const", "3", "1"]),
         (["invn"], ["const", "1", str(10**30)]),
-        (["mul", ["alt"], ["index"]], ["const", "0", "1"]),
+        (
+            ["mul", ["periodic", [["1", "1"], ["-1", "1"]]], ["index"]],
+            ["const", "0", "1"],
+        ),
     ]
     requests = [
         {"support": [True, True], "op": op, "left": left, "right": right}
         for left, right in pairs
         for op in ("lt", "eq")
     ]
+    # trunk-ignore(bandit/B603): CHECKER is the fixed repository build path, with no shell.
     completed = subprocess.run(
         [str(CHECKER)],
         input="".join(json.dumps(r) + "\n" for r in requests),
@@ -213,14 +218,18 @@ def test_emitted_cutoffs_cover_direct_exact_source_evaluations():
     )
     responses = [json.loads(line) for line in completed.stdout.splitlines()]
     assert len(responses) == len(requests)
-    for request, response in zip(requests, responses):
+    for request, response in zip(requests, responses, strict=True):
         cutoff = int(response["cutoff"])
         assert cutoff >= 1
         assert response["accepted"] is None and response["support"] is None
         for n in (cutoff, cutoff + 1, cutoff + 2, 2 * cutoff + 3, 10 * cutoff + 4):
             left, right = _evaluate(request["left"], n), _evaluate(request["right"], n)
             expected = left < right if request["op"] == "lt" else left == right
-            assert response["predicate"][n % 2] is expected, (request, response, n)
+            assert response["predicate"][n % len(response["predicate"])] is expected, (
+                request,
+                response,
+                n,
+            )
 
 
 @requires_lean
@@ -245,6 +254,7 @@ def test_invalid_protocol_lines_are_rejected_without_poisoning_following_request
     lines = (
         ["{not json}"] + [json.dumps(item) for item in invalid] + [json.dumps(valid)]
     )
+    # trunk-ignore(bandit/B603): CHECKER is the fixed repository build path, with no shell.
     completed = subprocess.run(
         [str(CHECKER)],
         input="\n".join(lines) + "\n",

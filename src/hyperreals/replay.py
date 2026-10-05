@@ -19,7 +19,7 @@ from fractions import Fraction
 from pathlib import Path
 from typing import Any, Literal, cast
 
-from .verified import LeanBackendError
+from .errors import LeanBackendError
 
 FORMAT = "hyperreals-residue-replay"
 VERSION = 1
@@ -550,6 +550,7 @@ def _manifest(root: Path, snapshot: str, source: str) -> dict[str, Any]:
                 "lean-toolchain",
                 "lakefile.toml",
                 "lake-manifest.json",
+                "src/hyperreals/errors.py",
                 "src/hyperreals/replay.py",
                 "src/hyperreals/verified_residue.py",
                 "src/hyperreals/polynomial.py",

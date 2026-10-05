@@ -1,8 +1,8 @@
 """Exact infinitesimal computation through finite observations.
 
-LeanResidueSystem exposes the verified periodic Laurent core. The periodic
-and parity Laurent interfaces provide its smaller verified fragments.
-Concrete exported results can be checked independently through verify_export.
+LeanResidueSystem exposes the verified periodic Laurent core. DifferentiableProgram
+compiles elementary vector derivatives. Concrete exported residue computations
+can be checked independently through verify_export.
 """
 
 from .differentiable import (
@@ -13,6 +13,7 @@ from .differentiable import (
     JVPVerification,
     variables,
 )
+from .errors import LeanBackendError
 from .polynomial import divided_difference, evaluate_polynomial, polynomial_quotient
 from .replay import (
     ReplayObservation,
@@ -21,8 +22,6 @@ from .replay import (
     ReplayVerificationError,
     verify_export,
 )
-from .verified import LeanBackendError, LeanPeriodicSystem, PeriodicHyperreal
-from .verified_laurent import LaurentHyperreal, LeanLaurentSystem
 from .verified_residue import (
     LeanResidueSystem,
     ResidueHyperreal,
@@ -38,9 +37,6 @@ __all__ = [
     "DomainCondition",
     "JVPVerification",
     "variables",
-    "LeanPeriodicSystem",
-    "LeanLaurentSystem",
-    "LaurentHyperreal",
     "LeanResidueSystem",
     "ResidueHyperreal",
     "StandardPartDiagnostic",
@@ -52,6 +48,5 @@ __all__ = [
     "ReplayVerification",
     "ReplayVerificationError",
     "verify_export",
-    "PeriodicHyperreal",
     "LeanBackendError",
 ]

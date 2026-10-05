@@ -63,7 +63,7 @@ def primed_transport(tmp_path, monkeypatch):
     return system, wire
 
 
-def test_missing_residue_checker_has_no_python_fallback(tmp_path):
+def test_missing_residue_checker_raises(tmp_path):
     with pytest.raises(LeanBackendError, match="not found"):
         LeanResidueSystem(checker_path=tmp_path / "absent")
 

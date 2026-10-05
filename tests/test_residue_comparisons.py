@@ -1,32 +1,31 @@
 """Integration checks of the actual Lean executable, not a Python mock."""
 
+# trunk-ignore-all(bandit/B101): pytest assertions are test oracles, not runtime validation.
+
 import itertools
 import json
+
+# trunk-ignore(bandit/B404): These tests invoke the repository's built Lean checker.
 import subprocess
 from fractions import Fraction
 from pathlib import Path
 
 import pytest
 
-from hyperreals import LeanBackendError, LeanPeriodicSystem
+from hyperreals import LeanResidueSystem
 
-CHECKER = Path(__file__).resolve().parents[1] / ".lake/build/bin/periodic_checker"
+CHECKER = Path(__file__).resolve().parents[1] / ".lake/build/bin/residue_checker"
 requires_lean = pytest.mark.skipif(
-    not CHECKER.is_file(), reason="run lake build periodic_checker"
+    not CHECKER.is_file(), reason="run lake build residue_checker"
 )
-
-
-def test_missing_checker_does_not_fall_back_to_python(tmp_path):
-    with pytest.raises(LeanBackendError, match="not found"):
-        LeanPeriodicSystem(checker_path=tmp_path / "absent")
 
 
 @requires_lean
 def test_lean_choices_share_one_completion_and_rejection_preserves_state():
-    system = LeanPeriodicSystem()
+    system = LeanResidueSystem()
     x, zero, one = system.alt(), system.constant(0), system.constant(1)
     assert system.probe(x, zero) == (True, True)
-    assert system.support == (True, True)
+    assert system.support == (True,)
     assert x < zero
     assert system.support == (False, True)
     assert not system.commit(x, one, "eq", truth=True)
@@ -37,7 +36,7 @@ def test_lean_choices_share_one_completion_and_rejection_preserves_state():
 
 @requires_lean
 def test_lean_query_order_can_select_the_other_completion():
-    system = LeanPeriodicSystem()
+    system = LeanResidueSystem()
     x = system.alt()
     assert x == system.constant(1)
     assert system.support == (True, False)
@@ -46,7 +45,7 @@ def test_lean_query_order_can_select_the_other_completion():
 
 @requires_lean
 def test_lean_arithmetic_avoids_float_rounding():
-    system = LeanPeriodicSystem()
+    system = LeanResidueSystem()
     a = system.constant(2**53)
     assert a < a + system.constant(1)
     assert not (a == a + system.constant(1))
@@ -59,7 +58,7 @@ def test_lean_arithmetic_avoids_float_rounding():
 
 @requires_lean
 def test_lean_contexts_cannot_be_mixed():
-    first, second = LeanPeriodicSystem(), LeanPeriodicSystem()
+    first, second = LeanResidueSystem(), LeanResidueSystem()
     with pytest.raises(ValueError, match="same Lean system"):
         _ = first.alt() + second.alt()
 
@@ -67,10 +66,20 @@ def test_lean_contexts_cannot_be_mixed():
 @requires_lean
 def test_exhaustive_finite_protocol_cases_match_rational_semantics():
     expressions = [
-        (["alt"], (Fraction(1), Fraction(-1))),
+        (["periodic", [["1", "1"], ["-1", "1"]]], (Fraction(1), Fraction(-1))),
         (["const", "0", "1"], (Fraction(0), Fraction(0))),
-        (["add", ["alt"], ["const", "1", "3"]], (Fraction(4, 3), Fraction(-2, 3))),
-        (["mul", ["alt"], ["alt"]], (Fraction(1), Fraction(1))),
+        (
+            ["add", ["periodic", [["1", "1"], ["-1", "1"]]], ["const", "1", "3"]],
+            (Fraction(4, 3), Fraction(-2, 3)),
+        ),
+        (
+            [
+                "mul",
+                ["periodic", [["1", "1"], ["-1", "1"]]],
+                ["periodic", [["1", "1"], ["-1", "1"]]],
+            ],
+            (Fraction(1), Fraction(1)),
+        ),
     ]
     requests, expectations = [], []
     for support, op, (left, lv), (right, rv), choice in itertools.product(
@@ -80,8 +89,12 @@ def test_exhaustive_finite_protocol_cases_match_rational_semantics():
         expressions,
         [True, False],
     ):
-        predicate = [a < b if op == "lt" else a == b for a, b in zip(lv, rv)]
-        selected = [s and (p == choice) for s, p in zip(support, predicate)]
+        predicate = [
+            a < b if op == "lt" else a == b for a, b in zip(lv, rv, strict=True)
+        ]
+        selected = [
+            s and (p == choice) for s, p in zip(support, predicate, strict=True)
+        ]
         requests.append(
             {
                 "support": support,
@@ -91,7 +104,9 @@ def test_exhaustive_finite_protocol_cases_match_rational_semantics():
                 "choice": choice,
             }
         )
-        expectations.append((predicate, selected))
+        predicate_period = 1 if left[0] == right[0] == "const" else 2
+        expectations.append((predicate[:predicate_period], selected))
+    # trunk-ignore(bandit/B603): CHECKER is the fixed repository build path, with no shell.
     completed = subprocess.run(
         [str(CHECKER)],
         input="".join(json.dumps(r) + "\n" for r in requests),
@@ -102,7 +117,7 @@ def test_exhaustive_finite_protocol_cases_match_rational_semantics():
     )
     responses = [json.loads(line) for line in completed.stdout.splitlines()]
     assert len(responses) == len(expectations)
-    for response, (predicate, selected) in zip(responses, expectations):
+    for response, (predicate, selected) in zip(responses, expectations, strict=True):
         assert response["predicate"] == predicate
         assert response["accepted"] is any(selected)
         assert response["support"] == (selected if any(selected) else None)
@@ -117,8 +132,9 @@ def test_lean_parser_rejects_invalid_rationals(bad_constant):
         "support": [True, True],
         "op": "lt",
         "left": bad_constant,
-        "right": ["alt"],
+        "right": ["periodic", [["1", "1"], ["-1", "1"]]],
     }
+    # trunk-ignore(bandit/B603): CHECKER is the fixed repository build path, with no shell.
     completed = subprocess.run(
         [str(CHECKER)],
         input=json.dumps(request) + "\n",

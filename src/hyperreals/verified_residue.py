@@ -17,8 +17,8 @@ from pathlib import Path
 from threading import RLock
 from typing import Any, Literal
 
+from .errors import LeanBackendError
 from .replay import ReplayObservation, ReplaySnapshot
-from .verified import LeanBackendError
 
 _Operation = Literal["lt", "eq"]
 _Mask = tuple[bool, ...]
