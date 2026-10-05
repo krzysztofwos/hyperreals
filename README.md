@@ -2,7 +2,7 @@
 
 A computational interface to infinitesimal arithmetic that records finite observations without constructing a free ultrafilter.
 
-The mathematical question is how a finite computation can use a nonconstructive object while leaving that object unspecified. Here, each accepted comparison records a set of sequence indices that a free-ultrafilter completion must contain. Lean connects checked adaptive execution to one fixed completion. Within the exact fragment, extraction succeeds exactly when every compatible completion has the same finite real standard part. Generic polynomial differentiation connects that executable result to the ordinary derivative. The executable core computes with exact finite periodic Laurent expressions. It does not select or enumerate whole ultrafilters.
+The mathematical question is how a finite computation can use a nonconstructive object while leaving that object unspecified. Here, each accepted comparison records a set of sequence indices that a free-ultrafilter completion must contain. Lean connects checked adaptive execution to one fixed completion. Within the exact fragment, extraction succeeds exactly when every compatible completion has the same finite real standard part. Generic polynomial differentiation connects that executable result to the ordinary derivative. The complete extraction core computes with exact finite periodic Laurent expressions. A separate symbolic compiler covers finite real vectors and elementary functions, with proved domains and literal infinitesimal quotient semantics. It does not select or enumerate whole ultrafilters.
 
 The main entry point is `LeanResidueSystem`, an exact interface to the Lean residue checker. Optional kernel replay verifies a recorded computation independently of the native result. See [formalization.md](formalization.md) for the precise statements, proof sources, and research questions.
 
@@ -30,6 +30,29 @@ assert quotient.standard_part() == Fraction(23, 2)
 ```
 
 [PolynomialDifferentiation.lean](Hyperreals/PolynomialDifferentiation.lean) proves source denotation, ordinary differentiation, and actual extraction for all such inputs. `evaluate_polynomial(coefficients, argument)` constructs exact Horner syntax. `divided_difference(coefficients, a, increment)` constructs a polynomial `D` satisfying `h * D = P(a+h) - P(a)` for an arbitrary representable increment `h`. Whenever `h` has extracted standard part zero in the current state, `D` extracts to the derivative. It equals the literal quotient when `h` is nonzero. At a zero increment it is a polynomial extension, not permission to cancel zero.
+
+## Verified elementary differentiation
+
+A second language supports rational constants, finite vectors, addition, subtraction, multiplication, general division, negation, and `sin`, `cos`, `exp`, `log`, and `sqrt`. It compiles exact symbolic Jacobian-vector products (JVPs), Jacobians, and scalar gradients. Results such as `cos(1)` remain expressions.
+
+```python
+from hyperreals import DifferentiableProgram, variables
+
+x, y = variables(2)
+program = DifferentiableProgram(2, (x.sin() * y.exp(), (1 + x*x + y*y).log()))
+compiled = program.jvp((1, 2))
+verified = compiled.verify(point=(1, 0), timeout=180)
+assert verified.domain_verified
+# Approximate samples only. The exact result remains compiled.derivative.
+print(compiled.derivative.approximate((1, 0)))  # (2.223244275..., 1.0)
+jacobian = program.jacobian()  # rows are outputs, columns are inputs
+```
+
+Lean proves that the generated JVP evaluates to `DF(x)v`. For any compatible completion and any step `h` that is infinitesimal and eventually nonzero in that completion, it also proves `st((F(x + h v) - F(x)) / h) = DF(x)v`, componentwise. The source domain remains valid under sufficiently small perturbations. The [vector example](examples/differentiable/README.md) combines this theorem with the existing observation-based choice of a nonzero step.
+
+Division requires a nonzero denominator. Logarithm and square root require positive arguments. `program.domain_conditions` exposes these obligations without discharging them. `compiled.verify()` checks the actual Python compiler output against Lean and proves correctness conditional on the domain. Supplying an exact rational `point` additionally asks Lean to prove the source, tangent, and derivative domains there. This bounded proof procedure can fail on a valid domain. Failure means unproved, not “no shared standard part.” `approximate()` uses floating-point arithmetic and is never a certificate. Constants accept `int` or `Fraction`.
+
+This is forward symbolic differentiation, with no reverse-mode implementation, tensor accelerator, arbitrary Python tracing, or complete elementary-function equality/limit solver. The Laurent backend retains its separate complete decision procedure. Run `uv run python scripts/differentiable_case.py` for a kernel-checked example.
 
 ## An observation that establishes a division condition
 
@@ -194,6 +217,8 @@ The audit rejects unfinished proofs and project-local axioms and permits only th
 | --------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | `Hyperreals/`                                                         | Semantic specification, completion theorems, and verified executable cores |
 | `src/hyperreals/verified_residue.py` and `src/hyperreals/replay.py`   | Main Python adapter and snapshot replay                                    |
+| `src/hyperreals/differentiable.py`                                    | Symbolic elementary/vector derivative compiler and kernel verification     |
+| `Hyperreals/Differentiable*.lean`                                     | Compiler correctness, domain preservation, and literal quotient limits     |
 | `src/hyperreals/polynomial.py`                                        | Exact polynomial and divided-difference syntax constructors                |
 | `src/hyperreals/verified.py` and `src/hyperreals/verified_laurent.py` | Restricted periodic and two-parity adapters                                |
 | `scripts/`, `examples/`, and `benchmarks/`                            | Runnable examples, replay artifacts, and bounded evaluation                |

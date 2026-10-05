@@ -58,6 +58,27 @@ The same core constructs `dividedDifference coefficients a increment`. This is a
 
 The [Python constructors](src/hyperreals/polynomial.py), `evaluate_polynomial`, `divided_difference`, and `polynomial_quotient`, mirror the Lean syntax. Their correspondence is tested rather than formally refined. Kernel replay verifies a particular exported expression and trace. The generic Lean theorem establishes the all-input result for the formal compiler.
 
+## Verified differentiable expressions
+
+[DifferentiableCore.lean](Hyperreals/DifferentiableCore.lean) defines an executable `Expr n` with rational constants, `Fin n` variables, arithmetic including general division, negation, and `sin`, `cos`, `exp`, `log`, and `sqrt`. `Program n m` is a finite vector of expressions. `Expr.jvp` compiles a source expression and input tangent expressions into derivative syntax. `Program.jacobian` applies it to coordinate basis vectors. The core imports no real analysis and does not accept derivative certificates.
+
+[Differentiable.lean](Hyperreals/Differentiable.lean) gives exact real evaluation and a compositional `Domain` predicate. Denominators must be nonzero. Logarithm and square root arguments must be positive. These sufficient smoothness conditions are deliberately conservative. The compiled theorems establish:
+
+- `Expr.differentiableAt`: every expression is Fréchet differentiable on its specified domain.
+- `Expr.hasDerivAt_eval`: the actual compiler obeys the chain rule along every differentiable input curve.
+- `Expr.jvp_eq_fderiv`: the compiled output equals the Fréchet derivative applied to the tangent value at the base point.
+- `Expr.domain_jvp`: the source and tangent domains imply the compiled output domain.
+- `Expr.domain_eventually`: the source domain is open. Small enough perturbations remain valid.
+- `Program.hasDerivAt_line` and `Program.jacobian_eq_fderiv`: vector outputs and coordinate Jacobian entries have the corresponding derivative guarantees.
+
+[DifferentiableInfinitesimal.lean](Hyperreals/DifferentiableInfinitesimal.lean) defines the literal sequence quotient `(F(x + h(k)v) - F(x)) / h(k)`. `Expr.quotient_tendsto` derives its limit from the compiler theorem for any filter in which `h` tends to zero and is eventually nonzero. `Expr.quotient_standardPart` and `Program.quotient_standardPart` specialize this to each compatible completion. `Expr.quotient_eventually_domain` ensures the perturbed source operations are eventually in their domains. Neither a derivative nor a remainder estimate is a supplied premise. The proof uses ordinary differentiability to establish the quotient limit. The step is not replaced by a nilpotent.
+
+[DifferentiableExamples.lean](Hyperreals/DifferentiableExamples.lean) connects this language to the existing checked step observation. `quotient_after_step_observation` handles every expression in the new grammar on either accepted branch. `vectorExample_after_observation` specializes it to the three-output elementary function in the [example](examples/differentiable/README.md), with symbolic standard part `(cos(1) + 2 sin(1), 1, 1 / sqrt(2))`. This reuses a residue observation trace to justify the step. It does not extend the finite observation interpreter with elementary comparisons or feed elementary quotients to Laurent normalization.
+
+The [Python compiler](src/hyperreals/differentiable.py) returns immutable, dimension-checked expressions. `CompiledJVP.verify()` regenerates fixed Lean source and proves each output equals `Expr.jvp` by `decide +kernel`, then instantiates the Fréchet derivative, domain-preservation, and standard-part theorems. A supplied rational point additionally requests kernel proofs of the source, tangent, and result domains there. The bounded domain tactic is incomplete, and failure is an unresolved proof obligation. The API accepts no caller-provided Lean tactics or proof files. Verification audits every generated theorem against the project's allowed axiom set. Python capture remains an unproved boundary. `approximate()` is floating-point evaluation with no certified error bound.
+
+The symbolic layer has no complete standard-part or equality decision procedure. Its output is an exact expression rather than a rational answer. The existing Laurent completeness and rejection theorems retain their original scope. Reverse mode, general control flow, tensors, certified numerical rounding, and efficient shared-expression compilation remain separate extensions. Formal dimensions are arbitrary finite naturals. The Python interface limits dimensions to 64, constant numerators and denominators to 4096 bits, and generated proofs to 20,000 expression nodes and depth 128. Verification uses the existing bounded timeout policy.
+
 ## An observation that establishes a division condition
 
 [DomainInfinitesimal.lean](Hyperreals/DomainInfinitesimal.lean) uses `h(n) = periodic([0,1])(n) / n`. It is infinitesimal in every free completion, but its nonzeroness depends on the observations. The finite program queries `h = 0`. The negative branch keeps `h` and multiplies the cubic numerator by the represented reciprocal `periodic([0,1]) * n`. The positive branch replaces the zero step with `1/n²` before forming the quotient. Both branches return standard part 12 at the point 2.
@@ -213,7 +234,7 @@ The following are separate obligations rather than claims of an already complete
 
 1. **Beyond the finite program model.** The finite adaptive interpreter and conditional monotone-union completion theorem are proved. Relating them to a larger host language, infinite operational behavior, or liveness would require new semantics and refinement arguments. The whole-run existence result does not supply executable witness extraction.
 2. **Rational-function division.** Periodic rational functions are a natural next grammar extension. They require a verified representation, eventual denominator-nonzero checks on every retained residue, and complete sign and limit algorithms. The polynomial divided-difference compiler and the example's represented reciprocal do not provide arbitrary inversion.
-3. **A broader analytic bridge.** Extend beyond exact finite Laurent expressions only with explicit domains, valuations/precision, remainder guarantees, and coefficient error bounds. The current executable grammar supplies none of these analytic extensions.
+3. **A broader analytic bridge.** Further analytic computation needs explicit domain and convergence guarantees. Certified approximate evaluation additionally needs coefficient and rounding error bounds. The new differentiable language proves symbolic elementary JVPs and their quotient limits on explicit smooth domains. Complete elementary limit decisions, certified numerical evaluation, and a richer observation language remain open.
 4. **Faithful execution capture.** Refine serialization, parsing, and transcript capture to the formal semantics, or keep their assumptions explicit. Kernel replay already checks the exported mathematical instance, not its historical provenance.
 5. **Independent application value.** Find a problem whose naturally occurring observations and required outputs benefit from this interface. Compare the same tasks with ordinary exact algebra and finite-constraint methods. The constructed calibration model and small benchmarks do not settle that question. Compact state and runtime improvements are supporting engineering work, not substitutes for it.
 
@@ -229,7 +250,7 @@ The contribution must be stated relative to existing nonstandard analysis and fo
 - Kido, Chaudhuri, and Hasuo, [Abstract Interpretation with Infinitesimals](https://arxiv.org/abs/1511.00825) (2015 preprint), established soundness and termination for nonstandard static analysis and evaluated hybrid-system examples.
 - Dou and Yu, [Formalization of the Filter Extension Principle in Coq](https://arxiv.org/abs/2407.06222) (2024 preprint), mechanized the classical extension principle.
 
-This remains a targeted prior-work comparison, not an exhaustive novelty search. The extension and compactness arguments, use of filters for symbolic semantics, and checking of externally computed results are established ideas. The specific contribution proposed here is their verified operational connection: exact executable observations determine a family of compatible completions, every accepted adaptive run is realized under one fixed member of that family, and complete extraction characterizes the finite outputs shared by the family. Generic polynomial differentiation supplies an executable all-degree application. The domain-dependent infinitesimal program additionally makes a recorded observation establish a necessary division condition. Whether this connection extends usefully beyond the present finite syntax remains open. A fully verified general hyperreal runtime is not established.
+This remains a targeted prior-work comparison, not an exhaustive novelty search. The extension and compactness arguments, use of filters for symbolic semantics, and checking of externally computed results are established ideas. The specific contribution proposed here is their verified operational connection: exact executable observations determine a family of compatible completions, every accepted adaptive run is realized under one fixed member of that family, and complete extraction characterizes the finite outputs shared by the family. Generic polynomial differentiation supplies an executable all-degree application. The elementary compiler extends the quotient interpretation to finite differentiable vectors while retaining explicit domain obligations. The domain-dependent infinitesimal program additionally makes a recorded observation establish a necessary division condition. Whether this connection extends usefully beyond the present finite syntax remains open. A fully verified general hyperreal runtime is not established.
 
 ## Validation
 
@@ -240,6 +261,8 @@ uv run pytest
 uv run pytest tests/test_verified_periodic.py tests/test_verified_laurent.py
 uv run pytest tests/test_verified_residue.py tests/test_replay.py tests/test_replay_capture.py
 uv run pytest tests/test_infinitesimal_case.py tests/test_domain_infinitesimal_case.py
+uv run pytest tests/test_differentiable.py
+uv run python scripts/differentiable_case.py
 uv run python scripts/infinitesimal_case.py
 uv run python scripts/domain_infinitesimal_case.py
 uv run python scripts/verified_demo.py
