@@ -19,3 +19,4 @@ import Hyperreals.ResidueLimitCompleteness
 import Hyperreals.ResidueLimitDiagnostic
 import Hyperreals.PolynomialDifferentiation
 import Hyperreals.DomainInfinitesimal
+import Hyperreals.DifferentiableExamples
