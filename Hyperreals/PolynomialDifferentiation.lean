@@ -1,6 +1,7 @@
 import Hyperreals.PolynomialDifferentiationCore
 import Hyperreals.ResidueExpr
 import Hyperreals.ResidueLimitCompleteness
+import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Algebra.Polynomial.Inductions
 import Mathlib.Algebra.Polynomial.Eval.Defs
@@ -234,7 +235,7 @@ theorem dividedDifference_standardPart_of_standardPart (coefficients : List Rat)
   simpa [NearStandardAt] using! standardPart_sound hzero U hfree hsupport
 
 /-- Generic executable differentiation: every polynomial, rational point,
-nonzero rational scale and positive integer power is handled by the existing
+nonzero rational scale and positive integer power is handled by the residue
 extractor on any nonempty residue support. The source is the literal quotient. -/
 theorem quotientExpr_standardPart (coefficients : List Rat) (a c : Rat) (k : Nat)
     (support : Support) (hc : c ≠ 0) (hnonempty : support.nonempty = true) :

@@ -4,9 +4,9 @@ import Init.Data.Rat.Basic
 # Exact executable Laurent normalization
 
 Dense ascending rational coefficients retain every term. A `Form` represents a
-polynomial divided by a natural power of the index. Division syntax names one
-nonzero rational monomial explicitly. `Expr.valid` checks that domain condition.
-The corresponding real-sequence refinement is proved in `LaurentExpr.lean`.
+polynomial divided by a natural power of the index. The residue expression
+normalizer uses these scalar operations on each coefficient residue. Their
+real-valued arithmetic laws are proved in `LaurentExpr.lean`.
 -/
 
 set_option autoImplicit false
@@ -54,32 +54,5 @@ def Form.mul (left right : Form) : Form := ⟨left.num.mul right.num, left.shift
 def Form.divMonomial (form : Form) (coefficient : Rat) : Int → Form
   | .ofNat power => ⟨form.num.scale coefficient⁻¹, form.shift + power⟩
   | .negSucc power => ⟨(form.num.scale coefficient⁻¹).shift (power + 1), form.shift⟩
-
-inductive Expr where
-  | constant (value : Rat)
-  | index
-  | reciprocalIndex
-  | alternating
-  | add (left right : Expr)
-  | sub (left right : Expr)
-  | mul (left right : Expr)
-  | divMonomial (argument : Expr) (coefficient : Rat) (power : Int)
-  deriving Repr
-
-def Expr.valid : Expr → Bool
-  | .constant _ | .index | .reciprocalIndex | .alternating => true
-  | .add left right | .sub left right | .mul left right => left.valid && right.valid
-  | .divMonomial argument coefficient _ => argument.valid && decide (coefficient ≠ 0)
-
-def Expr.normalize : Expr → Bool → Form
-  | .constant value, _ => .constant value
-  | .index, _ => .index
-  | .reciprocalIndex, _ => .reciprocalIndex
-  | .alternating, odd => .constant (if odd then -1 else 1)
-  | .add left right, odd => (left.normalize odd).add (right.normalize odd)
-  | .sub left right, odd => (left.normalize odd).sub (right.normalize odd)
-  | .mul left right, odd => (left.normalize odd).mul (right.normalize odd)
-  | .divMonomial argument coefficient power, odd =>
-      (argument.normalize odd).divMonomial coefficient power
 
 end Hyperreals.Laurent

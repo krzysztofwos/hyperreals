@@ -39,9 +39,9 @@ theorem vectorExample_derivative :
     norm_num [vectorExample, vectorDirection, Program.jvp, Program.eval,
       Expr.jvp, Expr.eval, x, y, one] <;> ring
 
-/-- Reuse the checked observation's nonzero step for any expression in the new language.
-The trace still belongs to the residue observation engine. The quotient is interpreted
-by the new language's semantics, not by Laurent normalization. -/
+/-- Reuse the checked observation's nonzero step for any differentiable expression.
+The trace belongs to the residue observation engine. The differentiable compiler
+theorem supplies the quotient semantics. -/
 theorem quotient_after_step_observation {n : Nat} (e : Expr n)
     (direction : Fin n → Expr n) (point : Fin n → ℝ) (hdomain : e.Domain point)
     (choice : Bool) (remaining : List Bool)

@@ -92,7 +92,7 @@ def test_divergent_residues_can_be_eliminated_before_extraction():
     assert system.support == (True, False, False)
 
 
-def test_exact_tables_and_existing_laurent_arithmetic():
+def test_exact_tables_and_laurent_arithmetic():
     system = LeanResidueSystem()
     huge = 10**100
     table = system.periodic([Fraction(1, 3), huge, Fraction(-1, 7)])
@@ -237,6 +237,7 @@ def test_parser_rejects_empty_tables_and_invalid_states_then_recovers():
         dict(valid, support=[]),
         dict(valid, support=[False, False, False]),
         dict(valid, support=[1]),
+        dict(valid, left=["alt"]),
         dict(valid, left=["periodic", []]),
         dict(valid, left=["periodic", [["1", "0"]]]),
         dict(valid, left=["periodic", [["1", "2", "3"]]]),

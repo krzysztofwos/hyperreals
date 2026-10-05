@@ -1,6 +1,5 @@
 import Hyperreals.ResidueExprCore
 import Hyperreals.ResidueSupportCore
-import Hyperreals.PeriodicCore
 import Hyperreals.LaurentSignCore
 
 /-! Executable comparison compilation at the common period of both operands.
@@ -12,7 +11,10 @@ set_option relaxedAutoImplicit false
 
 namespace Hyperreals.Residue
 
-abbrev Comparison := Periodic.Comparison
+inductive Comparison where
+  | lt
+  | eq
+  deriving Repr, DecidableEq
 
 structure CompiledComparison where
   mask : Support

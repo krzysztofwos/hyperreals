@@ -34,10 +34,9 @@ private partial def parseExpr (json : Json) : Except String Expr := do
       unless parts.size = 2 do throw "periodic entries must be rational pairs"
       parseRat parts[0]! parts[1]!
     return .periodic entries.toList
-  | "alt" | "index" | "invn" =>
+  | "index" | "invn" =>
     unless values.size = 1 do throw "primitive expects no arguments"
-    return if tag = "alt" then .periodic [1, -1] else if tag = "index" then .index
-      else .reciprocalIndex
+    return if tag = "index" then .index else .reciprocalIndex
   | "divMonomial" =>
     unless values.size = 5 do throw "divMonomial expects expression, numerator, denominator, power"
     let argument ← parseExpr values[1]!
@@ -87,8 +86,8 @@ private def handleRequest (request : Json) : Except String Json := do
       | none => Json.null
     return Json.mkObj [("value", value), ("support", supportJson support)]
   let comparison ← match operator with
-    | "lt" => pure Hyperreals.Periodic.Comparison.lt
-    | "eq" => pure Hyperreals.Periodic.Comparison.eq
+    | "lt" => pure Comparison.lt
+    | "eq" => pure Comparison.eq
     | _ => throw "op must be lt, eq, standardPart, or diagnoseStandardPart"
   let right ← parseExpr (← request.getObjVal? "right")
   unless right.valid do throw "invalid expression"

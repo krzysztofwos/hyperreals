@@ -1,5 +1,4 @@
 import Hyperreals.Completion
-import Hyperreals.Expressions
 
 /-!
 # Counterexample to propositional-only consistency
@@ -52,12 +51,12 @@ theorem contradictoryComparisons_not_hasFreeFIP (a : Sequence) :
 
 /-- The incompatible observations instantiated at the alternating sequence. -/
 def alternatingContradictoryComparisons : Commitments :=
-  contradictoryComparisons Expr.alternatingSign.denote
+  contradictoryComparisons (fun n ↦ (-1 : ℝ) ^ n)
 
 /-- The two concrete alternating-sequence observations have no common completion. -/
 theorem alternatingContradictoryComparisons_not_extendible :
     ¬ Extendible alternatingContradictoryComparisons :=
-  contradictoryComparisons_not_extendible Expr.alternatingSign.denote
+  contradictoryComparisons_not_extendible (fun n ↦ (-1 : ℝ) ^ n)
 
 #print axioms Hyperreals.contradictoryComparisons_not_extendible
 #print axioms Hyperreals.contradictoryComparisons_not_hasFreeFIP

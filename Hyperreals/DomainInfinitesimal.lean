@@ -9,7 +9,7 @@ The step h is zero on even indices and 1/n on odd indices. It is infinitesimal
 in every free completion, but only the negative answer to h = 0 licenses its
 use as a denominator. On that branch, a represented reciprocal gives the
 literal cubic quotient. The positive branch replaces h by 1/n² before dividing.
-Both accepted branches extract 12. This uses the existing Laurent grammar,
+Both accepted branches extract 12. This uses the residue Laurent grammar,
 not a general-purpose division operator.
 -/
 

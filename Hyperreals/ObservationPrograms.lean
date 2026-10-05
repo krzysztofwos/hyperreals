@@ -76,7 +76,7 @@ inductive Program.Path : Program → List Observation → Expr → Prop where
 def Execution.commitments (execution : Execution) : Commitments :=
   {A | ∃ observation ∈ execution.observations, A = observation.denote}
 
-/-- Every accepted program execution replays through the existing checked
+/-- Every accepted program execution replays through the checked
 runtime, follows its source tree, and records the actual extraction result. -/
 theorem Program.executeFrom_spec {program : Program} {support : Support}
     {choices : List Bool} {execution : Execution}

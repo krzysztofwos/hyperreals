@@ -30,28 +30,6 @@ noncomputable def monomial (coefficient : Rat) (power : Int) (x : ℝ) : ℝ :=
   | .ofNat k => (coefficient : ℝ) * x ^ k
   | .negSucc k => (coefficient : ℝ) / x ^ (k + 1)
 
-noncomputable def Expr.eval : Expr → Bool → ℝ → ℝ
-  | .constant value, _, _ => value
-  | .index, _, x => x
-  | .reciprocalIndex, _, x => x⁻¹
-  | .alternating, odd, _ => if odd then -1 else 1
-  | .add left right, odd, x => left.eval odd x + right.eval odd x
-  | .sub left right, odd, x => left.eval odd x - right.eval odd x
-  | .mul left right, odd, x => left.eval odd x * right.eval odd x
-  | .divMonomial argument coefficient power, odd, x =>
-      argument.eval odd x / monomial coefficient power x
-
-noncomputable def Expr.denote : Expr → Sequence
-  | .constant value => fun _ => value
-  | .index => fun n => n
-  | .reciprocalIndex => fun n => (n : ℝ)⁻¹
-  | .alternating => fun n => (-1 : ℝ) ^ n
-  | .add left right => fun n => left.denote n + right.denote n
-  | .sub left right => fun n => left.denote n - right.denote n
-  | .mul left right => fun n => left.denote n * right.denote n
-  | .divMonomial argument coefficient power =>
-      fun n => argument.denote n / monomial coefficient power n
-
 @[simp] theorem Poly.eval_add (left right : Poly) (x : ℝ) :
     (left.add right).eval x = left.eval x + right.eval x := by
   induction left generalizing right with
@@ -123,60 +101,10 @@ theorem Form.eval_divMonomial (form : Form) (coefficient : Rat) (power : Int)
       simp [Form.divMonomial, Form.eval, monomial, Poly.eval_shift, Poly.eval_scale]
       field_simp
 
-theorem Expr.normalize_correct (expression : Expr) (odd : Bool) (x : ℝ)
-    (hx : 0 < x) (hvalid : expression.valid = true) :
-    (expression.normalize odd).eval x = expression.eval odd x := by
-  induction expression with
-  | constant value => simp [Expr.normalize, Expr.eval]
-  | index => simp [Expr.normalize, Expr.eval]
-  | reciprocalIndex => simp [Expr.normalize, Expr.eval]
-  | alternating => cases odd <;> simp [Expr.normalize, Expr.eval]
-  | add left right ihl ihr =>
-      have hparts : left.valid = true ∧ right.valid = true := by
-        simpa only [Expr.valid, Bool.and_eq_true] using hvalid
-      simpa [Expr.normalize, Expr.eval, Form.eval_add _ _ _ hx.ne'] using
-        congrArg₂ (· + ·) (ihl hparts.1) (ihr hparts.2)
-  | sub left right ihl ihr =>
-      have hparts : left.valid = true ∧ right.valid = true := by
-        simpa only [Expr.valid, Bool.and_eq_true] using hvalid
-      simpa [Expr.normalize, Expr.eval, Form.eval_sub _ _ _ hx.ne'] using
-        congrArg₂ (· - ·) (ihl hparts.1) (ihr hparts.2)
-  | mul left right ihl ihr =>
-      have hparts : left.valid = true ∧ right.valid = true := by
-        simpa only [Expr.valid, Bool.and_eq_true] using hvalid
-      simpa [Expr.normalize, Expr.eval] using
-        congrArg₂ (· * ·) (ihl hparts.1) (ihr hparts.2)
-  | divMonomial argument coefficient power ih =>
-      have hparts : argument.valid = true ∧ decide (coefficient ≠ 0) = true := by
-        simpa only [Expr.valid, Bool.and_eq_true] using hvalid
-      have hc : coefficient ≠ 0 := of_decide_eq_true hparts.2
-      simpa [Expr.normalize, Expr.eval, Form.eval_divMonomial _ _ _ _ hx.ne' hc] using
-        congrArg (· / monomial coefficient power x) (ih hparts.1)
-
-theorem Expr.eval_parity_correct (expression : Expr) (n : ℕ) :
-    expression.eval (decide (n % 2 = 1)) n = expression.denote n := by
-  induction expression with
-  | constant _ | index | reciprocalIndex => rfl
-  | alternating =>
-      simp only [Expr.eval, Expr.denote]
-      rw [neg_one_pow_eq_pow_mod_two]
-      by_cases h : n % 2 = 1
-      · simp [h]
-      · have hz : n % 2 = 0 := by omega
-        simp [hz]
-  | add _ _ ihl ihr => simp [Expr.eval, Expr.denote, ihl, ihr]
-  | sub _ _ ihl ihr => simp [Expr.eval, Expr.denote, ihl, ihr]
-  | mul _ _ ihl ihr => simp [Expr.eval, Expr.denote, ihl, ihr]
-  | divMonomial _ _ _ ih => simp [Expr.eval, Expr.denote, ih]
-
-theorem Expr.normalize_sequence_correct (expression : Expr) (n : ℕ)
-    (hn : 0 < n) (hvalid : expression.valid = true) :
-    (expression.normalize (decide (n % 2 = 1))).eval n = expression.denote n := by
-  rw [expression.normalize_correct _ _ (by exact_mod_cast hn) hvalid,
-    expression.eval_parity_correct]
-
 #print axioms Hyperreals.Laurent.Poly.eval_mul
-#print axioms Hyperreals.Laurent.Expr.normalize_correct
-#print axioms Hyperreals.Laurent.Expr.normalize_sequence_correct
+#print axioms Hyperreals.Laurent.Form.eval_add
+#print axioms Hyperreals.Laurent.Form.eval_sub
+#print axioms Hyperreals.Laurent.Form.eval_mul
+#print axioms Hyperreals.Laurent.Form.eval_divMonomial
 
 end Hyperreals.Laurent

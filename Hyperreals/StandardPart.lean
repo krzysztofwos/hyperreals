@@ -1,14 +1,12 @@
 import Hyperreals.Completion
 import Mathlib.Analysis.SpecificLimits.Basic
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.ArctanDeriv
 
 /-!
-# Completion-invariant standard-part certificates
+# Standard parts and completion-invariant limits
 
-Ordinary (cofinite) convergence is the trusted certificate used here. Because
-every completion extends the cofinite filter, such a certificate implies the
-same ultrafilter limit in every completion. This module does not claim that a
-floating-point series recognizer has produced a valid convergence certificate.
+Every completion extends the cofinite filter. Ordinary convergence therefore
+implies the same ultrafilter limit in every completion. These definitions and
+limit laws connect exact sequence calculations to completion-relative values.
 -/
 
 set_option autoImplicit false
@@ -70,18 +68,6 @@ theorem div {x y : Sequence} {a b : ℝ} (hx : CofiniteLimit x a)
     CofiniteLimit (fun n ↦ x n / y n) (a / b) :=
   Filter.Tendsto.div hx hy hb
 
-/-- Continuous functions preserve completion-invariant standard parts. -/
-theorem comp_continuous {x : Sequence} {a : ℝ} {f : ℝ → ℝ}
-    (hx : CofiniteLimit x a) (hf : ContinuousAt f a) :
-    CofiniteLimit (fun n ↦ f (x n)) (f a) :=
-  hf.tendsto.comp hx
-
-/-- Tangent composition requires an explicit proof that the limit is not a pole. -/
-theorem tan {x : Sequence} {a : ℝ} (hx : CofiniteLimit x a)
-    (hcos : Real.cos a ≠ 0) :
-    CofiniteLimit (fun n ↦ Real.tan (x n)) (Real.tan a) :=
-  comp_continuous hx (Real.continuousAt_tan.mpr hcos)
-
 end CofiniteLimit
 
 /-- The distinguished sequence `1/n` has completion-invariant standard part zero. -/
@@ -98,7 +84,6 @@ theorem reciprocalIndex_nearStandardAt {Γ : Commitments} (C : Completion Γ) :
 
 #print axioms Hyperreals.cofiniteLimit_completion_invariant
 #print axioms Hyperreals.nearStandardAt_unique
-#print axioms Hyperreals.CofiniteLimit.tan
 #print axioms Hyperreals.reciprocalIndex_nearStandardAt
 
 end

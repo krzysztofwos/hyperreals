@@ -5,7 +5,7 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 project_root="$(cd "$script_dir/.." && pwd)"
 cd "$project_root"
 
-lean_sources=(Hyperreals.lean PeriodicChecker.lean LaurentChecker.lean ResidueChecker.lean Hyperreals/*.lean)
+lean_sources=(Hyperreals.lean ResidueChecker.lean Hyperreals/*.lean)
 
 for dependency in rg python3 lake; do
 	if ! command -v "$dependency" >/dev/null; then
@@ -28,18 +28,12 @@ lake build
 
 audited_modules=(
 	Hyperreals/Completion.lean
-	Hyperreals/Certificates.lean
-	Hyperreals/EventuallyPeriodic.lean
 	Hyperreals/StandardPart.lean
 	Hyperreals/Counterexample.lean
-	Hyperreals/Periodic.lean
 	Hyperreals/RuntimeInvariants.lean
 	Hyperreals/LaurentExpr.lean
 	Hyperreals/LaurentSign.lean
 	Hyperreals/LaurentLimit.lean
-	Hyperreals/LaurentStandardPart.lean
-	Hyperreals/LaurentRuntime.lean
-	Hyperreals/LaurentTrace.lean
 	Hyperreals/ResidueSupport.lean
 	Hyperreals/ResidueExpr.lean
 	Hyperreals/ResidueComparison.lean

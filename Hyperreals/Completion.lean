@@ -137,19 +137,9 @@ theorem extendible_insert_or_compl {Γ : Commitments} (hΓ : Extendible Γ)
   · exact Or.inl ⟨C.insertOfMem A hA⟩
   · exact Or.inr ⟨C.insertOfMem Aᶜ hAc⟩
 
-/-- A backend may commit `A` only by discharging this semantic obligation. -/
-def SafePositiveChoice (Γ : Commitments) (A : Set ℕ) : Prop :=
-  HasFreeFIP (insert A Γ)
-
-/-- A certified positive choice has a classical free-ultrafilter completion. -/
-theorem safePositiveChoice_extendible {Γ : Commitments} {A : Set ℕ}
-    (h : SafePositiveChoice Γ A) : Extendible (insert A Γ) :=
-  hasFreeFIP_iff_extendible.mp h
-
 #print axioms Hyperreals.extendible_of_hasFreeFIP
 #print axioms Hyperreals.hasFreeFIP_iff_extendible
 #print axioms Hyperreals.jointlyInfinite_iff_extendible
 #print axioms Hyperreals.extendible_insert_or_compl
-#print axioms Hyperreals.safePositiveChoice_extendible
 
 end Hyperreals

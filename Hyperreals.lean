@@ -1,13 +1,8 @@
 import Hyperreals.Semantics
 import Hyperreals.Completion
-import Hyperreals.Expressions
-import Hyperreals.Certificates
-import Hyperreals.EventuallyPeriodic
 import Hyperreals.StandardPart
 import Hyperreals.Counterexample
-import Hyperreals.Periodic
 import Hyperreals.RuntimeInvariants
-import Hyperreals.LaurentTrace
 import Hyperreals.ResidueTrace
 import Hyperreals.ResidueReplay
 import Hyperreals.ObservationPrograms
