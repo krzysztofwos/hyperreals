@@ -10,62 +10,40 @@
     {
       "name": "quotient",
       "result": "12",
-      "support": [
-        true
-      ],
+      "support": [true],
       "accepted_observations": 0,
       "verification": "kernel-checked",
       "snapshot_sha256": "f1d408e715610812f3ca57da063210075b9f0e6e63dbed24f25cd831fe1fcc51",
       "source_sha256": "b08bf943bc698f26e7ab20decfc5410cf643682368e402aeef1a3a1b8e07196a",
-      "axioms": [
-        "Classical.choice",
-        "Quot.sound",
-        "propext"
-      ],
+      "axioms": ["Classical.choice", "Quot.sound", "propext"],
       "lean_output": "'Hyperreals.GeneratedReplay.replay_check' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.trace_consistent' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.extraction_matches' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.support_correspondence' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.replayed_standard_part' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
     },
     {
       "name": "error",
       "result": "0",
-      "support": [
-        true
-      ],
+      "support": [true],
       "accepted_observations": 0,
       "verification": "kernel-checked",
       "snapshot_sha256": "0083a7569fd1e0a0779f648d22a1712a163ac606f35b661894ac3c846b10d673",
       "source_sha256": "19d61375eeb6b0cbbe55742c5a324c162a5f55e9f18a37df70e4b37ec1d51842",
-      "axioms": [
-        "Classical.choice",
-        "Quot.sound",
-        "propext"
-      ],
+      "axioms": ["Classical.choice", "Quot.sound", "propext"],
       "lean_output": "'Hyperreals.GeneratedReplay.replay_check' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.trace_consistent' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.extraction_matches' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.support_correspondence' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.replayed_standard_part' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
     },
     {
       "name": "after-odd-choice",
       "result": "12",
-      "support": [
-        false,
-        true
-      ],
+      "support": [false, true],
       "accepted_observations": 1,
       "verification": "kernel-checked",
       "snapshot_sha256": "bdabbae010aa0555d410c1e77d65880ebc1d2a1284f0b1941fe7c12679121358",
       "source_sha256": "13ae1a8955fc119dba38e777db3f4ada6cf34827308e482d3ef74a15d1fd36a4",
-      "axioms": [
-        "Classical.choice",
-        "Quot.sound",
-        "propext"
-      ],
+      "axioms": ["Classical.choice", "Quot.sound", "propext"],
       "lean_output": "'Hyperreals.GeneratedReplay.replay_check' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.trace_consistent' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.extraction_matches' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.support_correspondence' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.replayed_standard_part' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
     },
     {
       "name": "adaptive-backward",
       "result": "12",
-      "support": [
-        false,
-        true
-      ],
+      "support": [false, true],
       "accepted_observations": 1,
       "verification": "kernel-checked",
       "query": "(-1)^n < 0",
@@ -74,20 +52,13 @@
       "quotient": "(2^3 - (2 - epsilon)^3) / epsilon",
       "snapshot_sha256": "d10db75f0e1de2ea4e9540c4fecc535f30bfab6990a8591350a5e484f9c277ce",
       "source_sha256": "6c510e9670f111894c6a80ddb9849a343ec568c9100fc825f546c79a3f502b4d",
-      "axioms": [
-        "Classical.choice",
-        "Quot.sound",
-        "propext"
-      ],
+      "axioms": ["Classical.choice", "Quot.sound", "propext"],
       "lean_output": "'Hyperreals.GeneratedReplay.replay_check' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.trace_consistent' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.extraction_matches' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.support_correspondence' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.replayed_standard_part' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
     },
     {
       "name": "adaptive-forward",
       "result": "12",
-      "support": [
-        true,
-        false
-      ],
+      "support": [true, false],
       "accepted_observations": 1,
       "verification": "kernel-checked",
       "query": "(-1)^n < 0",
@@ -96,11 +67,7 @@
       "quotient": "((2 + epsilon)^3 - 2^3) / epsilon",
       "snapshot_sha256": "f5ea162f31e79f857f9a7b930a691c8069bee7cb5eb1f67c20a7e6c8560da415",
       "source_sha256": "42ad358b44357700b1177344bd401371cee6cfadc34dcdbabadef64a291cf772",
-      "axioms": [
-        "Classical.choice",
-        "Quot.sound",
-        "propext"
-      ],
+      "axioms": ["Classical.choice", "Quot.sound", "propext"],
       "lean_output": "'Hyperreals.GeneratedReplay.replay_check' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.trace_consistent' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.extraction_matches' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.support_correspondence' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Hyperreals.GeneratedReplay.replayed_standard_part' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
     }
   ]

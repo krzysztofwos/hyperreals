@@ -15,26 +15,8 @@
       "case": "infinitesimal_order",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        38667,
-        37375,
-        35416,
-        35250,
-        116583,
-        35667,
-        147916,
-        118500,
-        45209,
-        36250,
-        116667,
-        107875,
-        89375,
-        87208,
-        86292,
-        85792,
-        86042,
-        88125,
-        86375,
-        194042
+        38667, 37375, 35416, 35250, 116583, 35667, 147916, 118500, 45209, 36250,
+        116667, 107875, 89375, 87208, 86292, 85792, 86042, 88125, 86375, 194042
       ],
       "median_ns": 86333.5,
       "min_ns": 35250,
@@ -45,18 +27,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          true,
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "12",
-          "1"
-        ]
+        "accepted": [true, true, true],
+        "support": [true],
+        "standard_part": ["12", "1"]
       },
       "expression_nodes": 22,
       "max_normalized_terms": 3,
@@ -67,26 +40,9 @@
       "case": "infinitesimal_order",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        322541,
-        307417,
-        187709,
-        376500,
-        487750,
-        419792,
-        298875,
-        261834,
-        194916,
-        128792,
-        296334,
-        147083,
-        123417,
-        98583,
-        219250,
-        108792,
-        346666,
-        90750,
-        83334,
-        95291
+        322541, 307417, 187709, 376500, 487750, 419792, 298875, 261834, 194916,
+        128792, 296334, 147083, 123417, 98583, 219250, 108792, 346666, 90750,
+        83334, 95291
       ],
       "median_ns": 207083.0,
       "min_ns": 83334,
@@ -97,18 +53,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          true,
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "12",
-          "1"
-        ]
+        "accepted": [true, true, true],
+        "support": [true],
+        "standard_part": ["12", "1"]
       },
       "expression_nodes": 22,
       "max_normalized_terms": 3,
@@ -119,26 +66,9 @@
       "case": "infinitesimal_order",
       "backend_version": "1.14.0",
       "samples_ns": [
-        1441166,
-        1109541,
-        991458,
-        1140292,
-        2904125,
-        2557959,
-        1192458,
-        1175542,
-        1572125,
-        3616875,
-        3137500,
-        2977542,
-        2831417,
-        999583,
-        1100042,
-        871708,
-        859041,
-        2380708,
-        1836250,
-        1751542
+        1441166, 1109541, 991458, 1140292, 2904125, 2557959, 1192458, 1175542,
+        1572125, 3616875, 3137500, 2977542, 2831417, 999583, 1100042, 871708,
+        859041, 2380708, 1836250, 1751542
       ],
       "median_ns": 1506645.5,
       "min_ns": 859041,
@@ -149,18 +79,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          true,
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "12",
-          "1"
-        ]
+        "accepted": [true, true, true],
+        "support": [true],
+        "standard_part": ["12", "1"]
       },
       "expression_nodes": 22,
       "max_normalized_terms": 3,
@@ -171,26 +92,8 @@
       "case": "coprime_2_3",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        22125,
-        20375,
-        19500,
-        19334,
-        19084,
-        19000,
-        20208,
-        99583,
-        33209,
-        20916,
-        20083,
-        133291,
-        55417,
-        53458,
-        53167,
-        124375,
-        89459,
-        23833,
-        20084,
-        19584
+        22125, 20375, 19500, 19334, 19084, 19000, 20208, 99583, 33209, 20916,
+        20083, 133291, 55417, 53458, 53167, 124375, 89459, 23833, 20084, 19584
       ],
       "median_ns": 21520.5,
       "min_ns": 19000,
@@ -201,22 +104,9 @@
       "state_period": 6,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          true
-        ],
-        "support": [
-          false,
-          false,
-          false,
-          false,
-          false,
-          true
-        ],
-        "standard_part": [
-          "5",
-          "1"
-        ]
+        "accepted": [true, true],
+        "support": [false, false, false, false, false, true],
+        "standard_part": ["5", "1"]
       },
       "expression_nodes": 5,
       "max_normalized_terms": 1,
@@ -227,26 +117,9 @@
       "case": "coprime_2_3",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        365167,
-        400792,
-        313125,
-        362666,
-        317333,
-        270500,
-        246083,
-        221625,
-        203125,
-        330833,
-        120458,
-        70750,
-        63750,
-        61459,
-        68667,
-        61917,
-        59917,
-        114958,
-        157291,
-        269417
+        365167, 400792, 313125, 362666, 317333, 270500, 246083, 221625, 203125,
+        330833, 120458, 70750, 63750, 61459, 68667, 61917, 59917, 114958,
+        157291, 269417
       ],
       "median_ns": 212375.0,
       "min_ns": 59917,
@@ -257,22 +130,9 @@
       "state_period": 6,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          true
-        ],
-        "support": [
-          false,
-          false,
-          false,
-          false,
-          false,
-          true
-        ],
-        "standard_part": [
-          "5",
-          "1"
-        ]
+        "accepted": [true, true],
+        "support": [false, false, false, false, false, true],
+        "standard_part": ["5", "1"]
       },
       "expression_nodes": 5,
       "max_normalized_terms": 1,
@@ -283,26 +143,9 @@
       "case": "coprime_2_3",
       "backend_version": "1.14.0",
       "samples_ns": [
-        215083,
-        804583,
-        201583,
-        731834,
-        542542,
-        432458,
-        596542,
-        497875,
-        729125,
-        306250,
-        179750,
-        471958,
-        173292,
-        777500,
-        1082292,
-        189125,
-        652250,
-        628208,
-        693167,
-        678042
+        215083, 804583, 201583, 731834, 542542, 432458, 596542, 497875, 729125,
+        306250, 179750, 471958, 173292, 777500, 1082292, 189125, 652250, 628208,
+        693167, 678042
       ],
       "median_ns": 569542.0,
       "min_ns": 173292,
@@ -313,22 +156,9 @@
       "state_period": 6,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          true
-        ],
-        "support": [
-          false,
-          false,
-          false,
-          false,
-          false,
-          true
-        ],
-        "standard_part": [
-          "5",
-          "1"
-        ]
+        "accepted": [true, true],
+        "support": [false, false, false, false, false, true],
+        "standard_part": ["5", "1"]
       },
       "expression_nodes": 5,
       "max_normalized_terms": 1,
@@ -339,26 +169,8 @@
       "case": "coprime_3_5_7",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        72292,
-        68667,
-        105583,
-        68083,
-        66792,
-        176958,
-        99583,
-        79125,
-        71000,
-        68500,
-        68333,
-        67042,
-        68250,
-        67625,
-        68500,
-        67791,
-        67583,
-        1536834,
-        161583,
-        297959
+        72292, 68667, 105583, 68083, 66792, 176958, 99583, 79125, 71000, 68500,
+        68333, 67042, 68250, 67625, 68500, 67791, 67583, 1536834, 161583, 297959
       ],
       "median_ns": 68583.5,
       "min_ns": 66792,
@@ -369,11 +181,7 @@
       "state_period": 105,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          true,
-          true
-        ],
+        "accepted": [true, true, true],
         "support": [
           false,
           false,
@@ -481,10 +289,7 @@
           false,
           false
         ],
-        "standard_part": [
-          "9",
-          "1"
-        ]
+        "standard_part": ["9", "1"]
       },
       "expression_nodes": 11,
       "max_normalized_terms": 1,
@@ -495,26 +300,9 @@
       "case": "coprime_3_5_7",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        1067583,
-        666792,
-        988334,
-        1079875,
-        780417,
-        814250,
-        761167,
-        548125,
-        377917,
-        1074000,
-        902000,
-        564916,
-        1795625,
-        2000458,
-        691917,
-        2314459,
-        1627667,
-        1333584,
-        1244167,
-        1710500
+        1067583, 666792, 988334, 1079875, 780417, 814250, 761167, 548125,
+        377917, 1074000, 902000, 564916, 1795625, 2000458, 691917, 2314459,
+        1627667, 1333584, 1244167, 1710500
       ],
       "median_ns": 1027958.5,
       "min_ns": 377917,
@@ -525,11 +313,7 @@
       "state_period": 105,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          true,
-          true
-        ],
+        "accepted": [true, true, true],
         "support": [
           false,
           false,
@@ -637,10 +421,7 @@
           false,
           false
         ],
-        "standard_part": [
-          "9",
-          "1"
-        ]
+        "standard_part": ["9", "1"]
       },
       "expression_nodes": 11,
       "max_normalized_terms": 1,
@@ -651,26 +432,9 @@
       "case": "coprime_3_5_7",
       "backend_version": "1.14.0",
       "samples_ns": [
-        844625,
-        695625,
-        602250,
-        567625,
-        1624917,
-        1847042,
-        1668375,
-        1174750,
-        685416,
-        770000,
-        1156500,
-        726584,
-        615458,
-        1070250,
-        1303042,
-        1490875,
-        773167,
-        1419417,
-        2227750,
-        998833
+        844625, 695625, 602250, 567625, 1624917, 1847042, 1668375, 1174750,
+        685416, 770000, 1156500, 726584, 615458, 1070250, 1303042, 1490875,
+        773167, 1419417, 2227750, 998833
       ],
       "median_ns": 1034541.5,
       "min_ns": 567625,
@@ -681,11 +445,7 @@
       "state_period": 105,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          true,
-          true
-        ],
+        "accepted": [true, true, true],
         "support": [
           false,
           false,
@@ -793,10 +553,7 @@
           false,
           false
         ],
-        "standard_part": [
-          "9",
-          "1"
-        ]
+        "standard_part": ["9", "1"]
       },
       "expression_nodes": 11,
       "max_normalized_terms": 1,
@@ -807,26 +564,8 @@
       "case": "shared_factors_4_6",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        66250,
-        61292,
-        59667,
-        59500,
-        59250,
-        59250,
-        58667,
-        58875,
-        58625,
-        58750,
-        59000,
-        58666,
-        58958,
-        58959,
-        251625,
-        64000,
-        60208,
-        60084,
-        60000,
-        59584
+        66250, 61292, 59667, 59500, 59250, 59250, 58667, 58875, 58625, 58750,
+        59000, 58666, 58958, 58959, 251625, 64000, 60208, 60084, 60000, 59584
       ],
       "median_ns": 59375.0,
       "min_ns": 58625,
@@ -837,11 +576,7 @@
       "state_period": 12,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          false,
-          true
-        ],
+        "accepted": [true, false, true],
         "support": [
           false,
           false,
@@ -856,10 +591,7 @@
           false,
           false
         ],
-        "standard_part": [
-          "9",
-          "1"
-        ]
+        "standard_part": ["9", "1"]
       },
       "expression_nodes": 7,
       "max_normalized_terms": 1,
@@ -870,26 +602,9 @@
       "case": "shared_factors_4_6",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        487458,
-        300375,
-        269208,
-        295125,
-        314375,
-        148375,
-        221875,
-        118250,
-        227875,
-        252041,
-        339625,
-        146041,
-        317500,
-        467500,
-        380750,
-        278125,
-        219416,
-        140500,
-        203333,
-        183542
+        487458, 300375, 269208, 295125, 314375, 148375, 221875, 118250, 227875,
+        252041, 339625, 146041, 317500, 467500, 380750, 278125, 219416, 140500,
+        203333, 183542
       ],
       "median_ns": 260624.5,
       "min_ns": 118250,
@@ -900,11 +615,7 @@
       "state_period": 12,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          false,
-          true
-        ],
+        "accepted": [true, false, true],
         "support": [
           false,
           false,
@@ -919,10 +630,7 @@
           false,
           false
         ],
-        "standard_part": [
-          "9",
-          "1"
-        ]
+        "standard_part": ["9", "1"]
       },
       "expression_nodes": 7,
       "max_normalized_terms": 1,
@@ -933,26 +641,9 @@
       "case": "shared_factors_4_6",
       "backend_version": "1.14.0",
       "samples_ns": [
-        1700583,
-        2301000,
-        2347833,
-        608500,
-        734458,
-        1600500,
-        1067709,
-        1461459,
-        999000,
-        590334,
-        791666,
-        1091417,
-        844542,
-        1478291,
-        935208,
-        575375,
-        588417,
-        580083,
-        1187417,
-        1003459
+        1700583, 2301000, 2347833, 608500, 734458, 1600500, 1067709, 1461459,
+        999000, 590334, 791666, 1091417, 844542, 1478291, 935208, 575375,
+        588417, 580083, 1187417, 1003459
       ],
       "median_ns": 1001229.5,
       "min_ns": 575375,
@@ -963,11 +654,7 @@
       "state_period": 12,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true,
-          false,
-          true
-        ],
+        "accepted": [true, false, true],
         "support": [
           false,
           false,
@@ -982,10 +669,7 @@
           false,
           false
         ],
-        "standard_part": [
-          "9",
-          "1"
-        ]
+        "standard_part": ["9", "1"]
       },
       "expression_nodes": 7,
       "max_normalized_terms": 1,
@@ -996,26 +680,8 @@
       "case": "support_relative_limit",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        55583,
-        51917,
-        50750,
-        50875,
-        105667,
-        85250,
-        50958,
-        49458,
-        51625,
-        59584,
-        49625,
-        102958,
-        34417,
-        21708,
-        19584,
-        19250,
-        19250,
-        19167,
-        19083,
-        19250
+        55583, 51917, 50750, 50875, 105667, 85250, 50958, 49458, 51625, 59584,
+        49625, 102958, 34417, 21708, 19584, 19250, 19250, 19167, 19083, 19250
       ],
       "median_ns": 50187.5,
       "min_ns": 19083,
@@ -1026,17 +692,9 @@
       "state_period": 2,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          false,
-          true
-        ],
-        "standard_part": [
-          "-1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [false, true],
+        "standard_part": ["-1", "1"]
       },
       "expression_nodes": 7,
       "max_normalized_terms": 2,
@@ -1047,26 +705,9 @@
       "case": "support_relative_limit",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        153125,
-        160833,
-        133500,
-        149958,
-        80417,
-        156542,
-        298125,
-        194292,
-        158250,
-        103084,
-        123250,
-        149542,
-        146166,
-        181334,
-        185667,
-        87625,
-        282417,
-        227542,
-        258250,
-        76541
+        153125, 160833, 133500, 149958, 80417, 156542, 298125, 194292, 158250,
+        103084, 123250, 149542, 146166, 181334, 185667, 87625, 282417, 227542,
+        258250, 76541
       ],
       "median_ns": 154833.5,
       "min_ns": 76541,
@@ -1077,17 +718,9 @@
       "state_period": 2,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          false,
-          true
-        ],
-        "standard_part": [
-          "-1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [false, true],
+        "standard_part": ["-1", "1"]
       },
       "expression_nodes": 7,
       "max_normalized_terms": 2,
@@ -1098,26 +731,9 @@
       "case": "support_relative_limit",
       "backend_version": "1.14.0",
       "samples_ns": [
-        1132083,
-        536375,
-        338250,
-        291000,
-        239750,
-        228000,
-        227917,
-        219709,
-        213334,
-        430833,
-        297375,
-        583625,
-        615959,
-        408167,
-        358875,
-        259541,
-        248500,
-        305417,
-        518834,
-        786042
+        1132083, 536375, 338250, 291000, 239750, 228000, 227917, 219709, 213334,
+        430833, 297375, 583625, 615959, 408167, 358875, 259541, 248500, 305417,
+        518834, 786042
       ],
       "median_ns": 321833.5,
       "min_ns": 213334,
@@ -1128,17 +744,9 @@
       "state_period": 2,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          false,
-          true
-        ],
-        "standard_part": [
-          "-1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [false, true],
+        "standard_part": ["-1", "1"]
       },
       "expression_nodes": 7,
       "max_normalized_terms": 2,
@@ -1149,26 +757,8 @@
       "case": "unknown_differing_limits",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        15209,
-        12875,
-        11833,
-        11458,
-        11000,
-        10791,
-        10667,
-        11125,
-        10750,
-        10917,
-        10666,
-        10917,
-        10625,
-        10792,
-        10834,
-        10750,
-        10541,
-        10708,
-        10917,
-        10750
+        15209, 12875, 11833, 11458, 11000, 10791, 10667, 11125, 10750, 10917,
+        10666, 10917, 10625, 10792, 10834, 10750, 10541, 10708, 10917, 10750
       ],
       "median_ns": 10813.0,
       "min_ns": 10541,
@@ -1179,13 +769,8 @@
       "state_period": 2,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          false,
-          true
-        ],
+        "accepted": [true],
+        "support": [false, true],
         "standard_part": null
       },
       "expression_nodes": 3,
@@ -1197,26 +782,8 @@
       "case": "unknown_differing_limits",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        84375,
-        86459,
-        137417,
-        76333,
-        45208,
-        40500,
-        121166,
-        171375,
-        91041,
-        70917,
-        56708,
-        44542,
-        35125,
-        35959,
-        53292,
-        37000,
-        82916,
-        39625,
-        125750,
-        102208
+        84375, 86459, 137417, 76333, 45208, 40500, 121166, 171375, 91041, 70917,
+        56708, 44542, 35125, 35959, 53292, 37000, 82916, 39625, 125750, 102208
       ],
       "median_ns": 73625.0,
       "min_ns": 35125,
@@ -1227,13 +794,8 @@
       "state_period": 2,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          false,
-          true
-        ],
+        "accepted": [true],
+        "support": [false, true],
         "standard_part": null
       },
       "expression_nodes": 3,
@@ -1245,26 +807,9 @@
       "case": "unknown_differing_limits",
       "backend_version": "1.14.0",
       "samples_ns": [
-        166583,
-        122958,
-        113791,
-        110375,
-        260000,
-        280708,
-        181333,
-        280042,
-        190958,
-        146500,
-        419209,
-        341208,
-        534709,
-        364833,
-        948416,
-        408500,
-        614916,
-        115166,
-        109125,
-        103917
+        166583, 122958, 113791, 110375, 260000, 280708, 181333, 280042, 190958,
+        146500, 419209, 341208, 534709, 364833, 948416, 408500, 614916, 115166,
+        109125, 103917
       ],
       "median_ns": 225479.0,
       "min_ns": 103917,
@@ -1275,13 +820,8 @@
       "state_period": 2,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          false,
-          true
-        ],
+        "accepted": [true],
+        "support": [false, true],
         "standard_part": null
       },
       "expression_nodes": 3,
@@ -1293,26 +833,8 @@
       "case": "unknown_divergent_branch",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        87333,
-        20416,
-        38625,
-        56000,
-        17625,
-        17584,
-        17583,
-        83208,
-        31292,
-        20417,
-        18375,
-        18167,
-        17584,
-        17334,
-        17834,
-        17250,
-        17208,
-        17417,
-        17083,
-        244208
+        87333, 20416, 38625, 56000, 17625, 17584, 17583, 83208, 31292, 20417,
+        18375, 18167, 17584, 17334, 17834, 17250, 17208, 17417, 17083, 244208
       ],
       "median_ns": 18000.5,
       "min_ns": 17083,
@@ -1323,14 +845,8 @@
       "state_period": 3,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true,
-          false,
-          false
-        ],
+        "accepted": [true],
+        "support": [true, false, false],
         "standard_part": null
       },
       "expression_nodes": 7,
@@ -1342,26 +858,9 @@
       "case": "unknown_divergent_branch",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        198833,
-        149125,
-        267042,
-        1440417,
-        1168333,
-        511875,
-        1537584,
-        1770750,
-        623250,
-        1010750,
-        354375,
-        560709,
-        263791,
-        198000,
-        340500,
-        709334,
-        1279166,
-        978584,
-        1926000,
-        934625
+        198833, 149125, 267042, 1440417, 1168333, 511875, 1537584, 1770750,
+        623250, 1010750, 354375, 560709, 263791, 198000, 340500, 709334,
+        1279166, 978584, 1926000, 934625
       ],
       "median_ns": 666292.0,
       "min_ns": 149125,
@@ -1372,14 +871,8 @@
       "state_period": 3,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true,
-          false,
-          false
-        ],
+        "accepted": [true],
+        "support": [true, false, false],
         "standard_part": null
       },
       "expression_nodes": 7,
@@ -1391,26 +884,9 @@
       "case": "unknown_divergent_branch",
       "backend_version": "1.14.0",
       "samples_ns": [
-        601250,
-        686917,
-        926542,
-        560417,
-        503583,
-        1205333,
-        1269083,
-        771458,
-        553250,
-        722708,
-        751750,
-        636125,
-        633125,
-        264625,
-        208083,
-        203708,
-        255542,
-        664125,
-        691541,
-        556125
+        601250, 686917, 926542, 560417, 503583, 1205333, 1269083, 771458,
+        553250, 722708, 751750, 636125, 633125, 264625, 208083, 203708, 255542,
+        664125, 691541, 556125
       ],
       "median_ns": 634625.0,
       "min_ns": 203708,
@@ -1421,14 +897,8 @@
       "state_period": 3,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true,
-          false,
-          false
-        ],
+        "accepted": [true],
+        "support": [true, false, false],
         "standard_part": null
       },
       "expression_nodes": 7,
@@ -1440,25 +910,8 @@
       "case": "laurent_growth_4",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        69500,
-        64084,
-        184292,
-        195375,
-        66958,
-        77583,
-        62584,
-        62250,
-        62250,
-        62416,
-        61375,
-        62666,
-        62291,
-        62334,
-        62709,
-        243542,
-        165875,
-        157083,
-        152958,
+        69500, 64084, 184292, 195375, 66958, 77583, 62584, 62250, 62250, 62416,
+        61375, 62666, 62291, 62334, 62709, 243542, 165875, 157083, 152958,
         153708
       ],
       "median_ns": 65521.0,
@@ -1470,16 +923,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["1", "1"]
       },
       "expression_nodes": 33,
       "max_normalized_terms": 5,
@@ -1490,26 +936,9 @@
       "case": "laurent_growth_4",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        975750,
-        381625,
-        570291,
-        473750,
-        533292,
-        429583,
-        593167,
-        794542,
-        1191917,
-        799417,
-        496000,
-        426250,
-        836083,
-        630584,
-        348167,
-        343291,
-        428209,
-        625125,
-        458084,
-        867500
+        975750, 381625, 570291, 473750, 533292, 429583, 593167, 794542, 1191917,
+        799417, 496000, 426250, 836083, 630584, 348167, 343291, 428209, 625125,
+        458084, 867500
       ],
       "median_ns": 551791.5,
       "min_ns": 343291,
@@ -1520,16 +949,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["1", "1"]
       },
       "expression_nodes": 33,
       "max_normalized_terms": 5,
@@ -1540,26 +962,9 @@
       "case": "laurent_growth_4",
       "backend_version": "1.14.0",
       "samples_ns": [
-        6817625,
-        6386875,
-        5293625,
-        6758959,
-        3893875,
-        4325958,
-        4174459,
-        4128958,
-        3565958,
-        2117209,
-        9399667,
-        5500083,
-        5564875,
-        8173417,
-        5391541,
-        4235084,
-        6293041,
-        3882583,
-        4383000,
-        5229750
+        6817625, 6386875, 5293625, 6758959, 3893875, 4325958, 4174459, 4128958,
+        3565958, 2117209, 9399667, 5500083, 5564875, 8173417, 5391541, 4235084,
+        6293041, 3882583, 4383000, 5229750
       ],
       "median_ns": 5261687.5,
       "min_ns": 2117209,
@@ -1570,16 +975,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["1", "1"]
       },
       "expression_nodes": 33,
       "max_normalized_terms": 5,
@@ -1590,26 +988,9 @@
       "case": "laurent_growth_8",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        364458,
-        396084,
-        691334,
-        668750,
-        301250,
-        353041,
-        531208,
-        388291,
-        382250,
-        332000,
-        420292,
-        462125,
-        383542,
-        495000,
-        405333,
-        1051750,
-        395750,
-        295709,
-        396792,
-        461916
+        364458, 396084, 691334, 668750, 301250, 353041, 531208, 388291, 382250,
+        332000, 420292, 462125, 383542, 495000, 405333, 1051750, 395750, 295709,
+        396792, 461916
       ],
       "median_ns": 396438.0,
       "min_ns": 295709,
@@ -1620,16 +1001,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["1", "1"]
       },
       "expression_nodes": 65,
       "max_normalized_terms": 9,
@@ -1640,26 +1014,9 @@
       "case": "laurent_growth_8",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        480125,
-        679625,
-        724375,
-        1839000,
-        1234125,
-        843417,
-        886292,
-        1076375,
-        950791,
-        594334,
-        401292,
-        1137208,
-        285250,
-        1597458,
-        841833,
-        514042,
-        648417,
-        620333,
-        728416,
-        689208
+        480125, 679625, 724375, 1839000, 1234125, 843417, 886292, 1076375,
+        950791, 594334, 401292, 1137208, 285250, 1597458, 841833, 514042,
+        648417, 620333, 728416, 689208
       ],
       "median_ns": 726395.5,
       "min_ns": 285250,
@@ -1670,16 +1027,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["1", "1"]
       },
       "expression_nodes": 65,
       "max_normalized_terms": 9,
@@ -1690,26 +1040,9 @@
       "case": "laurent_growth_8",
       "backend_version": "1.14.0",
       "samples_ns": [
-        4607333,
-        3268834,
-        3257166,
-        3966792,
-        4488834,
-        6478125,
-        8442292,
-        6251000,
-        9620958,
-        6346458,
-        7087834,
-        5917500,
-        13186708,
-        8430584,
-        19922250,
-        7574667,
-        6698250,
-        7408708,
-        7079125,
-        8467167
+        4607333, 3268834, 3257166, 3966792, 4488834, 6478125, 8442292, 6251000,
+        9620958, 6346458, 7087834, 5917500, 13186708, 8430584, 19922250,
+        7574667, 6698250, 7408708, 7079125, 8467167
       ],
       "median_ns": 6888687.5,
       "min_ns": 3257166,
@@ -1720,16 +1053,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["1", "1"]
       },
       "expression_nodes": 65,
       "max_normalized_terms": 9,
@@ -1740,26 +1066,9 @@
       "case": "laurent_growth_12",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        294125,
-        334917,
-        418917,
-        664208,
-        502833,
-        399375,
-        518083,
-        347708,
-        1107375,
-        686084,
-        431167,
-        293208,
-        290667,
-        557666,
-        1382167,
-        317042,
-        322041,
-        288792,
-        730708,
-        756083
+        294125, 334917, 418917, 664208, 502833, 399375, 518083, 347708, 1107375,
+        686084, 431167, 293208, 290667, 557666, 1382167, 317042, 322041, 288792,
+        730708, 756083
       ],
       "median_ns": 425042.0,
       "min_ns": 288792,
@@ -1770,16 +1079,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["1", "1"]
       },
       "expression_nodes": 97,
       "max_normalized_terms": 13,
@@ -1790,26 +1092,9 @@
       "case": "laurent_growth_12",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        1972417,
-        1200083,
-        974125,
-        902875,
-        785833,
-        649459,
-        520958,
-        702083,
-        562833,
-        846292,
-        1337959,
-        973292,
-        1578500,
-        942667,
-        892417,
-        1210208,
-        964959,
-        1242792,
-        909208,
-        1136958
+        1972417, 1200083, 974125, 902875, 785833, 649459, 520958, 702083,
+        562833, 846292, 1337959, 973292, 1578500, 942667, 892417, 1210208,
+        964959, 1242792, 909208, 1136958
       ],
       "median_ns": 953813.0,
       "min_ns": 520958,
@@ -1820,16 +1105,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["1", "1"]
       },
       "expression_nodes": 97,
       "max_normalized_terms": 13,
@@ -1840,26 +1118,9 @@
       "case": "laurent_growth_12",
       "backend_version": "1.14.0",
       "samples_ns": [
-        14417125,
-        11593875,
-        16002292,
-        7257083,
-        6027666,
-        5827666,
-        6280083,
-        5718750,
-        4800250,
-        6806250,
-        7919958,
-        5470667,
-        12258834,
-        8461583,
-        13648250,
-        14857209,
-        10331250,
-        6127208,
-        7177250,
-        5634333
+        14417125, 11593875, 16002292, 7257083, 6027666, 5827666, 6280083,
+        5718750, 4800250, 6806250, 7919958, 5470667, 12258834, 8461583,
+        13648250, 14857209, 10331250, 6127208, 7177250, 5634333
       ],
       "median_ns": 7217166.5,
       "min_ns": 4800250,
@@ -1870,16 +1131,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "1",
-          "1"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["1", "1"]
       },
       "expression_nodes": 97,
       "max_normalized_terms": 13,
@@ -1890,26 +1144,9 @@
       "case": "exact_cancellation_12",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        842333,
-        562292,
-        535667,
-        813417,
-        1397708,
-        672250,
-        826291,
-        954583,
-        577542,
-        742500,
-        858667,
-        1091333,
-        537959,
-        1709042,
-        2625458,
-        1643250,
-        1125625,
-        777500,
-        752166,
-        821250
+        842333, 562292, 535667, 813417, 1397708, 672250, 826291, 954583, 577542,
+        742500, 858667, 1091333, 537959, 1709042, 2625458, 1643250, 1125625,
+        777500, 752166, 821250
       ],
       "median_ns": 823770.5,
       "min_ns": 535667,
@@ -1920,16 +1157,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "7",
-          "3"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["7", "3"]
       },
       "expression_nodes": 195,
       "max_normalized_terms": 1,
@@ -1940,26 +1170,9 @@
       "case": "exact_cancellation_12",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        1993958,
-        2459791,
-        2884500,
-        2592292,
-        2829125,
-        2103792,
-        2227208,
-        2810667,
-        4244083,
-        3377792,
-        2499917,
-        2302959,
-        2717000,
-        2773542,
-        2349750,
-        3625167,
-        1790417,
-        1995041,
-        3121333,
-        1652708
+        1993958, 2459791, 2884500, 2592292, 2829125, 2103792, 2227208, 2810667,
+        4244083, 3377792, 2499917, 2302959, 2717000, 2773542, 2349750, 3625167,
+        1790417, 1995041, 3121333, 1652708
       ],
       "median_ns": 2546104.5,
       "min_ns": 1652708,
@@ -1970,16 +1183,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "7",
-          "3"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["7", "3"]
       },
       "expression_nodes": 195,
       "max_normalized_terms": 1,
@@ -1990,26 +1196,9 @@
       "case": "exact_cancellation_12",
       "backend_version": "1.14.0",
       "samples_ns": [
-        302625,
-        237875,
-        666291,
-        244417,
-        697750,
-        236334,
-        460917,
-        225417,
-        216250,
-        1032834,
-        675458,
-        1394625,
-        759792,
-        622250,
-        1501583,
-        1013458,
-        242458,
-        587167,
-        614292,
-        503375
+        302625, 237875, 666291, 244417, 697750, 236334, 460917, 225417, 216250,
+        1032834, 675458, 1394625, 759792, 622250, 1501583, 1013458, 242458,
+        587167, 614292, 503375
       ],
       "median_ns": 600729.5,
       "min_ns": 216250,
@@ -2020,16 +1209,9 @@
       "state_period": 1,
       "active_residues": 1,
       "result": {
-        "accepted": [
-          true
-        ],
-        "support": [
-          true
-        ],
-        "standard_part": [
-          "7",
-          "3"
-        ]
+        "accepted": [true],
+        "support": [true],
+        "standard_part": ["7", "3"]
       },
       "expression_nodes": 195,
       "max_normalized_terms": 1,
@@ -2040,26 +1222,9 @@
       "case": "dense_lcm_210",
       "backend_version": "stdlib Fraction",
       "samples_ns": [
-        3533292,
-        3031708,
-        4650750,
-        3362208,
-        4236250,
-        3406792,
-        5468667,
-        4317417,
-        2635000,
-        3598083,
-        6495959,
-        2938458,
-        3057917,
-        3028500,
-        4594000,
-        6253750,
-        3463375,
-        3145959,
-        4150084,
-        4761750
+        3533292, 3031708, 4650750, 3362208, 4236250, 3406792, 5468667, 4317417,
+        2635000, 3598083, 6495959, 2938458, 3057917, 3028500, 4594000, 6253750,
+        3463375, 3145959, 4150084, 4761750
       ],
       "median_ns": 3565687.5,
       "min_ns": 2635000,
@@ -2070,9 +1235,7 @@
       "state_period": 210,
       "active_residues": 105,
       "result": {
-        "accepted": [
-          true
-        ],
+        "accepted": [true],
         "support": [
           true,
           true,
@@ -2285,10 +1448,7 @@
           false,
           false
         ],
-        "standard_part": [
-          "0",
-          "1"
-        ]
+        "standard_part": ["0", "1"]
       },
       "expression_nodes": 17,
       "max_normalized_terms": 1,
@@ -2299,26 +1459,9 @@
       "case": "dense_lcm_210",
       "backend_version": "Lean native residue_checker",
       "samples_ns": [
-        2544584,
-        3103709,
-        1774583,
-        1877167,
-        1771750,
-        1741166,
-        2674042,
-        2307542,
-        1772125,
-        1472042,
-        1611500,
-        1386000,
-        1375458,
-        1835083,
-        1557542,
-        1726333,
-        2658916,
-        1967291,
-        1467875,
-        1984875
+        2544584, 3103709, 1774583, 1877167, 1771750, 1741166, 2674042, 2307542,
+        1772125, 1472042, 1611500, 1386000, 1375458, 1835083, 1557542, 1726333,
+        2658916, 1967291, 1467875, 1984875
       ],
       "median_ns": 1773354.0,
       "min_ns": 1375458,
@@ -2329,9 +1472,7 @@
       "state_period": 210,
       "active_residues": 105,
       "result": {
-        "accepted": [
-          true
-        ],
+        "accepted": [true],
         "support": [
           true,
           true,
@@ -2544,10 +1685,7 @@
           false,
           false
         ],
-        "standard_part": [
-          "0",
-          "1"
-        ]
+        "standard_part": ["0", "1"]
       },
       "expression_nodes": 17,
       "max_normalized_terms": 1,
@@ -2558,26 +1696,9 @@
       "case": "dense_lcm_210",
       "backend_version": "1.14.0",
       "samples_ns": [
-        20541750,
-        22932500,
-        20258875,
-        23379917,
-        23074042,
-        23754084,
-        27944208,
-        134780542,
-        71481167,
-        49364250,
-        34256416,
-        46027375,
-        30449042,
-        38287458,
-        29868250,
-        27619000,
-        29356291,
-        26097625,
-        18459333,
-        18701708
+        20541750, 22932500, 20258875, 23379917, 23074042, 23754084, 27944208,
+        134780542, 71481167, 49364250, 34256416, 46027375, 30449042, 38287458,
+        29868250, 27619000, 29356291, 26097625, 18459333, 18701708
       ],
       "median_ns": 27781604.0,
       "min_ns": 18459333,
@@ -2588,9 +1709,7 @@
       "state_period": 210,
       "active_residues": 105,
       "result": {
-        "accepted": [
-          true
-        ],
+        "accepted": [true],
         "support": [
           true,
           true,
@@ -2803,10 +1922,7 @@
           false,
           false
         ],
-        "standard_part": [
-          "0",
-          "1"
-        ]
+        "standard_part": ["0", "1"]
       },
       "expression_nodes": 17,
       "max_normalized_terms": 1,
