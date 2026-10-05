@@ -5,6 +5,14 @@ and parity Laurent interfaces provide its smaller verified fragments.
 Concrete exported results can be checked independently through verify_export.
 """
 
+from .differentiable import (
+    CompiledJVP,
+    DifferentiableExpr,
+    DifferentiableProgram,
+    DomainCondition,
+    JVPVerification,
+    variables,
+)
 from .polynomial import divided_difference, evaluate_polynomial, polynomial_quotient
 from .replay import (
     ReplayObservation,
@@ -24,6 +32,12 @@ from .verified_residue import (
 __version__ = "0.1.0"
 
 __all__ = [
+    "CompiledJVP",
+    "DifferentiableExpr",
+    "DifferentiableProgram",
+    "DomainCondition",
+    "JVPVerification",
+    "variables",
     "LeanPeriodicSystem",
     "LeanLaurentSystem",
     "LaurentHyperreal",
