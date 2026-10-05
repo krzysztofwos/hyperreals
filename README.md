@@ -4,7 +4,7 @@ A computational interface to infinitesimal arithmetic that records finite observ
 
 The mathematical question is how a finite computation can use a nonconstructive object while leaving that object unspecified. Here, each accepted comparison records a set of sequence indices that a free-ultrafilter completion must contain. Lean connects checked adaptive execution to one fixed completion. Within the exact fragment, extraction succeeds exactly when every compatible completion has the same finite real standard part. Generic polynomial differentiation connects that executable result to the ordinary derivative. The complete extraction core computes with exact finite periodic Laurent expressions. A separate symbolic compiler covers finite real vectors and elementary functions, with proved domains and literal infinitesimal quotient semantics. It does not select or enumerate whole ultrafilters.
 
-The main entry point is `LeanResidueSystem`, an exact interface to the Lean residue checker. Optional kernel replay verifies a recorded computation independently of the native result. See [formalization.md](formalization.md) for the precise statements, proof sources, and research questions.
+`LeanResidueSystem` provides exact sequence arithmetic and finite observations. `DifferentiableProgram` provides symbolic elementary vector differentiation. Kernel checks verify exported residue computations and the derivative compiler's output. See [formalization.md](formalization.md) for the precise statements, proof sources, and research questions.
 
 ## Generic infinitesimal differentiation
 
@@ -48,7 +48,7 @@ print(compiled.derivative.approximate((1, 0)))  # (2.223244275..., 1.0)
 jacobian = program.jacobian()  # rows are outputs, columns are inputs
 ```
 
-Lean proves that the generated JVP evaluates to `DF(x)v`. For any compatible completion and any step `h` that is infinitesimal and eventually nonzero in that completion, it also proves `st((F(x + h v) - F(x)) / h) = DF(x)v`, componentwise. The source domain remains valid under sufficiently small perturbations. The [vector example](examples/differentiable/README.md) combines this theorem with the existing observation-based choice of a nonzero step.
+Lean proves that the generated JVP evaluates to `DF(x)v`. For any compatible completion and any step `h` that is infinitesimal and eventually nonzero in that completion, it also proves `st((F(x + h v) - F(x)) / h) = DF(x)v`, componentwise. The source domain remains valid under sufficiently small perturbations. The [vector example](examples/differentiable/README.md) combines this theorem with the observation-based choice of a nonzero step.
 
 Division requires a nonzero denominator. Logarithm and square root require positive arguments. `program.domain_conditions` exposes these obligations without discharging them. `compiled.verify()` checks the actual Python compiler output against Lean and proves correctness conditional on the domain. Supplying an exact rational `point` additionally asks Lean to prove the source, tangent, and derivative domains there. This bounded proof procedure can fail on a valid domain. Failure means unproved, not “no shared standard part.” `approximate()` uses floating-point arithmetic and is never a certificate. Constants accept `int` or `Fraction`.
 
@@ -56,7 +56,7 @@ This is forward symbolic differentiation, with no reverse-mode implementation, t
 
 ## An observation that establishes a division condition
 
-Let `h(n)` be zero at even indices and `1/n` at odd indices. Its standard part is zero before any choice, but that does not establish invertibility. A checked observation of `h = 0` now determines which calculation is legitimate:
+Let `h(n)` be zero at even indices and `1/n` at odd indices. Its standard part is zero before any choice, but that does not establish invertibility. A checked observation of `h = 0` determines which calculation is legitimate:
 
 ```text
 if observe(h = 0):
@@ -66,7 +66,7 @@ else:
 return the corresponding cubic quotient at 2
 ```
 
-[DomainInfinitesimal.lean](Hyperreals/DomainInfinitesimal.lean) proves that the negative observation makes this represented reciprocal an actual inverse in every completion of that branch. The zero branch rules out any inverse to the original step and uses the fallback instead. Both accepted executions use a nonzero infinitesimal and extract 12. Before refinement, multiplying the original numerator by the represented reciprocal has limits 0 and 12 on the two residue classes, so it has no shared standard part. The example uses existing multiplication and monomial division, without adding general division to the language.
+[DomainInfinitesimal.lean](Hyperreals/DomainInfinitesimal.lean) proves that the negative observation makes this represented reciprocal an actual inverse in every completion of that branch. The zero branch rules out any inverse to the original step and uses the fallback instead. Both accepted executions use a nonzero infinitesimal and extract 12. Before refinement, multiplying the original numerator by the represented reciprocal has limits 0 and 12 on the two residue classes, so it has no shared standard part. The example uses the residue language's multiplication and monomial division. Its represented reciprocal is justified only on the selected support.
 
 ```bash
 uv run python scripts/domain_infinitesimal_case.py
@@ -178,10 +178,6 @@ The proof concerns the exported expressions and choices. Python capture and its 
 ```bash
 # Exact arithmetic and successive choices across different periods
 uv run python scripts/residue_demo.py
-
-# Restricted two-parity Laurent example
-lake build laurent_checker
-uv run python scripts/verified_demo.py
 ```
 
 The [paired-channel calibration model](examples/delayed-choice/README.md) illustrates outputs before all phase choices are fixed. Its fused sensitivity is certified while thirty recurring phases remain possible, and a channel-specific value becomes available while ten remain. Exact symmetry assumptions make this a constructed mathematical example, not empirical sensor validation. It includes an exhaustive reference, a specified eager policy requiring backtracking, and three replayable snapshots.
@@ -190,13 +186,12 @@ The [comparative benchmark](benchmarks/README.md) records exact agreement and ex
 
 ## Verified interfaces
 
-| API                  | Scope                                                                                                                               | Build                         |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `LeanResidueSystem`  | Main core: exact finite Laurent expressions with arbitrary finite periodic coefficients, standard parts, and optional kernel replay | `lake build residue_checker`  |
-| `LeanLaurentSystem`  | Restricted interface with even and odd Laurent coefficients                                                                         | `lake build laurent_checker`  |
-| `LeanPeriodicSystem` | Restricted comparison interface with rational constants and alternating signs, without `n`, `1/n`, division, or standard parts      | `lake build periodic_checker` |
+| API                     | Computation                                                                                              | Verification                                                                                                |
+| ----------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `LeanResidueSystem`     | Exact periodic Laurent arithmetic, comparison observations, and complete shared standard-part extraction | `lake build residue_checker` for native execution. `verify_export()` kernel-checks a saved trace and query. |
+| `DifferentiableProgram` | Symbolic elementary vector JVPs, Jacobians, and scalar gradients on explicit domains                     | `CompiledJVP.verify()` kernel-checks compiler output and its derivative and quotient theorems.              |
 
-The APIs send unsimplified expression trees to their native checkers. Missing executables raise an error. Installed packages can pass an explicit `checker_path`. Arithmetic and comparisons between different systems are rejected. All three interfaces use exact finite representations with Lean refinement proofs. Their Python adapters and native execution retain the implementation boundaries described above.
+The residue API sends unsimplified expression trees to its native checker. A missing executable raises an error. Installed packages can pass an explicit `checker_path`. Arithmetic and comparisons between different systems are rejected. The differentiable API builds dimension-checked symbolic expressions and generates Lean proof obligations when verification is requested. Both kernel-verification paths require the pinned Lean checkout and accept an explicit `project_root`.
 
 ## Development and proof checks
 
@@ -206,22 +201,20 @@ uv run ruff check src/hyperreals
 uv run mypy src/hyperreals
 lake build
 make lean-audit
-uv run pytest tests/test_verified_periodic.py tests/test_verified_laurent.py
 uv run pytest tests/test_verified_residue.py tests/test_replay.py tests/test_replay_capture.py
 uv run pytest tests/test_infinitesimal_case.py tests/test_domain_infinitesimal_case.py
 ```
 
 The audit rejects unfinished proofs and project-local axioms and permits only the standard dependencies `propext`, `Classical.choice`, and `Quot.sound`. Classical choice is part of the completion-existence argument, not an executable construction of the completion. See [formalization.md](formalization.md) for the semantic definitions, theorem map, trust boundaries, and open obligations.
 
-| Location                                                              | Contents                                                                   |
-| --------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `Hyperreals/`                                                         | Semantic specification, completion theorems, and verified executable cores |
-| `src/hyperreals/verified_residue.py` and `src/hyperreals/replay.py`   | Main Python adapter and snapshot replay                                    |
-| `src/hyperreals/differentiable.py`                                    | Symbolic elementary/vector derivative compiler and kernel verification     |
-| `Hyperreals/Differentiable*.lean`                                     | Compiler correctness, domain preservation, and literal quotient limits     |
-| `src/hyperreals/polynomial.py`                                        | Exact polynomial and divided-difference syntax constructors                |
-| `src/hyperreals/verified.py` and `src/hyperreals/verified_laurent.py` | Restricted periodic and two-parity adapters                                |
-| `scripts/`, `examples/`, and `benchmarks/`                            | Runnable examples, replay artifacts, and bounded evaluation                |
+| Location                                                            | Contents                                                                   |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `Hyperreals/`                                                       | Semantic specification, completion theorems, and verified executable cores |
+| `src/hyperreals/verified_residue.py` and `src/hyperreals/replay.py` | Residue arithmetic, observations, and snapshot replay                      |
+| `src/hyperreals/differentiable.py`                                  | Symbolic elementary/vector derivative compiler and kernel verification     |
+| `Hyperreals/Differentiable*.lean`                                   | Compiler correctness, domain preservation, and literal quotient limits     |
+| `src/hyperreals/polynomial.py`                                      | Exact polynomial and divided-difference syntax constructors                |
+| `scripts/`, `examples/`, and `benchmarks/`                          | Runnable examples, replay artifacts, and bounded evaluation                |
 
 ## License
 

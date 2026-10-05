@@ -1,10 +1,10 @@
 # From finite observations to classical completions
 
-The research question is how a finite computation can use a nonconstructive mathematical object without constructing it. This repository studies that question for sequences interpreted through a free ultrafilter. A program records finite observations about index sets, preserves the possibility of a completion, and extracts a real value exactly when every compatible completion has that same finite standard part within the specified exact fragment. The resulting implementation computes generic polynomial derivatives through literal infinitesimal difference quotients.
+The research question is how a finite computation can use a nonconstructive mathematical object without constructing it. This repository studies that question for sequences interpreted through a free ultrafilter. A program records finite observations about index sets, preserves the possibility of a completion, and extracts a real value exactly when every compatible completion has that same finite standard part within the specified exact fragment. The residue implementation computes generic polynomial derivatives through literal infinitesimal difference quotients. A symbolic compiler extends the quotient interpretation to elementary vector functions on explicit smooth domains.
 
 The classical object and the executable state have different roles. A free ultrafilter completes every set-membership decision. The runtime stores only a finite description of observations. Existence of a completion is a theorem, not an executable output. The development is pinned to Lean and Mathlib 4.33.0.
 
-Mathlib already supplies a hyperreal field using a noncomputably chosen free ultrafilter. The present development concerns finite computational access to compatible completions and the results that do not depend on resolving the remaining choices. It does not construct a computable free ultrafilter or verify the complete Python package.
+Mathlib supplies a hyperreal field using a noncomputably chosen free ultrafilter. The present development concerns finite computational access to compatible completions and the results that do not depend on resolving the remaining choices. It does not construct a computable free ultrafilter or verify the complete Python package.
 
 ## The central semantic statement
 
@@ -41,7 +41,7 @@ The same module proves `extendible_iUnion_of_monotone`: if a sequence of commitm
 
 ## Generic executable polynomial differentiation
 
-[PolynomialDifferentiationCore.lean](Hyperreals/PolynomialDifferentiationCore.lean) compiles dense ascending rational coefficient lists into the existing expression grammar. `polynomialExpr` constructs Horner syntax. `quotientExpr coefficients a c k` constructs the literal unexpanded quotient with step `c/n^(k+1)`. The successor exponent makes positivity structural. The public Python `polynomial_quotient(coefficients, a, c, order, system=...)` takes the positive exponent itself and corresponds to Lean's `k = order - 1`.
+[PolynomialDifferentiationCore.lean](Hyperreals/PolynomialDifferentiationCore.lean) compiles dense ascending rational coefficient lists into the residue expression grammar. `polynomialExpr` constructs Horner syntax. `quotientExpr coefficients a c k` constructs the literal unexpanded quotient with step `c/n^(k+1)`. The successor exponent makes positivity structural. The public Python `polynomial_quotient(coefficients, a, c, order, system=...)` takes the positive exponent itself and corresponds to Lean's `k = order - 1`.
 
 [PolynomialDifferentiation.lean](Hyperreals/PolynomialDifferentiation.lean) proves the full connection from those inputs to the executed extractor:
 
@@ -49,7 +49,7 @@ The same module proves `extendible_iUnion_of_monotone`: if a sequence of commitm
 - `polynomialExpr_eval` and `quotientExpr_denote`: the generated source denotes polynomial evaluation and the literal difference quotient.
 - `polynomial_hasDerivAt`: the recursively computed rational `derivativeValue` is the ordinary real derivative at the rational point.
 - `quotientExpr_cofiniteLimit`: for every nonzero rational scale and positive integer exponent, the quotient converges to that derivative.
-- `quotientExpr_standardPart`: for every nonempty residue support, the existing extractor actually returns that rational.
+- `quotientExpr_standardPart`: for every nonempty residue support, the residue extractor returns that rational.
 - `quotientExpr_computes_derivative`: combines the executable equality with equality to the ordinary `deriv` result.
 
 The extractor receives the raw expression and support. Neither its input nor the compiler contains a supplied derivative value, expansion, or convergence certificate. `derivativeValue` computes the expected result from the coefficients in the theorem statement. The proof obtains extraction from independently established convergence and the completeness theorem below.
@@ -73,11 +73,11 @@ The [Python constructors](src/hyperreals/polynomial.py), `evaluate_polynomial`, 
 
 [DifferentiableInfinitesimal.lean](Hyperreals/DifferentiableInfinitesimal.lean) defines the literal sequence quotient `(F(x + h(k)v) - F(x)) / h(k)`. `Expr.quotient_tendsto` derives its limit from the compiler theorem for any filter in which `h` tends to zero and is eventually nonzero. `Expr.quotient_standardPart` and `Program.quotient_standardPart` specialize this to each compatible completion. `Expr.quotient_eventually_domain` ensures the perturbed source operations are eventually in their domains. Neither a derivative nor a remainder estimate is a supplied premise. The proof uses ordinary differentiability to establish the quotient limit. The step is not replaced by a nilpotent.
 
-[DifferentiableExamples.lean](Hyperreals/DifferentiableExamples.lean) connects this language to the existing checked step observation. `quotient_after_step_observation` handles every expression in the new grammar on either accepted branch. `vectorExample_after_observation` specializes it to the three-output elementary function in the [example](examples/differentiable/README.md), with symbolic standard part `(cos(1) + 2 sin(1), 1, 1 / sqrt(2))`. This reuses a residue observation trace to justify the step. It does not extend the finite observation interpreter with elementary comparisons or feed elementary quotients to Laurent normalization.
+[DifferentiableExamples.lean](Hyperreals/DifferentiableExamples.lean) connects this language to the checked step observation. `quotient_after_step_observation` handles every expression in the differentiable grammar on either accepted branch. `vectorExample_after_observation` specializes it to the three-output elementary function in the [example](examples/differentiable/README.md), with symbolic standard part `(cos(1) + 2 sin(1), 1, 1 / sqrt(2))`. This reuses a residue observation trace to justify the step. It does not extend the finite observation interpreter with elementary comparisons or feed elementary quotients to Laurent normalization.
 
 The [Python compiler](src/hyperreals/differentiable.py) returns immutable, dimension-checked expressions. `CompiledJVP.verify()` regenerates fixed Lean source and proves each output equals `Expr.jvp` by `decide +kernel`, then instantiates the Fréchet derivative, domain-preservation, and standard-part theorems. A supplied rational point additionally requests kernel proofs of the source, tangent, and result domains there. The bounded domain tactic is incomplete, and failure is an unresolved proof obligation. The API accepts no caller-provided Lean tactics or proof files. Verification audits every generated theorem against the project's allowed axiom set. Python capture remains an unproved boundary. `approximate()` is floating-point evaluation with no certified error bound.
 
-The symbolic layer has no complete standard-part or equality decision procedure. Its output is an exact expression rather than a rational answer. The existing Laurent completeness and rejection theorems retain their original scope. Reverse mode, general control flow, tensors, certified numerical rounding, and efficient shared-expression compilation remain separate extensions. Formal dimensions are arbitrary finite naturals. The Python interface limits dimensions to 64, constant numerators and denominators to 4096 bits, and generated proofs to 20,000 expression nodes and depth 128. Verification uses the existing bounded timeout policy.
+The symbolic layer has no complete standard-part or equality decision procedure. Its output is an exact expression rather than a rational answer. The Laurent completeness and rejection theorems apply to residue expressions. Reverse mode, general control flow, tensors, certified numerical rounding, and efficient shared-expression compilation remain separate extensions. Formal dimensions are arbitrary finite naturals. The Python interface limits dimensions to 64, constant numerators and denominators to 4096 bits, and generated proofs to 20,000 expression nodes and depth 128. Verification uses the bounded timeout policy described below.
 
 ## An observation that establishes a division condition
 
@@ -94,7 +94,7 @@ The proofs distinguish infinitesimality, invertibility, and extraction:
 - `accepted_result`, `accepted_realized`, and `accepted_standardPart`: both accepted executions extract 12, have a fixed realizing completion, and give the result in all their compatible completions.
 - `guarded_no_common_standardPart`: before refinement, the represented original quotient has no shared finite real standard part. Its even and odd limits are 0 and 12.
 
-The [companion script](scripts/domain_infinitesimal_case.py) exports and verifies both accepted branches and the unrefined rejection. This example makes an observation discharge a necessary mathematical condition. It uses a separately proved represented reciprocal and the existing monomial division grammar. It does not introduce a general inversion algorithm.
+The [companion script](scripts/domain_infinitesimal_case.py) exports and verifies both accepted branches and the unrefined rejection. This example makes an observation discharge a necessary mathematical condition. It uses a separately proved represented reciprocal and the residue monomial division grammar. It does not introduce a general inversion algorithm.
 
 ## One program, two infinitesimal quotients
 
@@ -117,7 +117,7 @@ st(q_backward) = st(q_forward) = 12
 
 The increment is positive and nonzero in every free completion and smaller than every positive real constant. The forward quotient is above 12 at every positive index, and the backward quotient is below 12. Their errors vanish. Taking a standard part removes an infinitesimal error without making either quotient pointwise equal to the derivative. No small floating-point step or truncated Taylor series is used. Each quotient already converges ordinarily to 12, so the role of the observation is to select a calculation, not to make its derivative exist.
 
-The [README example](README.md#an-adaptive-infinitesimal-calculation) executes both alternatives through `LeanResidueSystem`. Each run has a fixed-completion interpretation, and its result is valid in every completion of that run. Agreement across the two different runs is an additional property of this particular program. The general adaptive-execution theorem does not say that all branches of every program return the same ordinary value.
+The [README example](README.md#a-simpler-adaptive-calculation) executes both alternatives through `LeanResidueSystem`. Each run has a fixed-completion interpretation, and its result is valid in every completion of that run. Agreement across the two different runs is an additional property of this particular program. The general adaptive-execution theorem does not say that all branches of every program return the same ordinary value.
 
 [AdaptiveInfinitesimal.lean](Hyperreals/AdaptiveInfinitesimal.lean) defines the actual finite tree `Hyperreals.AdaptiveInfinitesimal.adaptiveProgram`. Its compiled results include:
 
@@ -139,7 +139,7 @@ Python branch selection and its correspondence with the finite Lean tree are tes
 
 ## An executable fragment of the semantics
 
-The main API, [`LeanResidueSystem`](src/hyperreals/verified_residue.py), sends raw expression trees to [ResidueChecker.lean](ResidueChecker.lean). Its grammar has rational constants, `n`, `1/n`, arbitrary nonempty rational periodic tables, addition, subtraction, multiplication, and division by an explicit nonzero rational monomial. Empty tables and zero monomial coefficients are rejected. General rational-function denominators and analytic functions are outside this grammar.
+The residue API, [`LeanResidueSystem`](src/hyperreals/verified_residue.py), sends raw expression trees to [ResidueChecker.lean](ResidueChecker.lean). Its grammar has rational constants, `n`, `1/n`, arbitrary nonempty rational periodic tables, addition, subtraction, multiplication, and division by an explicit nonzero rational monomial. Empty tables and zero monomial coefficients are rejected. General rational-function denominators and analytic functions are outside this grammar.
 
 `periodic(values)` denotes `values[n % len(values)]`. Constants, `n`, and `1/n` have coefficient period one, although the last two sequences are not themselves periodic. Binary expressions combine coefficient periods by LCM. Each residue normalizes to an exact rational polynomial divided by `n^shift`. All coefficients are retained, including arbitrarily high-order terms. Use `divide_monomial(c, k)` for division by `c * n^k`, with negative integer powers allowed. Python `/` accepts primitive constants, `n`, and `1/n`.
 
@@ -173,15 +173,13 @@ Extraction enumerates the LCM of the expression and state periods and tests ever
 
 Build and run the core with `lake build residue_checker` and `uv run python scripts/residue_demo.py`. The demonstration accepts `(-1)^n < 0` and `periodic([0,1,2]) = 2`, retains precisely residue 5 modulo 6, and rejects an incompatible later observation. Integration tests also evaluate raw syntax with `Fraction` at reported cutoffs. These sampled checks test transport and native behavior. The tail-wide mathematical guarantee comes from the Lean proofs.
 
-### Scalar arithmetic and restricted interfaces
+### Scalar Laurent arithmetic
 
-The residue implementation reuses the scalar Laurent algorithms. [LaurentExpr](Hyperreals/LaurentExpr.lean) proves exact normalization, [LaurentSign](Hyperreals/LaurentSign.lean) proves computed sign bounds, and [LaurentLimit](Hyperreals/LaurentLimit.lean) proves convergence from the executable coefficient test. The sign algorithm traverses Horner coefficients. For nonzero tail leading coefficient `a` and head `b`, it raises the cutoff to at least `ceil(abs(b) / abs(a)) + 1`. Induction bounds the entire remaining tail, rather than checking selected sample indices.
+The residue normalizer uses scalar Laurent forms on each coefficient residue. [LaurentExpr](Hyperreals/LaurentExpr.lean) proves the real-valued laws of their arithmetic operations, [LaurentSign](Hyperreals/LaurentSign.lean) proves computed sign bounds, and [LaurentLimit](Hyperreals/LaurentLimit.lean) proves convergence from the executable coefficient test. The sign algorithm traverses Horner coefficients. For nonzero tail leading coefficient `a` and head `b`, it raises the cutoff to at least `ceil(abs(b) / abs(a)) + 1`. Induction bounds the entire remaining tail, rather than checking selected sample indices.
 
 The finite-limit test rejects nonzero numerator coefficients above the denominator shift and reads the coefficient at that shift. Lower powers vanish. `Laurent.Form.standardPart?_sound` connects success to ordinary convergence. [LaurentLimitCompleteness](Hyperreals/LaurentLimitCompleteness.lean) proves the converse along every nontrivial filter extending the cofinite filter and proves that rejected scalar forms diverge in magnitude. The residue completeness proof constructs a free ultrafilter concentrating on each active residue to recover every branch obligation. Exact finite sums need neither a truncation rule nor an approximate remainder estimate.
 
-[`LeanLaurentSystem`](src/hyperreals/verified_laurent.py) exposes this arithmetic with only even and odd coefficients. Its compiled results include `Laurent.Expr.normalize_sequence_correct`, `Laurent.Form.sign_correct`, `Laurent.compile_correct`, `Laurent.run_universe_mem_iff`, and `Laurent.run_standardPart_sound`. [`LeanPeriodicSystem`](src/hyperreals/verified.py) is smaller still, with rational constants and alternating signs but no `n`, `1/n`, division, or standard parts. [Periodic.lean](Hyperreals/Periodic.lean) proves its evaluator, comparisons, transitions, and trace completion theorem. These restricted interfaces share the exact arithmetic approach. The arbitrary-period backend is the main executable realization.
-
-The executable cores explicitly enumerate residue masks and retain dense scalar coefficient lists. Potential LCM growth limits this representation. A compact implementation would be an engineering extension requiring its own refinement proof, not the central mathematical research question.
+The residue core explicitly enumerates support masks and retain dense scalar coefficient lists. Potential LCM growth limits this representation. A compact implementation would be an engineering extension requiring its own refinement proof, not the central mathematical research question.
 
 ## Kernel replay of a finite computation
 
@@ -196,7 +194,7 @@ The executable cores explicitly enumerate residue masks and retain dense scalar 
 
 The [Python adapter](src/hyperreals/verified_residue.py) records accepted observations. Failed commitments, probes, and extraction add no choices. `snapshot(expression)` captures history, support, expression, and actual native extraction under the same state lock. The [replay module](src/hyperreals/replay.py) validates and freezes the data independently of later state changes. A captured snapshot is a claim until it is verified.
 
-Export writes versioned `snapshot.json`, deterministic `Replay.lean`, and a manifest binding their hashes and relevant project sources. Verification rejects mismatched files, refreshes the replay-module build, and regenerates fixed Lean syntax from validated data. It does not execute arbitrary supplied Lean text. Each generated artifact proves `snapshot.check = true` with `decide +kernel`, instantiates the semantic theorems, and audits every generated headline declaration. Missing reports or unexpected axioms fail verification. Native decision shortcuts are not used. Replays of `None` now include the semantic rejection theorem. The snapshot format records the query result rather than the separate diagnostic witness fields.
+Export writes versioned `snapshot.json`, deterministic `Replay.lean`, and a manifest binding their hashes and relevant project sources. Verification rejects mismatched files, refreshes the replay-module build, and regenerates fixed Lean syntax from validated data. It does not execute arbitrary supplied Lean text. Each generated artifact proves `snapshot.check = true` with `decide +kernel`, instantiates the semantic theorems, and audits every generated headline declaration. Missing reports or unexpected axioms fail verification. Native decision shortcuts are not used. Replays of `None` include the semantic rejection theorem. The snapshot format records the query result rather than the separate diagnostic witness fields.
 
 A false native answer cannot pass this check for the recorded expression and trace. However, replay does not prove that Python captured the intended external session faithfully. Hashes identify artifact components and source revisions. They do not authenticate a historical execution. The Lean kernel, imported proof environment, and underlying platform remain trusted. Ordinary native calls additionally rely on parsing, transport, native compilation, and execution until separately replayed.
 
@@ -208,13 +206,11 @@ Tests cover immutable snapshots, negative observations, rejected transitions, la
 
 - Semantic sequences are exact total functions `ℕ → ℝ`. Freeness means extending the cofinite filter. Lean's total inverse gives `1/0 = 0`, and that single index does not affect free-filter limits.
 - Completion existence is classical and noncomputable. The development uses Mathlib's ultrafilter existence theorem. Axiom audits allow `propext`, `Classical.choice`, and `Quot.sound` and reject unfinished proofs and project-local axioms.
-- Lean-backed APIs serialize rational constants exactly. A supplied float denotes its binary rational value. Python conversion, capture, JSON parsing, and state handling are tested rather than formally refined to the Lean definitions.
+- The residue API serializes rational constants exactly. A supplied float denotes its binary rational value. The differentiable API accepts only integers and fractions as symbolic constants. Python conversion, capture, JSON parsing, and state handling are tested rather than formally refined to the Lean definitions.
 - The normalization and extraction theorems cover the specified finite Laurent grammar. They do not cover general division, analytic expansions, or floating-point coefficients with approximate error bounds.
 - A mathematical model's association with an external application is an assumption. Neither completion existence nor kernel replay validates an empirical interpretation of the recorded index sets.
 
-### Supporting semantic lemmas
-
-[EventuallyPeriodic.lean](Hyperreals/EventuallyPeriodic.lean) proves an infinitude checker for represented eventual-periodic sets. [Certificates.lean](Hyperreals/Certificates.lean) proves that an eventual comparison certificate selects a cofinite set and preserves existing completions. The generic `safePositiveChoice_extendible` theorem in [Completion.lean](Hyperreals/Completion.lean) requires the semantic finite-intersection condition explicitly. These are supporting mathematical interfaces. They do not extend the executable grammar.
+### Arithmetic side conditions
 
 [RuntimeInvariants.lean](Hyperreals/RuntimeInvariants.lean) records a quotient lower-bound rule and a truncation counterexample. The latter shows why a vanishing term cannot be discarded before a later Laurent shift makes it visible. The exact core avoids that loss by retaining every coefficient.
 
@@ -233,14 +229,14 @@ The central question is which observations and outputs of a computation can be j
 The following are separate obligations rather than claims of an already complete system:
 
 1. **Beyond the finite program model.** The finite adaptive interpreter and conditional monotone-union completion theorem are proved. Relating them to a larger host language, infinite operational behavior, or liveness would require new semantics and refinement arguments. The whole-run existence result does not supply executable witness extraction.
-2. **Rational-function division.** Periodic rational functions are a natural next grammar extension. They require a verified representation, eventual denominator-nonzero checks on every retained residue, and complete sign and limit algorithms. The polynomial divided-difference compiler and the example's represented reciprocal do not provide arbitrary inversion.
-3. **A broader analytic bridge.** Further analytic computation needs explicit domain and convergence guarantees. Certified approximate evaluation additionally needs coefficient and rounding error bounds. The new differentiable language proves symbolic elementary JVPs and their quotient limits on explicit smooth domains. Complete elementary limit decisions, certified numerical evaluation, and a richer observation language remain open.
-4. **Faithful execution capture.** Refine serialization, parsing, and transcript capture to the formal semantics, or keep their assumptions explicit. Kernel replay already checks the exported mathematical instance, not its historical provenance.
+2. **Complete rational-function extraction.** Extending the residue language to periodic rational functions would allow general denominators in its complete decision procedures. They require a verified representation, eventual denominator-nonzero checks on every retained residue, and complete sign and limit algorithms. The polynomial divided-difference compiler and the example's represented reciprocal do not provide arbitrary inversion.
+3. **A broader analytic bridge.** Further analytic computation needs explicit domain and convergence guarantees. Certified approximate evaluation additionally needs coefficient and rounding error bounds. The differentiable language proves symbolic elementary JVPs and their quotient limits on explicit smooth domains. Complete elementary limit decisions, certified numerical evaluation, and a richer observation language remain open.
+4. **Faithful execution capture.** Refine serialization, parsing, and transcript capture to the formal semantics, or keep their assumptions explicit. Kernel replay checks the exported mathematical instance, not its historical provenance.
 5. **Independent application value.** Find a problem whose naturally occurring observations and required outputs benefit from this interface. Compare the same tasks with ordinary exact algebra and finite-constraint methods. The constructed calibration model and small benchmarks do not settle that question. Compact state and runtime improvements are supporting engineering work, not substitutes for it.
 
-### Prior work and the publication question
+### Related work
 
-The contribution must be stated relative to existing nonstandard analysis and formalization, not as the first formalized hyperreals or first correct infinitesimal computation:
+The development builds on formalized nonstandard analysis, filter semantics, and checked symbolic computation:
 
 - Fleuriot and Paulson, [Mechanizing Nonstandard Real Analysis](https://doi.org/10.1112/S1461157000000267) (2000), formalized hyperreal construction and analysis in Isabelle/HOL.
 - [Mathlib's hyperreal development](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Analysis/Real/Hyperreal.html) provides a hyperreal field and standard-part infrastructure.
@@ -250,7 +246,7 @@ The contribution must be stated relative to existing nonstandard analysis and fo
 - Kido, Chaudhuri, and Hasuo, [Abstract Interpretation with Infinitesimals](https://arxiv.org/abs/1511.00825) (2015 preprint), established soundness and termination for nonstandard static analysis and evaluated hybrid-system examples.
 - Dou and Yu, [Formalization of the Filter Extension Principle in Coq](https://arxiv.org/abs/2407.06222) (2024 preprint), mechanized the classical extension principle.
 
-This remains a targeted prior-work comparison, not an exhaustive novelty search. The extension and compactness arguments, use of filters for symbolic semantics, and checking of externally computed results are established ideas. The specific contribution proposed here is their verified operational connection: exact executable observations determine a family of compatible completions, every accepted adaptive run is realized under one fixed member of that family, and complete extraction characterizes the finite outputs shared by the family. Generic polynomial differentiation supplies an executable all-degree application. The elementary compiler extends the quotient interpretation to finite differentiable vectors while retaining explicit domain obligations. The domain-dependent infinitesimal program additionally makes a recorded observation establish a necessary division condition. Whether this connection extends usefully beyond the present finite syntax remains open. A fully verified general hyperreal runtime is not established.
+The extension and compactness arguments, use of filters for symbolic semantics, and checking of externally computed results are established ideas. This development connects them operationally: exact executable observations determine a family of compatible completions, every accepted adaptive run is realized under one fixed member of that family, and complete extraction characterizes the finite outputs shared by the family. Generic polynomial differentiation supplies an executable all-degree application. The elementary compiler extends the quotient interpretation to finite differentiable vectors while retaining explicit domain obligations. The domain-dependent infinitesimal program additionally makes a recorded observation establish a necessary division condition. Whether this connection extends usefully beyond the present finite syntax remains open. A fully verified general hyperreal runtime is not established.
 
 ## Validation
 
@@ -258,14 +254,12 @@ This remains a targeted prior-work comparison, not an exhaustive novelty search.
 lake build
 make lean-audit
 uv run pytest
-uv run pytest tests/test_verified_periodic.py tests/test_verified_laurent.py
 uv run pytest tests/test_verified_residue.py tests/test_replay.py tests/test_replay_capture.py
 uv run pytest tests/test_infinitesimal_case.py tests/test_domain_infinitesimal_case.py
 uv run pytest tests/test_differentiable.py
 uv run python scripts/differentiable_case.py
 uv run python scripts/infinitesimal_case.py
 uv run python scripts/domain_infinitesimal_case.py
-uv run python scripts/verified_demo.py
 uv run python scripts/residue_demo.py
 uv run python scripts/verify_replay.py examples/delayed-choice/snapshots/early-fused
 ```

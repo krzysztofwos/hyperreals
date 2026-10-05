@@ -4,7 +4,7 @@
 The step h is zero at even indices and 1/n at odd indices. A false answer to
 h = 0 allows its represented reciprocal [0, 1] * n. A true answer requires a
 fallback step, 1/n**2. Both resulting cubic quotients have standard part 12.
-The current language still has only monomial division.
+The residue language has only monomial division.
 """
 
 from __future__ import annotations

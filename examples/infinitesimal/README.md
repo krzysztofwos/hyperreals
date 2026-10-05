@@ -69,7 +69,7 @@ uv run python scripts/infinitesimal_case.py
 
 The default run exports and kernel-checks five snapshots under `examples/infinitesimal/snapshots`: `quotient`, `error`, `after-odd-choice`, `adaptive-backward`, and `adaptive-forward`. The first three preserve the choice-free example and its later fixed parity choice. The last two capture the separate adaptive runs. Use `--no-parity` to omit `after-odd-choice` and `--no-adaptive` to omit both adaptive runs. Using both flags leaves only the two choice-free snapshots. Use `--skip-replay` to export without kernel checking. The generated `results.json` records each adaptive answer and selected branch, its result, and whether its snapshot was checked. No timings or performance comparisons are claimed.
 
-An individual saved bundle can be checked with the existing verifier.
+An individual saved bundle can be checked with the replay verifier.
 
 ```sh
 uv run python scripts/verify_replay.py examples/infinitesimal/snapshots/quotient
